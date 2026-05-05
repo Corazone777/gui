@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBEX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Cohesive Amber & Warm Palette */
+            --bg-base: #0c0804; /* Very dark warm charcoal */
+            --bg-panel: rgba(26, 18, 10, 0.85);
+            
+            --ibex-amber: #ffaa00; /* Main UI */
+            --ibex-gold: #ffcc00; /* Highlights & Terminal text */
+            --ibex-orange: #ff5500; /* Accents & Prompts (Replaces Pink) */
+            --ibex-rust: #8b3a00; /* Borders & Dim elements (Replaces Purple) */
+            --ibex-green: #dbd3c5; /* Kept for Success & MDR game */
+            --ibex-alert: #ff2200; /* Errors */
+
+            --text-main: #ffe6cc;
+            --text-dim: #8c735c;
+            
+            /* Glows tailored to the new colors */
+            --glow-amber: 0 0 10px rgba(255, 170, 0, 0.5);
+            --glow-gold: 0 0 10px rgba(255, 204, 0, 0.5);
+            --glow-orange: 0 0 10px rgba(255, 85, 0, 0.5);
+            --glow-green: 0 0 10px rgba(245, 245, 245, 0.5);
+            
+            --font-mono: 'Share Tech Mono', monospace;
+        }
+
+        /* --- Reset & Base --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html {
+            height: 100%; background-color: var(--bg-base); color: var(--text-main);
+            font-family: var(--font-mono); overflow: hidden; display: flex;
+            justify-content: center; align-items: center;
+        }
+        .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+
+        /* --- CRT & Grid Background --- */
+        .system-wrapper {
+            position: relative; width: 100vw; height: 100vh; max-width: 1400px; max-height: 900px;
+            display: flex; flex-direction: column; background: radial-gradient(circle at center, #140d08 0%, #000 100%);
+            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9); z-index: 1;
+        }
+        .system-wrapper::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(255, 170, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 170, 0, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px; z-index: -1; pointer-events: none; opacity: 0.5;
+        }
+        .system-wrapper::after {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+            background-size: 100% 4px; z-index: 100; pointer-events: none;
+        }
+
+        /* --- Main Layout --- */
+        .ui-container { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; gap: 20px; position: relative; z-index: 10; height: 100%; }
+        
+        /* --- Header --- */
+        header { 
+            display: flex; justify-content: space-between; align-items: flex-end; 
+            padding-bottom: 10px; border-bottom: 2px solid var(--ibex-amber);
+            box-shadow: 0 4px 10px -4px rgba(255, 170, 0, 0.3); 
+        }
+        h1 { font-size: 2.5rem; color: var(--ibex-amber); text-shadow: var(--glow-amber); letter-spacing: 2px; }
+        .header-stats { text-align: right; color: var(--ibex-orange); font-size: 1.1rem; }
+
+        /* --- Middle Section (Nav + Content) --- */
+        .middle-tier { display: flex; flex-grow: 1; gap: 20px; overflow: hidden; }
+
+        /* --- Navigation --- */
+        nav { display: flex; flex-direction: column; gap: 10px; min-width: 200px; }
+        .nav-btn {
+            background: var(--bg-panel); color: var(--ibex-gold); border: 1px solid var(--ibex-rust);
+            padding: 15px; text-align: left; font-family: inherit; font-size: 1.2rem; cursor: pointer;
+            text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: all 0.2s ease; position: relative;
+        }
+        .nav-btn::before { content: ">"; margin-right: 10px; opacity: 0.5; }
+        
+        /* Nav Hover */
+        .nav-btn:hover, .nav-btn:focus { background: rgba(255, 204, 0, 0.1); border-color: var(--ibex-gold); box-shadow: inset var(--glow-gold); outline: none; }
+        
+        /* Active Nav */
+        .nav-btn[aria-selected="true"] { 
+            background: var(--ibex-amber); 
+            color: var(--bg-base); 
+            border-color: var(--ibex-amber);
+            font-weight: bold; 
+            box-shadow: var(--glow-amber);
+        }
+        .nav-btn[aria-selected="true"]::before { opacity: 1; color: var(--bg-base); }
+        
+        /* MDR Nav Button */
+        .nav-btn[data-target="mdr"] { border-color: var(--ibex-green); color: var(--ibex-green); }
+        .nav-btn[data-target="mdr"]:hover { box-shadow: inset var(--glow-green); background: rgba(51, 255, 102, 0.1); }
+        .nav-btn[data-target="mdr"][aria-selected="true"] { background: var(--ibex-green); color: var(--bg-base); box-shadow: var(--glow-green); }
+
+        /* --- Content Viewport --- */
+        main {
+            flex-grow: 1; background: var(--bg-panel); border: 1px solid var(--ibex-rust); position: relative;
+            padding: 30px; overflow-y: auto; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+        }
+        main::after { content: ''; position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: var(--ibex-rust); }
+
+        .page { display: none; animation: glitch-in 0.3s ease-out forwards; }
+        .page.active { display: block; }
+        .page h2 { color: var(--ibex-orange); border-bottom: 1px dashed var(--ibex-orange); padding-bottom: 10px; margin-bottom: 20px; text-shadow: var(--glow-orange); }
+        .page p { font-size: 1.2rem; line-height: 1.6; margin-bottom: 15px; color: var(--text-main); }
+
+        /* Highlights in content */
+        .highlight-text { color: var(--ibex-gold); text-shadow: var(--glow-gold); }
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .portfolio-item { border: 1px solid var(--ibex-rust); padding: 15px; background: rgba(255, 170, 0, 0.05); transition: transform 0.2s; }
+        .portfolio-item:hover { transform: translateY(-5px); box-shadow: var(--glow-amber); border-color: var(--ibex-amber); }
+        .portfolio-item h3 { color: var(--ibex-amber); }
+
+        /* --- MDR Severance Mini-Game (Green phosphors mixed in) --- */
+        .mdr-header { color: var(--ibex-green) !important; border-color: var(--ibex-green) !important; text-shadow: var(--glow-green) !important; }
+        .data-matrix {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;
+            margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.6); border: 1px solid var(--ibex-green);
+            max-height: 300px; overflow-y: auto;
+        }
+        .data-node {
+            cursor: pointer; padding: 10px; text-align: center; background: rgba(51, 255, 102, 0.05);
+            border: 1px solid rgba(51, 255, 102, 0.3); transition: all 0.2s; user-select: none;
+            color: var(--text-dim); font-size: 1.1rem;
+        }
+        .data-node:hover { background: rgba(51, 255, 102, 0.2); color: var(--ibex-green); transform: scale(1.05); }
+        .data-node.found { background: var(--ibex-green); color: var(--bg-base); pointer-events: none; animation: pop 0.3s ease-out; box-shadow: var(--glow-green); }
+        .data-node.bad { border-color: var(--ibex-alert); color: var(--ibex-alert); animation: shake 0.3s; }
+
+        .bin-container { margin-top: 20px; border: 1px solid var(--ibex-green); padding: 5px; height: 30px; position: relative; }
+        .bin-fill { height: 100%; width: 0%; background: var(--ibex-green); transition: width 0.5s ease-out; box-shadow: var(--glow-green); }
+        .bin-status { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); mix-blend-mode: difference; font-weight: bold; }
+
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* --- CLI Terminal Footer --- */
+        footer {
+            height: 160px; display: flex; flex-direction: column; background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--ibex-rust); border-left: 5px solid var(--ibex-orange); padding: 10px;
+        }
+        
+        #cli-output { 
+            flex-grow: 1; overflow-y: auto; margin-bottom: 10px; font-size: 1.1rem; 
+            color: var(--ibex-gold); /* Terminal Text */
+            display: flex; flex-direction: column; 
+        }
+        /* Scroll Fix */
+        #cli-output::before { content: ''; margin-top: auto; }
+        
+        .cli-line { margin-bottom: 4px; }
+        .cli-line.error { color: var(--ibex-alert); }
+        .cli-line.success { color: var(--ibex-green); }
+        .cli-line.system { color: var(--ibex-amber); }
+        
+        .cli-input-wrapper { display: flex; align-items: center; font-size: 1.2rem; color: var(--ibex-orange); }
+        .prompt { margin-right: 10px; white-space: nowrap; color: var(--ibex-orange); }
+        
+        #cli-input { background: transparent; border: none; color: var(--text-main); font-family: inherit; font-size: 1.2rem; flex-grow: 1; outline: none; }
+        #cli-input:focus { border-bottom: 1px solid var(--ibex-gold); }
+
+        /* --- Animations --- */
+        @keyframes glitch-in { 0% { opacity: 0; transform: translateX(-10px); filter: contrast(200%); } 50% { opacity: 0.8; transform: translateX(5px); filter: contrast(50%); } 100% { opacity: 1; transform: translateX(0); filter: contrast(100%); } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: var(--ibex-rust); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ibex-orange); }
+    </style>
+</head>
+<body>
+
+    <div class="system-wrapper">
+        <div class="ui-container">
+            
+            <header>
+                <h1>IBEX_WEB.SYS</h1>
+                <div class="header-stats">
+                    <span id="sys-time">00:00:00</span> | UPLINK: <span style="color:var(--ibex-green)">SECURE</span>
+                </div>
+            </header>
+
+            <div class="middle-tier">
+                <nav aria-label="Main Navigation">
+                    <button class="nav-btn" aria-selected="true" data-target="home">Home</button>
+                    <button class="nav-btn" aria-selected="false" data-target="about">About</button>
+                    <button class="nav-btn" aria-selected="false" data-target="projects">Projects</button>
+                    <button class="nav-btn" aria-selected="false" data-target="contact">Contact</button>
+                    <button class="nav-btn" aria-selected="false" data-target="mdr">Refinement</button>
+                </nav>
+
+                <main id="viewport" aria-live="polite">
+                    
+                    <section id="home" class="page active">
+                        <h2>WELCOME OPERATOR</h2>
+                        <p>Connection established to the Ibex Mainframe. You are currently viewing the graphical interface layer of this node.</p>
+                        <p><strong class="highlight-text">PRO-TIP:</strong> You can navigate this node using the visual UI buttons on the left, or utilize the command line interface below. Press the <kbd style="color:var(--ibex-amber)">/</kbd> key to instantly focus the terminal.</p>
+                    </section>
+
+                    <section id="about" class="page">
+                        <h2>ABOUT_ME.TXT</h2>
+                        <p>Level 5 Cyber-Architect specializing in front-end construct rendering.</p>
+                    </section>
+
+                    <section id="projects" class="page">
+                        <h2>PROJECT_ARCHIVE</h2>
+                        <div class="portfolio-grid">
+                            <div class="portfolio-item">
+                                <h3>Project Orion</h3>
+                                <p style="font-size: 0.9rem; margin-top: 10px;">A decentralized data vault for sensitive corporate assets.</p>
+                            </div>
+                            <div class="portfolio-item">
+                                <h3>Neon Tracker</h3>
+                                <p style="font-size: 0.9rem; margin-top: 10px;">Real-time bounty tracking interface mapped to the city grid.</p>
+                            </div>
+                            <div class="portfolio-item">
+                                <h3>SynthOS</h3>
+                                <p style="font-size: 0.9rem; margin-top: 10px;">Custom operating system kernel written for older android models.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="contact" class="page">
+                        <h2>SECURE_COMM_LINK</h2>
+                        <p><strong class="highlight-text">Email:</strong> admin@ibex.sys</p>
+                    </section>
+
+                    <section id="mdr" class="page">
+                        <h2 class="mdr-header">MACRODATA REFINEMENT // IBEX FILE</h2>
+                        <p style="color: var(--ibex-green)">Isolate and bin the data points that elicit a positive corporate response. Seek the core values of the Ibex staffing initiative. Avoid the malaise.</p>
+                        
+                        <div class="data-matrix" id="mdr-grid">
+                            </div>
+
+                        <div class="bin-container">
+                            <div class="bin-fill" id="mdr-fill"></div>
+                            <div class="bin-status" id="mdr-status">FILE 0% BINNED</div>
+                        </div>
+                    </section>
+
+                </main>
+            </div>
+
+            <footer>
+                <div id="cli-output" aria-live="polite"></div>
+                <div class="cli-input-wrapper">
+                    <label for="cli-input" class="visually-hidden">Terminal Input</label>
+                    <span class="prompt">guest@ibex:~#</span>
+                    <input type="text" id="cli-input" autocomplete="off" spellcheck="false" placeholder="Type 'help' for commands..." />
+                </div>
+            </footer>
+
+        </div>
+    </div>
+
+    <script>
+        // --- Clock System ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('sys-time').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- GUI Navigation Logic ---
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const pages = document.querySelectorAll('.page');
+        const cliOutput = document.getElementById('cli-output');
+
+        function navigateTo(targetId, fromCli = false) {
+            const targetPage = document.getElementById(targetId);
+            const targetBtn = document.querySelector(`.nav-btn[data-target="${targetId}"]`);
+            
+            if (!targetPage) return false;
+
+            navBtns.forEach(btn => btn.setAttribute('aria-selected', 'false'));
+            pages.forEach(p => p.classList.remove('active'));
+
+            targetBtn.setAttribute('aria-selected', 'true');
+            targetPage.classList.add('active');
+
+            if (!fromCli) {
+                printToCLI(`> Executing GUI interrupt... Navigating to /${targetId}`, 'system');
+            }
+            return true;
+        }
+
+        navBtns.forEach(btn => btn.addEventListener('click', () => navigateTo(btn.getAttribute('data-target'))));
+
+        // --- CLI System Logic ---
+        const cliInput = document.getElementById('cli-input');
+        const validPaths = ['home', 'about', 'projects', 'contact', 'mdr'];
+
+        function printToCLI(text, type = 'normal') {
+            const line = document.createElement('div');
+            line.className = `cli-line ${type}`;
+            line.textContent = text;
+            cliOutput.appendChild(line);
+            setTimeout(() => { cliOutput.scrollTop = cliOutput.scrollHeight; }, 10);
+        }
+
+        printToCLI("IBEX CLI v2.4 initialized. Type 'help' for available commands.", "system");
+
+        cliInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const commandFull = this.value.trim().toLowerCase();
+                this.value = ''; 
+                if (commandFull === '') return;
+
+                printToCLI(`guest@ibex:~# ${commandFull}`, "system");
+                const parts = commandFull.split(' ');
+                const cmd = parts[0], arg = parts[1];
+
+                switch(cmd) {
+                    case 'help':
+                        printToCLI("AVAILABLE COMMANDS:");
+                        printToCLI("  cd <dir>   - Change directory (home, about, projects, contact, mdr)");
+                        printToCLI("  ls         - List available directories");
+                        printToCLI("  clear      - Clear terminal output");
+                        break;
+                    case 'ls':
+                        printToCLI("DIR_LIST: root/");
+                        printToCLI("  home/  about/  projects/  contact/  mdr/", "success");
+                        break;
+                    case 'cd':
+                        if (!arg) printToCLI("Error: Target directory required.", "error");
+                        else if (validPaths.includes(arg)) { printToCLI(`> Accessing /${arg}...`, "system"); navigateTo(arg, true); }
+                        else printToCLI(`Error: Directory '${arg}' not found.`, "error");
+                        break;
+                    case 'clear':
+                        cliOutput.innerHTML = '';
+                        break;
+                    default:
+                        printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
+                }
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); }
+        });
+
+        // --- MDR (Severance x Ibex) Mini-game Logic ---
+        const ibexWords = ["TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING"];
+        const badWords = ["FATIGUE", "TURNOVER", "STAGNATION", "ATTRITION", "DESPAIR", "MALAISE", "DOUBT", "FEAR", "DEFICIT", "APATHY"];
+        
+        let wordsFound = 0;
+        const totalWords = ibexWords.length;
+        const grid = document.getElementById('mdr-grid');
+        const fillBar = document.getElementById('mdr-fill');
+        const statusText = document.getElementById('mdr-status');
+
+        function initMDR() {
+            grid.innerHTML = '';
+            wordsFound = 0;
+            updateMDRProgress();
+            
+            let allNodes = [...ibexWords.map(w => ({ word: w, good: true }))];
+            
+            for(let i = 0; i < 24; i++) {
+                allNodes.push({ word: badWords[Math.floor(Math.random() * badWords.length)], good: false });
+            }
+
+            allNodes.sort(() => Math.random() - 0.5);
+
+            allNodes.forEach(item => {
+                const node = document.createElement('div');
+                node.className = 'data-node';
+                node.textContent = generateGarbageText(item.word.length); 
+                
+                node.addEventListener('mouseenter', () => { if(!node.classList.contains('found')) node.textContent = item.word; });
+                node.addEventListener('mouseleave', () => { if(!node.classList.contains('found')) node.textContent = generateGarbageText(item.word.length); });
+
+                node.addEventListener('click', () => {
+                    if (node.classList.contains('found')) return;
+                    
+                    if (item.good) {
+                        node.classList.add('found');
+                        node.textContent = item.word;
+                        wordsFound++;
+                        updateMDRProgress();
+                        printToCLI(`> MDR: '${item.word}' safely binned.`, 'success');
+                    } else {
+                        node.classList.add('bad');
+                        setTimeout(() => node.classList.remove('bad'), 300);
+                        printToCLI(`> MDR WARNING: '${item.word}' triggers negative corporate response.`, 'error');
+                    }
+                });
+                grid.appendChild(node);
+            });
+        }
+
+        function generateGarbageText(length) {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$&*";
+            let result = "";
+            for(let i=0; i<length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+
+        function updateMDRProgress() {
+            const percentage = (wordsFound / totalWords) * 100;
+            fillBar.style.width = `${percentage}%`;
+            statusText.textContent = `FILE ${Math.round(percentage)}% BINNED`;
+
+            if (wordsFound === totalWords) {
+                setTimeout(() => {
+                    statusText.textContent = "FILE COMPLETE.";
+                    printToCLI("> MDR: File completed. Ibex protocol fully optimized.", "success");
+                }, 500);
+            }
+        }
+
+        initMDR();
+    </script>
+</body>
+</html>

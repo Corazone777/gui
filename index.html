@@ -11,229 +11,833 @@
             /* Cohesive Amber & Warm Palette */
             --bg-base: #0c0804;
             --bg-panel: rgba(26, 18, 10, 0.85);
-            
+
             --ibex-amber: #ffaa00;
             --ibex-gold: #ffcc00;
             --ibex-orange: #ff5500;
             --ibex-rust: #8b3a00;
-            --ibex-green: #e7e8e7;
+            --ibex-green: #c9d3cb;
             --ibex-alert: #ff2200;
 
             --text-main: #ffe6cc;
             --text-dim: #8c735c;
-            
+
             /* Glows */
             --glow-amber: 0 0 10px rgba(255, 170, 0, 0.5);
             --glow-gold: 0 0 10px rgba(255, 204, 0, 0.5);
             --glow-orange: 0 0 10px rgba(255, 85, 0, 0.5);
             --glow-green: 0 0 10px rgba(51, 255, 102, 0.5);
             --glow-alert: 0 0 10px rgba(255, 34, 0, 0.5);
-            
+
             --font-mono: 'Share Tech Mono', monospace;
         }
 
         /* --- Reset & Base --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html {
-            height: 100%; background-color: var(--bg-base); color: var(--text-main);
-            font-family: var(--font-mono); overflow: hidden; display: flex;
-            justify-content: center; align-items: center;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+
+        body,
+        html {
+            height: 100%;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
 
         /* --- CRT & Grid Background --- */
         .system-wrapper {
-            position: relative; width: 100vw; height: 100vh; max-width: 1400px; max-height: 900px;
-            display: flex; flex-direction: column; background: radial-gradient(circle at center, #140d08 0%, #000 100%);
-            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9); z-index: 1;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 1400px;
+            max-height: 900px;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at center, #140d08 0%, #000 100%);
+            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+            z-index: 1;
         }
+
         .system-wrapper::before {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-image: linear-gradient(rgba(255, 170, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 170, 0, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px; z-index: -1; pointer-events: none; opacity: 0.5;
+            background-size: 30px 30px;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.5;
         }
+
         .system-wrapper::after {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
-            background-size: 100% 4px; z-index: 100; pointer-events: none;
+            background-size: 100% 4px;
+            z-index: 100;
+            pointer-events: none;
         }
 
         /* --- Boot Screen Overlay --- */
         #boot-screen {
-            position: absolute; inset: 0; z-index: 9999;
-            background-color: var(--bg-base); padding: 40px; 
-            display: flex; flex-direction: column; justify-content: flex-end;
+            position: absolute;
+            inset: 0;
+            z-index: 9999;
+            background-color: var(--bg-base);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
             transition: opacity 0.5s ease-out;
         }
-        #boot-text { margin-bottom: 10px; color: var(--ibex-amber); font-size: 1.2rem; line-height: 1.5; white-space: pre-wrap; }
-        
-        #boot-input-wrapper { display: none; align-items: center; font-size: 1.2rem; color: var(--ibex-gold); position: relative; }
-        #boot-display { margin-left: 10px; white-space: pre; text-transform: uppercase; }
-        #boot-input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: text; }
-        
-        .blinking-cursor { display: inline-block; width: 10px; height: 1.2rem; background: var(--ibex-gold); animation: blink 1s step-end infinite; }
+
+        #boot-text {
+            margin-bottom: 10px;
+            color: var(--ibex-amber);
+            font-size: 1.2rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        #boot-input-wrapper {
+            display: none;
+            align-items: center;
+            font-size: 1.2rem;
+            color: var(--ibex-gold);
+            position: relative;
+        }
+
+        #boot-display {
+            margin-left: 10px;
+            white-space: pre;
+            text-transform: uppercase;
+        }
+
+        #boot-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            cursor: text;
+        }
+
+        .blinking-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background: var(--ibex-gold);
+            animation: blink 1s step-end infinite;
+        }
 
         /* --- Main Layout --- */
-        .ui-container { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; gap: 20px; position: relative; z-index: 10; height: 100%; opacity: 0; transition: opacity 1s ease-in; }
-        
-        /* --- Header --- */
-        header { 
-            display: flex; justify-content: space-between; align-items: flex-end; 
-            padding-bottom: 10px; border-bottom: 2px solid var(--ibex-amber);
-            box-shadow: 0 4px 10px -4px rgba(255, 170, 0, 0.3); 
+        .ui-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.2s ease-in;
         }
-        h1 { font-size: 2.5rem; color: var(--ibex-amber); text-shadow: var(--glow-amber); letter-spacing: 2px; }
-        .header-stats { text-align: right; color: var(--ibex-orange); font-size: 1.1rem; }
+
+        /* SEQUENCE ANIMATION SETUP */
+        .sys-element {
+            opacity: 0;
+        }
+
+        /* Starts hidden until JS triggers it */
+        .flicker-on {
+            animation: flicker-boot 0.6s ease-out forwards;
+        }
+
+        @keyframes flicker-boot {
+            0% {
+                opacity: 0;
+                filter: brightness(2) contrast(1.5);
+                transform: scale(0.98);
+            }
+
+            15% {
+                opacity: 1;
+            }
+
+            30% {
+                opacity: 0;
+            }
+
+            45% {
+                opacity: 1;
+                filter: brightness(1) contrast(1);
+                transform: scale(1);
+            }
+
+            60% {
+                opacity: 0.3;
+            }
+
+            75% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+                filter: brightness(1) contrast(1);
+                transform: scale(1);
+            }
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--ibex-amber);
+            box-shadow: 0 4px 10px -4px rgba(255, 170, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--ibex-amber);
+            text-shadow: var(--glow-amber);
+            letter-spacing: 2px;
+        }
+
+        .header-stats {
+            text-align: right;
+            color: var(--ibex-orange);
+            font-size: 1.1rem;
+        }
 
         /* --- Middle Section (Nav + Content) --- */
-        .middle-tier { display: flex; flex-grow: 1; gap: 20px; overflow: hidden; }
+        .middle-tier {
+            display: flex;
+            flex-grow: 1;
+            gap: 20px;
+            overflow: hidden;
+        }
 
         /* --- Navigation with Gradient Borders --- */
-        nav { display: flex; flex-direction: column; gap: 10px; min-width: 200px; }
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 200px;
+        }
+
         .nav-btn {
             --btn-border: var(--ibex-rust);
             --btn-bg: var(--bg-panel);
-            background: 
+            background:
                 linear-gradient(135deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px),
                 linear-gradient(-45deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px),
                 var(--btn-bg);
-            color: var(--ibex-gold); border: 1px solid var(--btn-border);
-            padding: 15px; text-align: left; font-family: inherit; font-size: 1.2rem; cursor: pointer;
-            text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-            transition: all 0.2s ease; position: relative;
+            color: var(--ibex-gold);
+            border: 1px solid var(--btn-border);
+            padding: 15px;
+            text-align: left;
+            font-family: inherit;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: all 0.2s ease;
+            position: relative;
         }
-        .nav-btn::before { content: ">"; margin-right: 10px; opacity: 0.5; }
-        
-        .nav-btn:hover, .nav-btn:focus { --btn-bg: rgba(255, 204, 0, 0.1); --btn-border: var(--ibex-gold); box-shadow: inset var(--glow-gold); outline: none; }
-        .nav-btn[aria-selected="true"] { --btn-bg: var(--ibex-amber); --btn-border: var(--ibex-amber); color: var(--bg-base); font-weight: bold; box-shadow: var(--glow-amber); }
-        .nav-btn[aria-selected="true"]::before { opacity: 1; color: var(--bg-base); }
-        
-        .nav-btn[data-target="mdr"] { --btn-border: var(--ibex-green); color: var(--ibex-green); }
-        .nav-btn[data-target="mdr"]:hover { --btn-bg: rgba(51, 255, 102, 0.1); box-shadow: inset var(--glow-green); }
-        .nav-btn[data-target="mdr"][aria-selected="true"] { --btn-bg: var(--ibex-green); color: var(--bg-base); box-shadow: var(--glow-green); }
+
+        .nav-btn::before {
+            content: ">";
+            margin-right: 10px;
+            opacity: 0.5;
+        }
+
+        .nav-btn:hover,
+        .nav-btn:focus {
+            --btn-bg: rgba(255, 204, 0, 0.1);
+            --btn-border: var(--ibex-gold);
+            box-shadow: inset var(--glow-gold);
+            outline: none;
+        }
+
+        .nav-btn[aria-selected="true"] {
+            --btn-bg: var(--ibex-amber);
+            --btn-border: var(--ibex-amber);
+            color: var(--bg-base);
+            font-weight: bold;
+            box-shadow: var(--glow-amber);
+        }
+
+        .nav-btn[aria-selected="true"]::before {
+            opacity: 1;
+            color: var(--bg-base);
+        }
+
+        .nav-btn[data-target="mdr"] {
+            --btn-border: var(--ibex-green);
+            color: var(--ibex-green);
+        }
+
+        .nav-btn[data-target="mdr"]:hover {
+            --btn-bg: rgba(51, 255, 102, 0.1);
+            box-shadow: inset var(--glow-green);
+        }
+
+        .nav-btn[data-target="mdr"][aria-selected="true"] {
+            --btn-bg: var(--ibex-green);
+            color: var(--bg-base);
+            box-shadow: var(--glow-green);
+        }
 
         /* --- Content Viewport --- */
         main {
-            flex-grow: 1; background: var(--bg-panel); border: 1px solid var(--ibex-rust); position: relative;
-            padding: 30px; overflow-y: auto;
+            flex-grow: 1;
+            background: var(--bg-panel);
+            border: 1px solid var(--ibex-rust);
+            position: relative;
+            padding: 30px;
+            overflow-y: auto;
         }
 
-        .page { display: none; animation: glitch-in 0.3s ease-out forwards; }
-        .page.active { display: block; }
-        .page h2 { color: var(--ibex-orange); border-bottom: 1px dashed var(--ibex-orange); padding-bottom: 10px; margin-bottom: 20px; text-shadow: var(--glow-orange); }
-        .page p { font-size: 1.2rem; line-height: 1.6; margin-bottom: 15px; color: var(--text-main); }
-        .highlight-text { color: var(--ibex-gold); text-shadow: var(--glow-gold); }
+        .page {
+            display: none;
+            animation: glitch-in 0.3s ease-out forwards;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page h2 {
+            color: var(--ibex-orange);
+            border-bottom: 1px dashed var(--ibex-orange);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-shadow: var(--glow-orange);
+        }
+
+        .page p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .highlight-text {
+            color: var(--ibex-gold);
+            text-shadow: var(--glow-gold);
+        }
 
         /* --- Telemetry Stream --- */
         .telemetry-box {
-            border: 1px solid var(--ibex-rust); background: rgba(0, 0, 0, 0.5);
-            padding: 15px; margin-top: 20px; height: 160px; overflow: hidden; position: relative;
-            display: flex; flex-direction: column; justify-content: flex-end;
+            border: 1px solid var(--ibex-rust);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            margin-top: 20px;
+            height: 160px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
         }
-        .telemetry-box::before { content: ''; margin-top: auto; }
-        .telemetry-line { font-size: 1rem; color: var(--text-dim); margin-bottom: 6px; }
-        .telemetry-line .t-id { color: var(--ibex-gold); }
-        .telemetry-line .t-pass { color: var(--ibex-green); }
-        .telemetry-line .t-fail { color: var(--ibex-alert); }
-        .telemetry-line .t-sector { color: var(--ibex-amber); }
+
+        .telemetry-box::before {
+            content: '';
+            margin-top: auto;
+        }
+
+        .telemetry-line {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .telemetry-line .t-id {
+            color: var(--ibex-gold);
+        }
+
+        .telemetry-line .t-pass {
+            color: var(--ibex-green);
+        }
+
+        .telemetry-line .t-fail {
+            color: var(--ibex-alert);
+        }
+
+        .telemetry-line .t-sector {
+            color: var(--ibex-amber);
+        }
 
         /* --- Projects/Services Grid --- */
-        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .portfolio-item { border: 1px solid var(--ibex-rust); padding: 15px; background: rgba(255, 170, 0, 0.05); transition: transform 0.2s; }
-        .portfolio-item:hover { transform: translateY(-5px); box-shadow: var(--glow-amber); border-color: var(--ibex-amber); }
-        .portfolio-item h3 { color: var(--ibex-amber); margin-bottom: 8px; }
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .portfolio-item {
+            border: 1px solid var(--ibex-rust);
+            padding: 15px;
+            background: rgba(255, 170, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--glow-amber);
+            border-color: var(--ibex-amber);
+        }
+
+        .portfolio-item h3 {
+            color: var(--ibex-amber);
+            margin-bottom: 8px;
+        }
 
         /* --- MDR Severance Mini-Game --- */
-        .mdr-header { color: var(--ibex-green) !important; border-color: var(--ibex-green) !important; text-shadow: var(--glow-green) !important; }
-        
-        .mdr-workspace { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .mdr-header {
+            color: var(--ibex-green) !important;
+            border-color: var(--ibex-green) !important;
+            text-shadow: var(--glow-green) !important;
+        }
+
+        .mdr-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
 
         .data-matrix {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 8px;
-            padding: 25px; background: rgba(0,0,0,0.6); border: 1px solid var(--ibex-green);
-            max-height: 250px; overflow: hidden; /* Strictly prevents any inner scroll bar */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            gap: 8px;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--ibex-green);
+            max-height: 250px;
+            overflow: hidden;
+            /* Prevents inner scroll bar */
         }
 
         .data-node {
-            cursor: grab; padding: 10px 4px; text-align: center; background: rgba(51, 255, 102, 0.05);
-            border: 1px solid rgba(51, 255, 102, 0.3); transition: all 0.2s; user-select: none;
-            color: var(--text-dim); font-size: 0.95rem; /* Scaled down text to fit long words */
-            letter-spacing: -0.5px; /* Pulls the monospace letters slightly tighter together */
+            cursor: grab;
+            padding: 8px 4px;
+            text-align: center;
+            background: rgba(51, 255, 102, 0.05);
+            border: 1px solid rgba(51, 255, 102, 0.3);
+            transition: all 0.2s;
+            user-select: none;
+            color: var(--text-dim);
+            font-size: 1rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
         }
 
-        .data-node:active { cursor: grabbing; }
-        .data-node.dragging { opacity: 0.4; border-style: dashed; }
-        .data-node:hover:not(.dragging) { background: rgba(51, 255, 102, 0.2); color: var(--ibex-green); transform: scale(1.05); }
-        .data-node.bad { border-color: var(--ibex-alert); color: var(--ibex-alert); animation: shake 0.3s; }
+        .data-node:active {
+            cursor: grabbing;
+        }
+
+        .data-node.dragging {
+            opacity: 0.4;
+            border-style: dashed;
+        }
+
+        .data-node:hover:not(.dragging) {
+            background: rgba(51, 255, 102, 0.2);
+            color: var(--ibex-green);
+            transform: scale(1.05);
+        }
+
+        .data-node.bad {
+            border-color: var(--ibex-alert);
+            color: var(--ibex-alert);
+            animation: shake 0.3s;
+        }
 
         /* The Drop Zone */
         .ibex-dropzone {
-            height: 100px; border: 2px dashed var(--ibex-green); background: rgba(51, 255, 102, 0.05);
-            display: flex; justify-content: center; align-items: center;
-            color: var(--ibex-green); font-size: 2rem; font-weight: bold; letter-spacing: 5px;
-            text-shadow: var(--glow-green); transition: all 0.3s ease;
+            height: 100px;
+            border: 2px dashed var(--ibex-green);
+            background: rgba(51, 255, 102, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--ibex-green);
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            text-shadow: var(--glow-green);
+            transition: all 0.3s ease;
         }
+
         .ibex-dropzone.drag-over {
             background: rgba(51, 255, 102, 0.2);
             box-shadow: inset 0 0 30px var(--ibex-green);
             transform: scale(1.02);
         }
+
         .ibex-dropzone.error {
-            border-color: var(--ibex-alert); color: var(--ibex-alert);
-            background: rgba(255, 34, 0, 0.1); text-shadow: var(--glow-alert);
+            border-color: var(--ibex-alert);
+            color: var(--ibex-alert);
+            background: rgba(255, 34, 0, 0.1);
+            text-shadow: var(--glow-alert);
             box-shadow: inset 0 0 30px var(--ibex-alert);
             animation: shake 0.3s;
         }
 
-        .bin-container { border: 1px solid var(--ibex-green); padding: 5px; height: 30px; position: relative; }
-        .bin-fill { height: 100%; width: 0%; background: var(--ibex-green); transition: width 0.5s ease-out; box-shadow: var(--glow-green); }
-        .bin-status { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); mix-blend-mode: difference; font-weight: bold; }
+        .bin-container {
+            border: 1px solid var(--ibex-green);
+            padding: 5px;
+            height: 30px;
+            position: relative;
+        }
+
+        .bin-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--ibex-green);
+            transition: width 0.5s ease-out;
+            box-shadow: var(--glow-green);
+        }
+
+        .bin-status {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            mix-blend-mode: difference;
+            font-weight: bold;
+        }
 
         /* --- CLI Terminal Footer --- */
         footer {
-            height: 160px; display: flex; flex-direction: column; background: rgba(0, 0, 0, 0.85);
-            border: 1px solid var(--ibex-rust); border-left: 5px solid var(--ibex-orange); padding: 10px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--ibex-rust);
+            border-left: 5px solid var(--ibex-orange);
+            padding: 10px;
         }
-        #cli-output { flex-grow: 1; overflow-y: auto; margin-bottom: 10px; font-size: 1.1rem; color: var(--ibex-gold); display: flex; flex-direction: column; }
-        #cli-output::before { content: ''; margin-top: auto; }
-        .cli-line { margin-bottom: 4px; }
-        .cli-line.error { color: var(--ibex-alert); }
-        .cli-line.success { color: var(--ibex-green); }
-        .cli-line.system { color: var(--ibex-amber); }
-        
-        .cli-input-wrapper { display: flex; align-items: center; font-size: 1.2rem; color: var(--ibex-orange); }
-        .prompt { margin-right: 10px; white-space: nowrap; color: var(--ibex-orange); }
-        #cli-input { background: transparent; border: none; color: var(--text-main); font-family: inherit; font-size: 1.2rem; flex-grow: 1; outline: none; }
-        #cli-input:focus { border-bottom: 1px solid var(--ibex-gold); }
+
+        #cli-output {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: var(--ibex-gold);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #cli-output::before {
+            content: '';
+            margin-top: auto;
+        }
+
+        .cli-line {
+            margin-bottom: 4px;
+        }
+
+        .cli-line.error {
+            color: var(--ibex-alert);
+        }
+
+        .cli-line.success {
+            color: var(--ibex-green);
+        }
+
+        .cli-line.system {
+            color: var(--ibex-amber);
+        }
+
+        .cli-input-wrapper {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            color: var(--ibex-orange);
+        }
+
+        .prompt {
+            margin-right: 10px;
+            white-space: nowrap;
+            color: var(--ibex-orange);
+        }
+
+        #cli-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1.2rem;
+            flex-grow: 1;
+            outline: none;
+        }
+
+        #cli-input:focus {
+            border-bottom: 1px solid var(--ibex-gold);
+        }
 
         /* --- Animations --- */
-        @keyframes glitch-in { 0% { opacity: 0; transform: translateX(-10px); filter: contrast(200%); } 50% { opacity: 0.8; transform: translateX(5px); filter: contrast(50%); } 100% { opacity: 1; transform: translateX(0); filter: contrast(100%); } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        
+        @keyframes glitch-in {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+                filter: contrast(200%);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: translateX(5px);
+                filter: contrast(50%);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+                filter: contrast(100%);
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
         /* Easter Egg Glitch */
-        .kernel-panic { animation: extreme-glitch 0.2s infinite; pointer-events: none; }
+        .kernel-panic {
+            animation: extreme-glitch 0.2s infinite;
+            pointer-events: none;
+        }
+
         @keyframes extreme-glitch {
-            0% { transform: translate(0); filter: hue-rotate(0deg) contrast(100%); }
-            20% { transform: translate(-10px, 5px); filter: hue-rotate(90deg) contrast(200%); }
-            40% { transform: translate(-5px, -10px); filter: hue-rotate(180deg) contrast(300%); }
-            60% { transform: translate(10px, 5px); filter: hue-rotate(270deg) invert(100%); }
-            80% { transform: translate(5px, -5px); filter: hue-rotate(360deg) contrast(50%); }
-            100% { transform: translate(0); filter: hue-rotate(0deg); }
+            0% {
+                transform: translate(0);
+                filter: hue-rotate(0deg) contrast(100%);
+            }
+
+            20% {
+                transform: translate(-10px, 5px);
+                filter: hue-rotate(90deg) contrast(200%);
+            }
+
+            40% {
+                transform: translate(-5px, -10px);
+                filter: hue-rotate(180deg) contrast(300%);
+            }
+
+            60% {
+                transform: translate(10px, 5px);
+                filter: hue-rotate(270deg) invert(100%);
+            }
+
+            80% {
+                transform: translate(5px, -5px);
+                filter: hue-rotate(360deg) contrast(50%);
+            }
+
+            100% {
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-base); }
-        ::-webkit-scrollbar-thumb { background: var(--ibex-rust); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--ibex-orange); }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--ibex-rust);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--ibex-orange);
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            .ui-container {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .header-stats {
+                text-align: left;
+                font-size: 0.9rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .middle-tier {
+                flex-direction: column;
+            }
+
+            nav {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .nav-btn {
+                flex: 1 1 calc(50% - 10px);
+                padding: 10px;
+                font-size: 1rem;
+                text-align: center;
+            }
+
+            .nav-btn::before {
+                display: none;
+            }
+
+            main {
+                padding: 15px;
+            }
+
+            .page h2 {
+                font-size: 1.3rem;
+            }
+
+            .page p {
+                font-size: 1rem;
+            }
+
+            footer {
+                height: 120px;
+                padding: 8px;
+            }
+
+            .cli-input-wrapper,
+            #cli-output {
+                font-size: 1rem;
+            }
+
+            .prompt {
+                margin-right: 5px;
+            }
+
+            #boot-screen {
+                padding: 20px;
+            }
+
+            #boot-text {
+                font-size: 1rem;
+            }
+
+            #boot-input-wrapper {
+                font-size: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            #boot-display {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-btn {
+                flex: 1 1 100%;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <div class="system-wrapper">
-        
+
         <div id="boot-screen">
             <div id="boot-text"></div>
             <div id="boot-input-wrapper">
@@ -244,7 +848,7 @@
         </div>
 
         <div class="ui-container" id="main-ui">
-            <header>
+            <header class="sys-element">
                 <h1>IBEX // WORKSPACE</h1>
                 <div class="header-stats">
                     <span id="sys-time">00:00:00</span> | UPLINK: <span style="color:var(--ibex-green)">SECURE</span>
@@ -252,7 +856,7 @@
             </header>
 
             <div class="middle-tier">
-                <nav aria-label="Main Navigation">
+                <nav aria-label="Main Navigation" class="sys-element">
                     <button class="nav-btn" aria-selected="true" data-target="home">Dashboard</button>
                     <button class="nav-btn" aria-selected="false" data-target="about">About Ibex</button>
                     <button class="nav-btn" aria-selected="false" data-target="projects">Services</button>
@@ -260,21 +864,29 @@
                     <button class="nav-btn" aria-selected="false" data-target="mdr">Refinement</button>
                 </nav>
 
-                <main id="viewport" aria-live="polite">
+                <main id="viewport" aria-live="polite" class="sys-element">
                     <section id="home" class="page active">
                         <h2>WELCOME TO IBEX</h2>
-                        <p>Connection securely established to the primary staffing dashboard. You are currently viewing the talent management interface.</p>
-                        <p><strong class="highlight-text">SYSTEM NOTE:</strong> You can navigate this workspace using the side menu or utilize the command line terminal below. Press the <kbd style="color:var(--ibex-amber)">/</kbd> key to instantly focus the terminal.</p>
-                        
-                        <h3 style="color: var(--ibex-orange); border-bottom: 1px solid var(--ibex-rust); margin-top: 30px; padding-bottom: 5px;">LIVE TALENT TELEMETRY</h3>
+                        <p>Connection securely established to the primary staffing dashboard. You are currently viewing
+                            the talent management interface.</p>
+                        <p><strong class="highlight-text">SYSTEM NOTE:</strong> You can navigate this workspace using
+                            the side menu or utilize the command line terminal below. Press the <kbd
+                                style="color:var(--ibex-amber)">/</kbd> key to instantly focus the terminal.</p>
+
+                        <h3
+                            style="color: var(--ibex-orange); border-bottom: 1px solid var(--ibex-rust); margin-top: 30px; padding-bottom: 5px;">
+                            LIVE TALENT TELEMETRY</h3>
                         <div class="telemetry-box" id="telemetry-output">
-                            </div>
+                        </div>
                     </section>
 
                     <section id="about" class="page">
                         <h2>ABOUT IBEX</h2>
-                        <p>Ibex is a premier talent acquisition and professional staffing firm. We specialize in connecting top-tier candidates with industry-leading organizations through precision data-matching and a highly refined evaluation process.</p>
-                        <p>Our proprietary systems ensure that every placement aligns with both technical requirements and organizational culture.</p>
+                        <p>Ibex is a premier talent acquisition and professional staffing firm. We specialize in
+                            connecting top-tier candidates with industry-leading organizations through precision
+                            data-matching and a highly refined evaluation process.</p>
+                        <p>Our proprietary systems ensure that every placement aligns with both technical requirements
+                            and organizational culture.</p>
                     </section>
 
                     <section id="projects" class="page">
@@ -282,15 +894,18 @@
                         <div class="portfolio-grid">
                             <div class="portfolio-item">
                                 <h3>Executive Search</h3>
-                                <p style="font-size: 0.9rem;">Targeted placement services for C-suite executives, directors, and senior management roles.</p>
+                                <p style="font-size: 0.9rem;">Targeted placement services for C-suite executives,
+                                    directors, and senior management roles.</p>
                             </div>
                             <div class="portfolio-item">
                                 <h3>Technical Staffing</h3>
-                                <p style="font-size: 0.9rem;">Rapid deployment of highly specialized engineering, IT, and software development talent.</p>
+                                <p style="font-size: 0.9rem;">Rapid deployment of highly specialized engineering, IT,
+                                    and software development talent.</p>
                             </div>
                             <div class="portfolio-item">
                                 <h3>Contract Solutions</h3>
-                                <p style="font-size: 0.9rem;">Flexible workforce management for project-based initiatives and temporary scaling needs.</p>
+                                <p style="font-size: 0.9rem;">Flexible workforce management for project-based
+                                    initiatives and temporary scaling needs.</p>
                             </div>
                         </div>
                     </section>
@@ -303,8 +918,10 @@
 
                     <section id="mdr" class="page">
                         <h2 class="mdr-header">TALENT METRICS REFINEMENT</h2>
-                        <p style="color: var(--ibex-green)">Optimize our search algorithms by identifying positive organizational traits. Drag the successful metrics into the IBEX bin and ignore the negative indicators.</p>
-                        
+                        <p style="color: var(--ibex-green)">Optimize our search algorithms by identifying positive
+                            organizational traits. Drag the successful metrics into the IBEX bin and ignore the negative
+                            indicators.</p>
+
                         <div class="mdr-workspace">
                             <div class="data-matrix" id="mdr-grid"></div>
 
@@ -321,12 +938,13 @@
                 </main>
             </div>
 
-            <footer>
+            <footer class="sys-element">
                 <div id="cli-output" aria-live="polite"></div>
                 <div class="cli-input-wrapper">
                     <label for="cli-input" class="visually-hidden">Terminal Input</label>
                     <span class="prompt" id="cli-prompt-text">user@ibex:~#</span>
-                    <input type="text" id="cli-input" autocomplete="off" spellcheck="false" placeholder="Type 'help' for commands..." />
+                    <input type="text" id="cli-input" autocomplete="off" spellcheck="false"
+                        placeholder="Type 'help' for commands..." />
                 </div>
             </footer>
         </div>
@@ -367,12 +985,10 @@
 
         window.onload = () => setTimeout(playBootSequence, 500);
 
-        // Update the visible span when typing
         bootInput.addEventListener('input', () => {
             bootDisplay.textContent = bootInput.value.toUpperCase();
         });
 
-        // Ensure focus stays on invisible input if user clicks the wrapper
         bootInputWrapper.addEventListener('click', () => {
             bootInput.focus();
         });
@@ -381,17 +997,29 @@
             if (e.key === 'Enter' && bootInput.value.trim() !== '') {
                 const operatorId = bootInput.value.trim().toLowerCase();
                 document.getElementById('cli-prompt-text').textContent = `${operatorId}@ibex:~#`;
-                
+
                 bootText.innerHTML += `<br>> VERIFYING CREDENTIALS... [ACCEPTED]<br>> ACCESS GRANTED. LOGGING IN...`;
                 bootInputWrapper.style.display = 'none';
-                
+
                 setTimeout(() => {
                     bootScreen.style.opacity = '0';
                     setTimeout(() => {
                         bootScreen.style.display = 'none';
                         mainUI.style.opacity = '1';
-                        isBooted = true;
-                        initTelemetry(); 
+
+                        // Sequence the flicker-on animation
+                        const uiElements = document.querySelectorAll('.sys-element');
+                        uiElements.forEach((el, index) => {
+                            setTimeout(() => {
+                                el.classList.add('flicker-on');
+                            }, index * 250); // 250ms gap between each section loading
+                        });
+
+                        setTimeout(() => {
+                            isBooted = true;
+                            initTelemetry();
+                        }, uiElements.length * 250 + 600);
+
                     }, 500);
                 }, 800);
             }
@@ -420,11 +1048,11 @@
                 const id = Math.floor(Math.random() * 8999 + 1000);
                 const sector = sectors[Math.floor(Math.random() * sectors.length)];
                 const status = statuses[Math.floor(Math.random() * statuses.length)];
-                
+
                 const line = document.createElement('div');
                 line.className = 'telemetry-line';
                 line.innerHTML = `> PROFILE <span class="t-id">#${id}</span> - STATUS: <span class="${status.class}">${status.text}</span> - DEPT: <span class="t-sector">[${sector}]</span>`;
-                
+
                 telemetryOutput.appendChild(line);
                 if (telemetryOutput.children.length > 6) {
                     telemetryOutput.removeChild(telemetryOutput.firstChild);
@@ -464,17 +1092,17 @@
 
         printToCLI("IBEX Terminal v3.1 initialized. Type 'help' for available commands.", "system");
 
-        cliInput.addEventListener('keydown', function(e) {
+        cliInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 const commandFull = this.value.trim().toLowerCase();
-                this.value = ''; 
+                this.value = '';
                 if (commandFull === '') return;
 
                 printToCLI(`${document.getElementById('cli-prompt-text').textContent} ${commandFull}`, "system");
                 const parts = commandFull.split(' ');
                 const cmd = parts[0], arg = parts[1];
 
-                switch(cmd) {
+                switch (cmd) {
                     case 'help':
                         printToCLI("AVAILABLE COMMANDS: cd, ls, clear, admin", "normal");
                         break;
@@ -521,7 +1149,7 @@
         // --- MDR Drag and Drop Mini-Game ---
         const ibexWords = ["TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING"];
         const badWords = ["TURNOVER", "STAGNATION", "ATTRITION", "MISMATCH", "INEFFICIENCY", "GAPS", "UNRELIABLE", "CONFLICT"];
-        
+
         let wordsFound = 0;
         const totalWords = ibexWords.length;
         const grid = document.getElementById('mdr-grid');
@@ -533,9 +1161,9 @@
             grid.innerHTML = '';
             wordsFound = 0;
             updateMDRProgress();
-            
+
             let allNodes = [...ibexWords.map(w => ({ word: w, good: true }))];
-            for(let i = 0; i < 24; i++) {
+            for (let i = 0; i < 24; i++) {
                 allNodes.push({ word: badWords[Math.floor(Math.random() * badWords.length)], good: false });
             }
             allNodes.sort(() => Math.random() - 0.5);
@@ -543,31 +1171,28 @@
             allNodes.forEach((item, index) => {
                 const node = document.createElement('div');
                 node.className = 'data-node';
-                node.textContent = generateGarbageText(item.word.length); 
-                
-                // Set Drag properties
+                node.textContent = generateGarbageText(item.word.length);
+
                 node.setAttribute('draggable', 'true');
                 node.dataset.id = index;
                 node.dataset.good = item.good;
                 node.dataset.word = item.word;
-                
-                // Hover to reveal
+
                 node.addEventListener('mouseenter', () => { node.textContent = item.word; });
-                node.addEventListener('mouseleave', () => { 
-                    if(!node.classList.contains('found')) node.textContent = generateGarbageText(item.word.length); 
+                node.addEventListener('mouseleave', () => {
+                    if (!node.classList.contains('found')) node.textContent = generateGarbageText(item.word.length);
                 });
 
-                // Drag Events
                 node.addEventListener('dragstart', (e) => {
                     node.classList.add('dragging');
-                    node.textContent = item.word; 
+                    node.textContent = item.word;
                     e.dataTransfer.setData('text/plain', index);
                     ibexBin.style.borderColor = "var(--ibex-gold)";
                 });
 
                 node.addEventListener('dragend', () => {
                     node.classList.remove('dragging');
-                    ibexBin.style.borderColor = ""; 
+                    ibexBin.style.borderColor = "";
                     if (!node.classList.contains('found')) {
                         node.textContent = generateGarbageText(item.word.length);
                     }
@@ -577,9 +1202,8 @@
             });
         }
 
-        // Drop Zone Events
         ibexBin.addEventListener('dragover', (e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             ibexBin.classList.add('drag-over');
         });
 
@@ -590,7 +1214,7 @@
         ibexBin.addEventListener('drop', (e) => {
             e.preventDefault();
             ibexBin.classList.remove('drag-over');
-            
+
             const nodeId = e.dataTransfer.getData('text/plain');
             const node = document.querySelector(`.data-node[data-id='${nodeId}']`);
             if (!node) return;
@@ -600,7 +1224,7 @@
 
             if (isGood) {
                 node.classList.add('found');
-                node.style.visibility = 'hidden'; 
+                node.style.visibility = 'hidden';
                 wordsFound++;
                 updateMDRProgress();
                 printToCLI(`> ALGORITHM UPDATE: Trait '${word}' successfully integrated.`, 'success');
@@ -618,7 +1242,7 @@
         function generateGarbageText(length) {
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$&*";
             let result = "";
-            for(let i=0; i<length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
             return result;
         }
 
@@ -635,8 +1259,9 @@
                 }, 500);
             }
         }
-        
+
         initMDR();
     </script>
 </body>
+
 </html>

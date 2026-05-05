@@ -103,59 +103,6 @@
             pointer-events: none;
         }
 
-        /* --- Boot Screen Overlay --- */
-        #boot-screen {
-            position: absolute;
-            inset: 0;
-            z-index: 9999;
-            background-color: var(--bg-base);
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            transition: opacity 0.5s ease-out;
-        }
-
-        #boot-text {
-            margin-bottom: 10px;
-            color: var(--ibex-amber);
-            font-size: 1.2rem;
-            line-height: 1.5;
-            white-space: pre-wrap;
-        }
-
-        #boot-input-wrapper {
-            display: none;
-            align-items: center;
-            font-size: 1.2rem;
-            color: var(--ibex-gold);
-            position: relative;
-        }
-
-        #boot-display {
-            margin-left: 10px;
-            white-space: pre;
-            text-transform: uppercase;
-        }
-
-        #boot-input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            left: 0;
-            top: 0;
-            cursor: text;
-        }
-
-        .blinking-cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.2rem;
-            background: var(--ibex-gold);
-            animation: blink 1s step-end infinite;
-        }
-
         /* --- Main Layout --- */
         .ui-container {
             flex-grow: 1;
@@ -175,9 +122,9 @@
             opacity: 0;
         }
 
-        /* Starts hidden until JS triggers it */
+        /* 50% faster animation: 0.3s instead of 0.6s */
         .flicker-on {
-            animation: flicker-boot 0.6s ease-out forwards;
+            animation: flicker-boot 0.3s ease-out forwards;
         }
 
         @keyframes flicker-boot {
@@ -801,25 +748,6 @@
             .prompt {
                 margin-right: 5px;
             }
-
-            #boot-screen {
-                padding: 20px;
-            }
-
-            #boot-text {
-                font-size: 1rem;
-            }
-
-            #boot-input-wrapper {
-                font-size: 1rem;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            #boot-display {
-                margin-left: 0;
-            }
         }
 
         @media (max-width: 480px) {
@@ -837,15 +765,6 @@
 <body>
 
     <div class="system-wrapper">
-
-        <div id="boot-screen">
-            <div id="boot-text"></div>
-            <div id="boot-input-wrapper">
-                <span>ENTER SECURE ID:</span>
-                <span id="boot-display"></span><span class="blinking-cursor"></span>
-                <input type="text" id="boot-input" autocomplete="off" spellcheck="false" />
-            </div>
-        </div>
 
         <div class="ui-container" id="main-ui">
             <header class="sys-element">
@@ -951,79 +870,26 @@
     </div>
 
     <script>
-        // --- 1. Boot Sequence Logic ---
-        const bootScreen = document.getElementById('boot-screen');
-        const bootText = document.getElementById('boot-text');
-        const bootInputWrapper = document.getElementById('boot-input-wrapper');
-        const bootInput = document.getElementById('boot-input');
-        const bootDisplay = document.getElementById('boot-display');
         const mainUI = document.getElementById('main-ui');
         let isBooted = false;
 
-        const bootSequence = [
-            "INITIALIZING IBEX TALENT MATRIX v4.2...",
-            "MOUNTING SECURE CANDIDATE DATABASES... [OK]",
-            "ESTABLISHING ENCRYPTED CLIENT UPLINK... [OK]",
-            "LOADING SCREENING MODULES... [OK]",
-            "VERIFYING SYSTEM INTEGRITY... [OK]",
-            "SYNCHRONIZING WITH GLOBAL NETWORK..."
-        ];
+        // --- Initiate Sequence on Page Load ---
+        window.onload = () => {
+            mainUI.style.opacity = '1';
 
-        let bootIndex = 0;
-        function playBootSequence() {
-            if (bootIndex < bootSequence.length) {
-                bootText.innerHTML += `> ${bootSequence[bootIndex]}<br>`;
-                bootIndex++;
-                setTimeout(playBootSequence, Math.random() * 300 + 100);
-            } else {
+            // Sequence the flicker-on animation (50% faster, 125ms gap)
+            const uiElements = document.querySelectorAll('.sys-element');
+            uiElements.forEach((el, index) => {
                 setTimeout(() => {
-                    bootInputWrapper.style.display = 'flex';
-                    bootInput.focus();
-                }, 500);
-            }
-        }
+                    el.classList.add('flicker-on');
+                }, index * 125); 
+            });
 
-        window.onload = () => setTimeout(playBootSequence, 500);
-
-        bootInput.addEventListener('input', () => {
-            bootDisplay.textContent = bootInput.value.toUpperCase();
-        });
-
-        bootInputWrapper.addEventListener('click', () => {
-            bootInput.focus();
-        });
-
-        bootInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && bootInput.value.trim() !== '') {
-                const operatorId = bootInput.value.trim().toLowerCase();
-                document.getElementById('cli-prompt-text').textContent = `${operatorId}@ibex:~#`;
-
-                bootText.innerHTML += `<br>> VERIFYING CREDENTIALS... [ACCEPTED]<br>> ACCESS GRANTED. LOGGING IN...`;
-                bootInputWrapper.style.display = 'none';
-
-                setTimeout(() => {
-                    bootScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        bootScreen.style.display = 'none';
-                        mainUI.style.opacity = '1';
-
-                        // Sequence the flicker-on animation
-                        const uiElements = document.querySelectorAll('.sys-element');
-                        uiElements.forEach((el, index) => {
-                            setTimeout(() => {
-                                el.classList.add('flicker-on');
-                            }, index * 250); // 250ms gap between each section loading
-                        });
-
-                        setTimeout(() => {
-                            isBooted = true;
-                            initTelemetry();
-                        }, uiElements.length * 250 + 600);
-
-                    }, 500);
-                }, 800);
-            }
-        });
+            setTimeout(() => {
+                isBooted = true;
+                initTelemetry();
+            }, uiElements.length * 125 + 300);
+        };
 
         // --- Clock System ---
         function updateClock() {

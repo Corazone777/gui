@@ -26,739 +26,253 @@
             --glow-amber: 0 0 10px rgba(255, 170, 0, 0.5);
             --glow-gold: 0 0 10px rgba(255, 204, 0, 0.5);
             --glow-orange: 0 0 10px rgba(255, 85, 0, 0.5);
-            --glow-green: 0 0 10px rgba(51, 255, 102, 0.5);
+            --glow-green: 0 0 10px rgba(201, 211, 203, 0.5);
             --glow-alert: 0 0 10px rgba(255, 34, 0, 0.5);
 
             --font-mono: 'Share Tech Mono', monospace;
         }
 
         /* --- Reset & Base --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            height: 100%; background-color: var(--bg-base); color: var(--text-main);
+            font-family: var(--font-mono); overflow: hidden; display: flex;
+            justify-content: center; align-items: center;
         }
 
-        body,
-        html {
-            height: 100%;
-            background-color: black;
-            color: var(--text-main);
-            font-family: var(--font-mono);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            margin: -1px;
-            padding: 0;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            border: 0;
-        }
+        .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 
         /* --- CRT & Grid Background --- */
         .system-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 1400px;
-            max-height: 900px;
-            display: flex;
-            flex-direction: column;
-            background: radial-gradient(circle at center, #140d08 0%, #000 100%);
-            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
-            z-index: 1;
+            position: relative; width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; background: radial-gradient(circle at center, #140d08 0%, #000 100%);
+            box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.9); z-index: 1;
         }
 
         .system-wrapper::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background-image: linear-gradient(rgba(255, 170, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 170, 0, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            z-index: -1;
-            pointer-events: none;
-            opacity: 0.5;
+            background-size: 30px 30px; z-index: -1; pointer-events: none; opacity: 0.5;
         }
 
         .system-wrapper::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
-            background-size: 100% 4px;
-            z-index: 100;
-            pointer-events: none;
+            background-size: 100% 4px; z-index: 100; pointer-events: none;
+        }
+
+        /* --- AMBIENT BACKGROUND MACRODATA PROCESS --- */
+        #bg-matrix {
+            position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden;
+        }
+
+        .data-node {
+            position: absolute; padding: 4px 8px; text-align: center;
+            color: var(--ibex-green); font-size: 0.85rem; opacity: 0.2;
+            transition: opacity 0.2s, background 0.2s, font-size 0.2s;
+            user-select: none; pointer-events: auto; border-radius: 3px;
+            /* Slow, organic floating animation */
+            animation: ambient-float 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes ambient-float {
+            0% { transform: translate(0px, 0px); }
+            33% { transform: translate(20px, -15px); }
+            66% { transform: translate(-15px, 20px); }
+            100% { transform: translate(0px, 0px); }
+        }
+
+        /* Fluid Trailing State (Replaces rigid magnetic snap) */
+        .data-node.attached {
+            position: fixed; 
+            opacity: 1 !important; border: 1px dashed var(--ibex-green); background: rgba(0,0,0,0.9);
+            z-index: 9999; pointer-events: none;
+            /* Removed the translate center snap. Added smooth trailing transition */
+            transition: left 0.15s ease-out, top 0.15s ease-out;
+            text-shadow: var(--glow-green); box-shadow: var(--glow-green);
+            animation: none !important; /* Stop floating when caught */
+        }
+        
+        .data-node:hover:not(.attached) {
+            opacity: 1; z-index: 998; background: rgba(0, 0, 0, 0.9);
+            text-shadow: var(--glow-green); border: 1px solid rgba(201, 211, 203, 0.4);
+            font-size: 1.1rem; animation-play-state: paused;
+        }
+
+        .data-node.bad {
+            color: var(--ibex-alert); text-shadow: var(--glow-alert);
+            border-color: var(--ibex-alert); animation: shake 0.3s;
         }
 
         /* --- Main Layout --- */
         .ui-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 20px;
-            position: relative;
-            z-index: 10;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.2s ease-in;
+            /* Increased width and max-width for a much wider interface */
+            width: 90%; max-width: 1600px; height: 90%; margin: auto; 
+            display: flex; flex-direction: column; gap: 20px;
+            position: relative; z-index: 10; opacity: 0; transition: opacity 0.2s ease-in;
+            pointer-events: none; 
         }
 
-        /* SEQUENCE ANIMATION SETUP */
-        .sys-element {
-            opacity: 0;
-        }
+        header, nav, main, footer { pointer-events: auto; }
 
-        /* 50% faster animation: 0.3s instead of 0.6s */
-        .flicker-on {
-            animation: flicker-boot 0.3s ease-out forwards;
-        }
+        .sys-element { opacity: 0; }
+        .flicker-on { animation: flicker-boot 0.3s ease-out forwards; }
 
         @keyframes flicker-boot {
-            0% {
-                opacity: 0;
-                filter: brightness(2) contrast(1.5);
-                transform: scale(0.98);
-            }
-
-            15% {
-                opacity: 1;
-            }
-
-            30% {
-                opacity: 0;
-            }
-
-            45% {
-                opacity: 1;
-                filter: brightness(1) contrast(1);
-                transform: scale(1);
-            }
-
-            60% {
-                opacity: 0.3;
-            }
-
-            75% {
-                opacity: 1;
-            }
-
-            90% {
-                opacity: 0.6;
-            }
-
-            100% {
-                opacity: 1;
-                filter: brightness(1) contrast(1);
-                transform: scale(1);
-            }
+            0% { opacity: 0; filter: brightness(2) contrast(1.5); transform: scale(0.98); }
+            15% { opacity: 1; }
+            30% { opacity: 0; }
+            45% { opacity: 1; filter: brightness(1) contrast(1); transform: scale(1); }
+            60% { opacity: 0.3; }
+            75% { opacity: 1; }
+            90% { opacity: 0.6; }
+            100% { opacity: 1; filter: brightness(1) contrast(1); transform: scale(1); }
         }
 
         /* --- Header --- */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--ibex-amber);
-            box-shadow: 0 4px 10px -4px rgba(255, 170, 0, 0.3);
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding-bottom: 10px; border-bottom: 2px solid var(--ibex-amber);
+            box-shadow: 0 4px 10px -4px rgba(255, 170, 0, 0.3); background: var(--bg-panel); padding: 15px;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            color: var(--ibex-amber);
-            text-shadow: var(--glow-amber);
-            letter-spacing: 2px;
-        }
-
-        .header-stats {
-            text-align: right;
-            color: var(--ibex-orange);
-            font-size: 1.1rem;
-        }
+        h1 { font-size: 2.5rem; color: var(--ibex-amber); text-shadow: var(--glow-amber); letter-spacing: 2px; margin: 0; }
+        .header-stats { text-align: right; color: var(--ibex-orange); font-size: 1.1rem; }
 
         /* --- Middle Section (Nav + Content) --- */
-        .middle-tier {
-            display: flex;
-            flex-grow: 1;
-            gap: 20px;
-            overflow: hidden;
-        }
+        .middle-tier { display: flex; flex-grow: 1; gap: 20px; overflow: hidden; pointer-events: none; }
 
-        /* --- Navigation with Gradient Borders --- */
-        nav {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            min-width: 200px;
-        }
+        /* --- Navigation --- */
+        nav { display: flex; flex-direction: column; gap: 10px; min-width: 220px; pointer-events: auto; }
 
         .nav-btn {
-            --btn-border: var(--ibex-rust);
-            --btn-bg: var(--bg-panel);
-            background:
-                linear-gradient(135deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px),
-                linear-gradient(-45deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px),
-                var(--btn-bg);
-            color: var(--ibex-gold);
-            border: 1px solid var(--btn-border);
-            padding: 15px;
-            text-align: left;
-            font-family: inherit;
-            font-size: 1.2rem;
-            cursor: pointer;
-            text-transform: uppercase;
+            --btn-border: var(--ibex-rust); --btn-bg: var(--bg-panel);
+            background: linear-gradient(135deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px),
+                        linear-gradient(-45deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px), var(--btn-bg);
+            color: var(--ibex-gold); border: 1px solid var(--btn-border); padding: 15px; text-align: left;
+            font-family: inherit; font-size: 1.2rem; cursor: pointer; text-transform: uppercase;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-            transition: all 0.2s ease;
-            position: relative;
+            transition: all 0.2s ease; position: relative;
         }
 
-        .nav-btn::before {
-            content: ">";
-            margin-right: 10px;
-            opacity: 0.5;
-        }
-
-        .nav-btn:hover,
-        .nav-btn:focus {
-            --btn-bg: rgba(255, 204, 0, 0.1);
-            --btn-border: var(--ibex-gold);
-            box-shadow: inset var(--glow-gold);
-            outline: none;
-        }
-
-        .nav-btn[aria-selected="true"] {
-            --btn-bg: var(--ibex-amber);
-            --btn-border: var(--ibex-amber);
-            color: var(--bg-base);
-            font-weight: bold;
-            box-shadow: var(--glow-amber);
-        }
-
-        .nav-btn[aria-selected="true"]::before {
-            opacity: 1;
-            color: var(--bg-base);
-        }
-
-        .nav-btn[data-target="mdr"] {
-            --btn-border: var(--ibex-green);
-            color: var(--ibex-green);
-        }
-
-        .nav-btn[data-target="mdr"]:hover {
-            --btn-bg: rgba(51, 255, 102, 0.1);
-            box-shadow: inset var(--glow-green);
-        }
-
-        .nav-btn[data-target="mdr"][aria-selected="true"] {
-            --btn-bg: var(--ibex-green);
-            color: var(--bg-base);
-            box-shadow: var(--glow-green);
-        }
-
-        /* --- Content Viewport --- */
-        main {
-            flex-grow: 1;
-            background: var(--bg-panel);
-            border: 1px solid var(--ibex-rust);
-            position: relative;
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .page {
-            display: none;
-            animation: glitch-in 0.3s ease-out forwards;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .page h2 {
-            color: var(--ibex-orange);
-            border-bottom: 1px dashed var(--ibex-orange);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            text-shadow: var(--glow-orange);
-        }
-
-        .page p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 15px;
-            color: var(--text-main);
-        }
-
-        .highlight-text {
-            color: var(--ibex-gold);
-            text-shadow: var(--glow-gold);
-        }
-
-        /* --- Telemetry Stream --- */
-        .telemetry-box {
-            border: 1px solid var(--ibex-rust);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            margin-top: 20px;
-            height: 160px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
-
-        .telemetry-box::before {
-            content: '';
-            margin-top: auto;
-        }
-
-        .telemetry-line {
-            font-size: 1rem;
-            color: var(--text-dim);
-            margin-bottom: 6px;
-        }
-
-        .telemetry-line .t-id {
-            color: var(--ibex-gold);
-        }
-
-        .telemetry-line .t-pass {
-            color: var(--ibex-green);
-        }
-
-        .telemetry-line .t-fail {
-            color: var(--ibex-alert);
-        }
-
-        .telemetry-line .t-sector {
-            color: var(--ibex-amber);
-        }
-
-        /* --- Projects/Services Grid --- */
-        .portfolio-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .portfolio-item {
-            border: 1px solid var(--ibex-rust);
-            padding: 15px;
-            background: rgba(255, 170, 0, 0.05);
-            transition: transform 0.2s;
-        }
-
-        .portfolio-item:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--glow-amber);
-            border-color: var(--ibex-amber);
-        }
-
-        .portfolio-item h3 {
-            color: var(--ibex-amber);
-            margin-bottom: 8px;
-        }
-
-        /* --- MDR Severance Mini-Game --- */
-        .mdr-header {
-            color: var(--ibex-green) !important;
-            border-color: var(--ibex-green) !important;
-            text-shadow: var(--glow-green) !important;
-        }
-
-        .mdr-workspace {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .data-matrix {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-            gap: 8px;
-            padding: 25px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--ibex-green);
-            max-height: 250px;
-            overflow: hidden;
-            /* Prevents inner scroll bar */
-        }
-
-        .data-node {
-            cursor: grab;
-            padding: 8px 4px;
-            text-align: center;
-            background: rgba(51, 255, 102, 0.05);
-            border: 1px solid rgba(51, 255, 102, 0.3);
-            transition: all 0.2s;
-            user-select: none;
-            color: var(--text-dim);
-            font-size: 1rem;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 40px;
-        }
-
-        .data-node:active {
-            cursor: grabbing;
-        }
-
-        .data-node.dragging {
-            opacity: 0.4;
-            border-style: dashed;
-        }
-
-        .data-node:hover:not(.dragging) {
-            background: rgba(51, 255, 102, 0.2);
-            color: var(--ibex-green);
-            transform: scale(1.05);
-        }
-
-        .data-node.bad {
-            border-color: var(--ibex-alert);
-            color: var(--ibex-alert);
-            animation: shake 0.3s;
-        }
+        .nav-btn::before { content: ">"; margin-right: 10px; opacity: 0.5; }
+        .nav-btn:hover, .nav-btn:focus { --btn-bg: rgba(255, 204, 0, 0.1); --btn-border: var(--ibex-gold); box-shadow: inset var(--glow-gold); outline: none; }
+        .nav-btn[aria-selected="true"] { --btn-bg: var(--ibex-amber); --btn-border: var(--ibex-amber); color: var(--bg-base); font-weight: bold; box-shadow: var(--glow-amber); }
+        .nav-btn[aria-selected="true"]::before { opacity: 1; color: var(--bg-base); }
 
         /* The Drop Zone */
         .ibex-dropzone {
-            height: 100px;
-            border: 2px dashed var(--ibex-green);
-            background: rgba(51, 255, 102, 0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--ibex-green);
-            font-size: 2rem;
-            font-weight: bold;
-            letter-spacing: 5px;
-            text-shadow: var(--glow-green);
-            transition: all 0.3s ease;
+            margin-top: auto; height: 90px; border: 1px dashed var(--ibex-green);
+            background: rgba(10, 10, 25, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: var(--ibex-green); font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;
+            text-shadow: var(--glow-green); transition: all 0.3s ease; text-align: center; cursor: pointer;
         }
 
-        .ibex-dropzone.drag-over {
-            background: rgba(51, 255, 102, 0.2);
-            box-shadow: inset 0 0 30px var(--ibex-green);
-            transform: scale(1.02);
+        /* Pulsing Hint Animation for when a word is trailing the cursor */
+        @keyframes hint-blink {
+            0%, 100% { box-shadow: inset 0 0 10px var(--ibex-green); border-color: var(--ibex-green); }
+            50% { box-shadow: inset 0 0 30px var(--ibex-gold); border-color: var(--ibex-gold); color: var(--ibex-gold); }
         }
 
-        .ibex-dropzone.error {
-            border-color: var(--ibex-alert);
-            color: var(--ibex-alert);
-            background: rgba(255, 34, 0, 0.1);
-            text-shadow: var(--glow-alert);
-            box-shadow: inset 0 0 30px var(--ibex-alert);
-            animation: shake 0.3s;
+        .ibex-dropzone.blinking-hint { animation: hint-blink 1s infinite; }
+        .ibex-dropzone.drag-over { background: rgba(201, 211, 203, 0.2); box-shadow: inset 0 0 30px var(--ibex-green); transform: scale(1.02); border: 1px solid var(--ibex-green); }
+        .ibex-dropzone.error { border-color: var(--ibex-alert); color: var(--ibex-alert); background: rgba(255, 34, 0, 0.1); text-shadow: var(--glow-alert); box-shadow: inset 0 0 20px var(--ibex-alert); animation: shake 0.3s; }
+
+        .bin-container { border: 1px solid var(--ibex-green); padding: 3px; height: 12px; width: 80%; margin-top: 10px; position: relative; }
+        .bin-fill { height: 100%; width: 0%; background: var(--ibex-green); transition: width 0.5s ease-out; box-shadow: var(--glow-green); }
+
+        /* --- Content Viewport --- */
+        main {
+            flex-grow: 1; background: var(--bg-panel); border: 1px solid var(--ibex-rust); position: relative; padding: 30px; overflow-y: auto;
         }
 
-        .bin-container {
-            border: 1px solid var(--ibex-green);
-            padding: 5px;
-            height: 30px;
-            position: relative;
-        }
+        .page { display: none; animation: glitch-in 0.3s ease-out forwards; }
+        .page.active { display: block; }
+        .page h2 { color: var(--ibex-orange); border-bottom: 1px dashed var(--ibex-orange); padding-bottom: 10px; margin-bottom: 20px; text-shadow: var(--glow-orange); }
+        .page p { font-size: 1.2rem; line-height: 1.6; margin-bottom: 15px; color: var(--text-main); }
+        .highlight-text { color: var(--ibex-gold); text-shadow: var(--glow-gold); }
 
-        .bin-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--ibex-green);
-            transition: width 0.5s ease-out;
-            box-shadow: var(--glow-green);
+        /* --- Telemetry Stream --- */
+        .telemetry-box {
+            border: 1px solid var(--ibex-rust); background: rgba(0, 0, 0, 0.5); padding: 15px; margin-top: 20px;
+            height: 160px; overflow: hidden; position: relative; display: flex; flex-direction: column; justify-content: flex-end;
         }
+        .telemetry-box::before { content: ''; margin-top: auto; }
+        .telemetry-line { font-size: 1rem; color: var(--text-dim); margin-bottom: 6px; }
+        .telemetry-line .t-id { color: var(--ibex-gold); }
+        .telemetry-line .t-pass { color: var(--ibex-green); }
+        .telemetry-line .t-fail { color: var(--ibex-alert); }
+        .telemetry-line .t-sector { color: var(--ibex-amber); }
 
-        .bin-status {
-            position: absolute;
-            top: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            mix-blend-mode: difference;
-            font-weight: bold;
-        }
+        /* --- Projects/Services Grid --- */
+        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .portfolio-item { border: 1px solid var(--ibex-rust); padding: 15px; background: rgba(255, 170, 0, 0.05); transition: transform 0.2s; }
+        .portfolio-item:hover { transform: translateY(-5px); box-shadow: var(--glow-amber); border-color: var(--ibex-amber); }
+        .portfolio-item h3 { color: var(--ibex-amber); margin-bottom: 8px; }
 
         /* --- CLI Terminal Footer --- */
         footer {
-            height: 160px;
-            display: flex;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid var(--ibex-rust);
-            border-left: 5px solid var(--ibex-orange);
-            padding: 10px;
+            height: 160px; display: flex; flex-direction: column; background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--ibex-rust); border-left: 5px solid var(--ibex-orange); padding: 10px;
         }
 
-        #cli-output {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-            color: var(--ibex-gold);
-            display: flex;
-            flex-direction: column;
-        }
+        #cli-output { flex-grow: 1; overflow-y: auto; margin-bottom: 10px; font-size: 1.1rem; color: var(--ibex-gold); display: flex; flex-direction: column; }
+        #cli-output::before { content: ''; margin-top: auto; }
+        .cli-line { margin-bottom: 4px; }
+        .cli-line.error { color: var(--ibex-alert); }
+        .cli-line.success { color: var(--ibex-green); }
+        .cli-line.system { color: var(--ibex-amber); }
 
-        #cli-output::before {
-            content: '';
-            margin-top: auto;
-        }
-
-        .cli-line {
-            margin-bottom: 4px;
-        }
-
-        .cli-line.error {
-            color: var(--ibex-alert);
-        }
-
-        .cli-line.success {
-            color: var(--ibex-green);
-        }
-
-        .cli-line.system {
-            color: var(--ibex-amber);
-        }
-
-        .cli-input-wrapper {
-            display: flex;
-            align-items: center;
-            font-size: 1.2rem;
-            color: var(--ibex-orange);
-        }
-
-        .prompt {
-            margin-right: 10px;
-            white-space: nowrap;
-            color: var(--ibex-orange);
-        }
-
-        #cli-input {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-family: inherit;
-            font-size: 1.2rem;
-            flex-grow: 1;
-            outline: none;
-        }
-
-        #cli-input:focus {
-            border-bottom: 1px solid var(--ibex-gold);
-        }
+        .cli-input-wrapper { display: flex; align-items: center; font-size: 1.2rem; color: var(--ibex-orange); }
+        .prompt { margin-right: 10px; white-space: nowrap; color: var(--ibex-orange); }
+        #cli-input { background: transparent; border: none; color: var(--text-main); font-family: inherit; font-size: 1.2rem; flex-grow: 1; outline: none; }
+        #cli-input:focus { border-bottom: 1px solid var(--ibex-gold); }
 
         /* --- Animations --- */
         @keyframes glitch-in {
-            0% {
-                opacity: 0;
-                transform: translateX(-10px);
-                filter: contrast(200%);
-            }
-
-            50% {
-                opacity: 0.8;
-                transform: translateX(5px);
-                filter: contrast(50%);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-                filter: contrast(100%);
-            }
-        }
-
-        @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes pop {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.2);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+            0% { opacity: 0; transform: translateX(-10px); filter: contrast(200%); }
+            50% { opacity: 0.8; transform: translateX(5px); filter: contrast(50%); }
+            100% { opacity: 1; transform: translateX(0); filter: contrast(100%); }
         }
 
         @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-5px);
-            }
-
-            75% {
-                transform: translateX(5px);
-            }
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
-        /* Easter Egg Glitch */
-        .kernel-panic {
-            animation: extreme-glitch 0.2s infinite;
-            pointer-events: none;
-        }
-
+        .kernel-panic { animation: extreme-glitch 0.2s infinite; pointer-events: none; }
         @keyframes extreme-glitch {
-            0% {
-                transform: translate(0);
-                filter: hue-rotate(0deg) contrast(100%);
-            }
-
-            20% {
-                transform: translate(-10px, 5px);
-                filter: hue-rotate(90deg) contrast(200%);
-            }
-
-            40% {
-                transform: translate(-5px, -10px);
-                filter: hue-rotate(180deg) contrast(300%);
-            }
-
-            60% {
-                transform: translate(10px, 5px);
-                filter: hue-rotate(270deg) invert(100%);
-            }
-
-            80% {
-                transform: translate(5px, -5px);
-                filter: hue-rotate(360deg) contrast(50%);
-            }
-
-            100% {
-                transform: translate(0);
-                filter: hue-rotate(0deg);
-            }
+            0% { transform: translate(0); filter: hue-rotate(0deg) contrast(100%); }
+            20% { transform: translate(-10px, 5px); filter: hue-rotate(90deg) contrast(200%); }
+            40% { transform: translate(-5px, -10px); filter: hue-rotate(180deg) contrast(300%); }
+            60% { transform: translate(10px, 5px); filter: hue-rotate(270deg) invert(100%); }
+            80% { transform: translate(5px, -5px); filter: hue-rotate(360deg) contrast(50%); }
+            100% { transform: translate(0); filter: hue-rotate(0deg); }
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-base);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--ibex-rust);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--ibex-orange);
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: var(--ibex-rust); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ibex-orange); }
 
         /* --- Responsive Adjustments --- */
         @media (max-width: 768px) {
-            .ui-container {
-                padding: 10px;
-                gap: 10px;
-            }
-
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-
-            .header-stats {
-                text-align: left;
-                font-size: 0.9rem;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .middle-tier {
-                flex-direction: column;
-            }
-
-            nav {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .nav-btn {
-                flex: 1 1 calc(50% - 10px);
-                padding: 10px;
-                font-size: 1rem;
-                text-align: center;
-            }
-
-            .nav-btn::before {
-                display: none;
-            }
-
-            main {
-                padding: 15px;
-            }
-
-            .page h2 {
-                font-size: 1.3rem;
-            }
-
-            .page p {
-                font-size: 1rem;
-            }
-
-            footer {
-                height: 120px;
-                padding: 8px;
-            }
-
-            .cli-input-wrapper,
-            #cli-output {
-                font-size: 1rem;
-            }
-
-            .prompt {
-                margin-right: 5px;
-            }
+            .ui-container { width: 95%; height: 95%; padding: 0; gap: 10px; }
+            header { flex-direction: column; align-items: flex-start; gap: 5px; }
+            .header-stats { text-align: left; font-size: 0.9rem; }
+            h1 { font-size: 1.8rem; }
+            .middle-tier { flex-direction: column; }
+            nav { flex-direction: row; flex-wrap: wrap; }
+            .nav-btn { flex: 1 1 calc(50% - 10px); padding: 10px; font-size: 1rem; text-align: center; }
+            .nav-btn::before { display: none; }
+            main { padding: 15px; }
+            footer { height: 120px; padding: 8px; }
+            .ibex-dropzone { width: 100%; margin-top: 10px; height: 60px; }
         }
 
-        @media (max-width: 480px) {
-            .nav-btn {
-                flex: 1 1 100%;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-        }
     </style>
 </head>
 
@@ -766,9 +280,11 @@
 
     <div class="system-wrapper">
 
+        <div id="bg-matrix"></div>
+
         <div class="ui-container" id="main-ui">
             <header class="sys-element">
-                <h1>IBEX // STAFFING SOLUTIONS</h1>
+                <h1>IBEX // OS</h1>
                 <div class="header-stats">
                     <span id="sys-time">00:00:00</span> | UPLINK: <span style="color:var(--ibex-green)">SECURE</span>
                 </div>
@@ -780,7 +296,14 @@
                     <button class="nav-btn" aria-selected="false" data-target="about">About Ibex</button>
                     <button class="nav-btn" aria-selected="false" data-target="projects">Services</button>
                     <button class="nav-btn" aria-selected="false" data-target="contact">Directory</button>
-                    <button class="nav-btn" aria-selected="false" data-target="mdr">Refinement</button>
+                    
+                    <div class="ibex-dropzone" id="ibex-bin">
+                        [ IBEX POOL ]
+                        <div class="bin-container">
+                            <div class="bin-fill" id="mdr-fill"></div>
+                        </div>
+                        <div id="mdr-status" style="font-size: 0.8rem; margin-top: 5px; font-weight: normal;">0% OPTIMIZED</div>
+                    </div>
                 </nav>
 
                 <main id="viewport" aria-live="polite" class="sys-element">
@@ -789,11 +312,10 @@
                         <p>Connection securely established to the primary staffing dashboard. You are currently viewing
                             the talent management interface.</p>
                         <p><strong class="highlight-text">SYSTEM NOTE:</strong> You can navigate this workspace using
-                            the side menu or utilize the command line terminal below. Press the <kbd
-                                style="color:var(--ibex-amber)">/</kbd> key to instantly focus the terminal.</p>
+                            the side menu or utilize the command line terminal below. Press the <kbd style="color:var(--ibex-amber)">/</kbd> key to instantly focus the terminal.</p>
+                        <p><strong class="highlight-text">MDR PROCESS:</strong> Hover your cursor over positive organizational traits floating in the outer void to extract them. Move the extracted data into the [IBEX POOL] to integrate.</p>
 
-                        <h3
-                            style="color: var(--ibex-orange); border-bottom: 1px solid var(--ibex-rust); margin-top: 30px; padding-bottom: 5px;">
+                        <h3 style="color: var(--ibex-orange); border-bottom: 1px solid var(--ibex-rust); margin-top: 30px; padding-bottom: 5px;">
                             LIVE TALENT TELEMETRY</h3>
                         <div class="telemetry-box" id="telemetry-output">
                         </div>
@@ -813,18 +335,15 @@
                         <div class="portfolio-grid">
                             <div class="portfolio-item">
                                 <h3>Executive Search</h3>
-                                <p style="font-size: 0.9rem;">Targeted placement services for C-suite executives,
-                                    directors, and senior management roles.</p>
+                                <p style="font-size: 0.9rem;">Targeted placement services for C-suite executives, directors, and senior management roles.</p>
                             </div>
                             <div class="portfolio-item">
                                 <h3>Technical Staffing</h3>
-                                <p style="font-size: 0.9rem;">Rapid deployment of highly specialized engineering, IT,
-                                    and software development talent.</p>
+                                <p style="font-size: 0.9rem;">Rapid deployment of highly specialized engineering, IT, and software development talent.</p>
                             </div>
                             <div class="portfolio-item">
                                 <h3>Contract Solutions</h3>
-                                <p style="font-size: 0.9rem;">Flexible workforce management for project-based
-                                    initiatives and temporary scaling needs.</p>
+                                <p style="font-size: 0.9rem;">Flexible workforce management for project-based initiatives and temporary scaling needs.</p>
                             </div>
                         </div>
                     </section>
@@ -833,26 +352,6 @@
                         <h2>INTERNAL DIRECTORY</h2>
                         <p><strong class="highlight-text">Support Email:</strong> admin@ibex-staffing.tech</p>
                         <p><strong class="highlight-text">Network Status:</strong> Optimal</p>
-                    </section>
-
-                    <section id="mdr" class="page">
-                        <h2 class="mdr-header">TALENT METRICS REFINEMENT</h2>
-                        <p style="color: var(--ibex-green)">Optimize our search algorithms by identifying positive
-                            organizational traits. Drag the successful metrics into the IBEX bin and ignore the negative
-                            indicators.</p>
-
-                        <div class="mdr-workspace">
-                            <div class="data-matrix" id="mdr-grid"></div>
-
-                            <div class="ibex-dropzone" id="ibex-bin">
-                                [ IBEX POOL ]
-                            </div>
-
-                            <div class="bin-container">
-                                <div class="bin-fill" id="mdr-fill"></div>
-                                <div class="bin-status" id="mdr-status">ALGORITHM 0% OPTIMIZED</div>
-                            </div>
-                        </div>
                     </section>
                 </main>
             </div>
@@ -871,13 +370,12 @@
 
     <script>
         const mainUI = document.getElementById('main-ui');
-        let isBooted = false;
 
         // --- Initiate Sequence on Page Load ---
         window.onload = () => {
             mainUI.style.opacity = '1';
 
-            // Sequence the flicker-on animation (50% faster, 125ms gap)
+            // Sequence the flicker-on animation (50% faster)
             const uiElements = document.querySelectorAll('.sys-element');
             uiElements.forEach((el, index) => {
                 setTimeout(() => {
@@ -886,8 +384,8 @@
             });
 
             setTimeout(() => {
-                isBooted = true;
                 initTelemetry();
+                initMDR(); // Boot the background data stream
             }, uiElements.length * 125 + 300);
         };
 
@@ -927,7 +425,7 @@
         }
 
         // --- GUI Navigation Logic ---
-        const navBtns = document.querySelectorAll('.nav-btn');
+        const navBtns = document.querySelectorAll('.nav-btn[data-target]');
         const pages = document.querySelectorAll('.page');
         const cliOutput = document.getElementById('cli-output');
 
@@ -937,7 +435,7 @@
             if (!targetPage) return false;
             navBtns.forEach(btn => btn.setAttribute('aria-selected', 'false'));
             pages.forEach(p => p.classList.remove('active'));
-            targetBtn.setAttribute('aria-selected', 'true');
+            if(targetBtn) targetBtn.setAttribute('aria-selected', 'true');
             targetPage.classList.add('active');
             if (!fromCli) printToCLI(`> GUI Navigating to module: ${targetId}`, 'system');
             return true;
@@ -946,7 +444,7 @@
 
         // --- CLI System Logic ---
         const cliInput = document.getElementById('cli-input');
-        const validPaths = ['home', 'about', 'projects', 'contact', 'mdr'];
+        const validPaths = ['home', 'about', 'projects', 'contact'];
 
         function printToCLI(text, type = 'normal') {
             const line = document.createElement('div');
@@ -969,139 +467,190 @@
                 const cmd = parts[0], arg = parts[1];
 
                 switch (cmd) {
-                    case 'help':
-                        printToCLI("AVAILABLE COMMANDS: cd, ls, clear, admin", "normal");
-                        break;
-                    case 'ls':
-                        printToCLI("AVAILABLE MODULES:", "normal");
-                        printToCLI("  home/  about/  projects/  contact/  mdr/", "success");
-                        break;
+                    case 'help': printToCLI("AVAILABLE COMMANDS: cd, ls, clear, admin", "normal"); break;
+                    case 'ls': printToCLI("AVAILABLE MODULES: home/  about/  projects/  contact/", "success"); break;
                     case 'cd':
                         if (!arg) printToCLI("Error: Target module required.", "error");
                         else if (validPaths.includes(arg)) { printToCLI(`> Accessing ${arg}...`, "system"); navigateTo(arg, true); }
                         else printToCLI(`Error: Module '${arg}' not found.`, "error");
                         break;
-                    case 'clear':
-                        cliOutput.innerHTML = '';
-                        break;
+                    case 'clear': cliOutput.innerHTML = ''; break;
                     case 'sudo':
-                    case 'admin':
-                        printToCLI("ADMINISTRATOR PRIVILEGES REQUIRED. PLEASE CONTACT IT SUPPORT.", "error");
-                        break;
+                    case 'admin': printToCLI("ADMINISTRATOR PRIVILEGES REQUIRED. PLEASE CONTACT IT SUPPORT.", "error"); break;
                     case 'read':
                         if (arg === 'manual') {
                             printToCLI("IBEX CORE VALUES:", "system");
                             printToCLI("1. Integrity in Placement", "normal");
                             printToCLI("2. Precision in Evaluation", "normal");
-                            printToCLI("3. Client Success", "normal");
-                        }
-                        else printToCLI("Error: Document not found.", "error");
+                        } else printToCLI("Error: Document not found.", "error");
                         break;
                     case 'reboot':
                         printToCLI("INITIATING SYSTEM REBOOT...", "system");
                         document.body.classList.add('kernel-panic');
                         setTimeout(() => location.reload(), 2000);
                         break;
-                    default:
-                        printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
+                    default: printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
                 }
             }
         });
 
         document.addEventListener('keydown', (e) => {
-            if (isBooted && e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); }
+            if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); }
         });
 
-        // --- MDR Drag and Drop Mini-Game ---
+        // --- AMBIENT BACKGROUND TRAILING MDR GAME ---
         const ibexWords = ["TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING"];
         const badWords = ["TURNOVER", "STAGNATION", "ATTRITION", "MISMATCH", "INEFFICIENCY", "GAPS", "UNRELIABLE", "CONFLICT"];
 
         let wordsFound = 0;
         const totalWords = ibexWords.length;
-        const grid = document.getElementById('mdr-grid');
+        const bgMatrix = document.getElementById('bg-matrix');
         const fillBar = document.getElementById('mdr-fill');
         const statusText = document.getElementById('mdr-status');
         const ibexBin = document.getElementById('ibex-bin');
+        
+        let attachedNode = null; 
+
+        // Make the attached word fluidly trail the mouse
+        document.addEventListener('mousemove', (e) => {
+            if (attachedNode) {
+                // Offsetting slightly so it follows the pointer rather than snapping to its center
+                attachedNode.style.left = (e.clientX + 15) + 'px';
+                attachedNode.style.top = (e.clientY + 15) + 'px';
+            }
+        });
+
+        // Click anywhere to drop a word if you change your mind
+        document.addEventListener('click', (e) => {
+            if(attachedNode && !e.target.closest('#ibex-bin')) {
+                attachedNode.classList.remove('attached');
+                attachedNode.textContent = generateGarbageText(attachedNode.dataset.word.length);
+                attachedNode = null;
+                ibexBin.classList.remove('blinking-hint'); // Stop the hint pulse
+            }
+        });
+
+        // Function to calculate a position strictly in the outer 5-10% margins
+        function getRandomOuterPosition() {
+            const edge = Math.floor(Math.random() * 4); // 0=Top, 1=Right, 2=Bottom, 3=Left
+            let left, top;
+            
+            if (edge === 0) { // Top
+                left = Math.random() * 90 + '%';
+                top = Math.random() * 4 + '%';
+            } else if (edge === 1) { // Right
+                left = Math.random() * 3 + 92 + '%'; 
+                top = Math.random() * 90 + '%';
+            } else if (edge === 2) { // Bottom
+                left = Math.random() * 90 + '%';
+                top = Math.random() * 4 + 92 + '%';
+            } else { // Left
+                left = Math.random() * 3 + 1 + '%';
+                top = Math.random() * 90 + '%';
+            }
+            return { left, top };
+        }
 
         function initMDR() {
-            grid.innerHTML = '';
+            bgMatrix.innerHTML = '';
             wordsFound = 0;
             updateMDRProgress();
 
             let allNodes = [...ibexWords.map(w => ({ word: w, good: true }))];
-            for (let i = 0; i < 24; i++) {
+            
+            // Pad the background with junk data
+            for (let i = 0; i < 40; i++) {
                 allNodes.push({ word: badWords[Math.floor(Math.random() * badWords.length)], good: false });
             }
-            allNodes.sort(() => Math.random() - 0.5);
 
             allNodes.forEach((item, index) => {
                 const node = document.createElement('div');
                 node.className = 'data-node';
                 node.textContent = generateGarbageText(item.word.length);
 
-                node.setAttribute('draggable', 'true');
+                // Spawn strictly in the outer void
+                const pos = getRandomOuterPosition();
+                node.style.left = pos.left;
+                node.style.top = pos.top;
+
+                // Add a random animation delay so they don't all float in sync
+                node.style.animationDelay = `-${Math.random() * 15}s`;
+
                 node.dataset.id = index;
                 node.dataset.good = item.good;
                 node.dataset.word = item.word;
 
-                node.addEventListener('mouseenter', () => { node.textContent = item.word; });
+                node.addEventListener('mouseenter', (e) => {
+                    if (node.classList.contains('found')) return;
+
+                    // Catch it!
+                    if (!attachedNode) {
+                        if (item.good) {
+                            attachedNode = node;
+                            node.classList.add('attached');
+                            node.textContent = item.word;
+                            
+                            // Offset by 15px so it trails smoothly alongside the cursor
+                            node.style.left = (e.clientX + 15) + 'px';
+                            node.style.top = (e.clientY + 15) + 'px';
+                            
+                            // Make the target box blink so the user knows where to drop it
+                            ibexBin.classList.add('blinking-hint');
+                        } else {
+                            // Bad word penalty
+                            node.textContent = item.word;
+                            node.classList.add('bad');
+                            setTimeout(() => { 
+                                node.classList.remove('bad'); 
+                                node.textContent = generateGarbageText(item.word.length); 
+                            }, 500);
+                            printToCLI(`> SYSTEM WARNING: Unstable background metric detected.`, 'error');
+                        }
+                    } else if (!node.classList.contains('attached')) {
+                        // Just reveal the word briefly if you're already holding one
+                        node.textContent = item.word;
+                    }
+                });
+
                 node.addEventListener('mouseleave', () => {
-                    if (!node.classList.contains('found')) node.textContent = generateGarbageText(item.word.length);
-                });
-
-                node.addEventListener('dragstart', (e) => {
-                    node.classList.add('dragging');
-                    node.textContent = item.word;
-                    e.dataTransfer.setData('text/plain', index);
-                    ibexBin.style.borderColor = "var(--ibex-gold)";
-                });
-
-                node.addEventListener('dragend', () => {
-                    node.classList.remove('dragging');
-                    ibexBin.style.borderColor = "";
-                    if (!node.classList.contains('found')) {
+                    if (!node.classList.contains('attached') && !node.classList.contains('found')) {
                         node.textContent = generateGarbageText(item.word.length);
                     }
                 });
 
-                grid.appendChild(node);
+                bgMatrix.appendChild(node);
             });
+
+            // Randomly scramble untouched background nodes to look "alive"
+            setInterval(() => {
+                document.querySelectorAll('.data-node:not(.found):not(.attached):not(:hover)').forEach(node => {
+                    if (Math.random() > 0.8) {
+                        node.textContent = generateGarbageText(node.dataset.word.length);
+                    }
+                });
+            }, 2000);
         }
 
-        ibexBin.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            ibexBin.classList.add('drag-over');
-        });
+        // Hover over the Bin to integrate the attached word
+        ibexBin.addEventListener('mouseenter', () => {
+            if (attachedNode) {
+                const word = attachedNode.dataset.word;
+                
+                // Hide and resolve the word
+                attachedNode.classList.remove('attached');
+                attachedNode.classList.add('found');
+                attachedNode.style.visibility = 'hidden';
+                
+                attachedNode = null;
+                ibexBin.classList.remove('blinking-hint'); // Stop the hint pulse
 
-        ibexBin.addEventListener('dragleave', () => {
-            ibexBin.classList.remove('drag-over');
-        });
-
-        ibexBin.addEventListener('drop', (e) => {
-            e.preventDefault();
-            ibexBin.classList.remove('drag-over');
-
-            const nodeId = e.dataTransfer.getData('text/plain');
-            const node = document.querySelector(`.data-node[data-id='${nodeId}']`);
-            if (!node) return;
-
-            const isGood = node.dataset.good === 'true';
-            const word = node.dataset.word;
-
-            if (isGood) {
-                node.classList.add('found');
-                node.style.visibility = 'hidden';
                 wordsFound++;
                 updateMDRProgress();
-                printToCLI(`> ALGORITHM UPDATE: Trait '${word}' successfully integrated.`, 'success');
-            } else {
-                node.classList.add('bad');
-                ibexBin.classList.add('error');
-                setTimeout(() => {
-                    node.classList.remove('bad');
-                    ibexBin.classList.remove('error');
-                }, 500);
-                printToCLI(`> SYSTEM WARNING: Negative metric '${word}' rejected from talent pool.`, 'error');
+                
+                ibexBin.classList.add('drag-over');
+                setTimeout(() => ibexBin.classList.remove('drag-over'), 300);
+                
+                printToCLI(`> BACKGROUND PROCESS: Metric '${word}' extracted.`, 'success');
             }
         });
 
@@ -1115,18 +664,16 @@
         function updateMDRProgress() {
             const percentage = (wordsFound / totalWords) * 100;
             fillBar.style.width = `${percentage}%`;
-            statusText.textContent = `ALGORITHM ${Math.round(percentage)}% OPTIMIZED`;
+            statusText.textContent = `${Math.round(percentage)}% OPTIMIZED`;
 
             if (wordsFound === totalWords) {
                 setTimeout(() => {
-                    statusText.textContent = "OPTIMIZATION COMPLETE.";
-                    ibexBin.textContent = "[ ALGORITHM CALIBRATED ]";
-                    printToCLI("> SYSTEM: Search algorithms successfully updated and optimized.", "success");
+                    ibexBin.innerHTML = "[ OPTIMIZED ]";
+                    ibexBin.classList.remove('blinking-hint');
+                    printToCLI("> SYSTEM: Background metrics fully optimized.", "success");
                 }, 500);
             }
         }
-
-        initMDR();
     </script>
 </body>
 

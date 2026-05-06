@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IBEX</title>
+    <title>IBEX Staffing Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -71,7 +71,7 @@
             position: absolute; padding: 4px 8px; text-align: center;
             color: var(--ibex-green); font-size: 0.85rem; opacity: 0.2;
             transition: opacity 0.2s, background 0.2s, font-size 0.2s;
-            user-select: none; pointer-events: auto; border-radius: 3px;
+            user-select: none; pointer-events: auto; border-radius: 3px; cursor: crosshair;
             /* Slow, organic floating animation */
             animation: ambient-float 15s ease-in-out infinite alternate;
         }
@@ -83,13 +83,12 @@
             100% { transform: translate(0px, 0px); }
         }
 
-        /* Fluid Trailing State (Replaces rigid magnetic snap) */
+        /* Fluid Trailing State (Multi-Select Stack) */
         .data-node.attached {
             position: fixed; 
             opacity: 1 !important; border: 1px dashed var(--ibex-green); background: rgba(0,0,0,0.9);
             z-index: 9999; pointer-events: none;
-            /* Removed the translate center snap. Added smooth trailing transition */
-            transition: left 0.15s ease-out, top 0.15s ease-out;
+            transition: left 0.1s ease-out, top 0.1s ease-out; /* Fast, snappy trailing */
             text-shadow: var(--glow-green); box-shadow: var(--glow-green);
             animation: none !important; /* Stop floating when caught */
         }
@@ -107,7 +106,6 @@
 
         /* --- Main Layout --- */
         .ui-container {
-            /* Increased width and max-width for a much wider interface */
             width: 90%; max-width: 1600px; height: 90%; margin: auto; 
             display: flex; flex-direction: column; gap: 20px;
             position: relative; z-index: 10; opacity: 0; transition: opacity 0.2s ease-in;
@@ -169,7 +167,7 @@
             text-shadow: var(--glow-green); transition: all 0.3s ease; text-align: center; cursor: pointer;
         }
 
-        /* Pulsing Hint Animation for when a word is trailing the cursor */
+        /* Pulsing Hint Animation for Drop Zone */
         @keyframes hint-blink {
             0%, 100% { box-shadow: inset 0 0 10px var(--ibex-green); border-color: var(--ibex-green); }
             50% { box-shadow: inset 0 0 30px var(--ibex-gold); border-color: var(--ibex-gold); color: var(--ibex-gold); }
@@ -284,7 +282,7 @@
 
         <div class="ui-container" id="main-ui">
             <header class="sys-element">
-                <h1>IBEX // OS</h1>
+                <h1>IBEX // STAFFING SOLUTIONS</h1>
                 <div class="header-stats">
                     <span id="sys-time">00:00:00</span> | UPLINK: <span style="color:var(--ibex-green)">SECURE</span>
                 </div>
@@ -313,7 +311,7 @@
                             the talent management interface.</p>
                         <p><strong class="highlight-text">SYSTEM NOTE:</strong> You can navigate this workspace using
                             the side menu or utilize the command line terminal below. Press the <kbd style="color:var(--ibex-amber)">/</kbd> key to instantly focus the terminal.</p>
-                        <p><strong class="highlight-text">MDR PROCESS:</strong> Hover your cursor over positive organizational traits floating in the outer void to extract them. Move the extracted data into the [IBEX POOL] to integrate.</p>
+                        <p><strong class="highlight-text">MDR PROCESS:</strong> Sweep your cursor over positive organizational traits floating in the outer void to extract them. You may catch multiple metrics simultaneously. Move the extracted data stack into the [IBEX POOL] to integrate.</p>
 
                         <h3 style="color: var(--ibex-orange); border-bottom: 1px solid var(--ibex-rust); margin-top: 30px; padding-bottom: 5px;">
                             LIVE TALENT TELEMETRY</h3>
@@ -498,7 +496,7 @@
             if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); }
         });
 
-        // --- AMBIENT BACKGROUND TRAILING MDR GAME ---
+        // --- AMBIENT BACKGROUND TRAILING MDR GAME (MULTI-SELECT) ---
         const ibexWords = ["TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING"];
         const badWords = ["TURNOVER", "STAGNATION", "ATTRITION", "MISMATCH", "INEFFICIENCY", "GAPS", "UNRELIABLE", "CONFLICT"];
 
@@ -509,24 +507,29 @@
         const statusText = document.getElementById('mdr-status');
         const ibexBin = document.getElementById('ibex-bin');
         
-        let attachedNode = null; 
+        // Array to hold all currently attached words
+        let attachedNodes = []; 
 
-        // Make the attached word fluidly trail the mouse
+        // Make all attached words fluidly trail the mouse, stacking vertically
         document.addEventListener('mousemove', (e) => {
-            if (attachedNode) {
-                // Offsetting slightly so it follows the pointer rather than snapping to its center
-                attachedNode.style.left = (e.clientX + 15) + 'px';
-                attachedNode.style.top = (e.clientY + 15) + 'px';
+            if (attachedNodes.length > 0) {
+                attachedNodes.forEach((node, index) => {
+                    // Stacking them slightly offset so you can see all collected packets
+                    node.style.left = (e.clientX + 15) + 'px';
+                    node.style.top = (e.clientY + 15 + (index * 30)) + 'px';
+                });
             }
         });
 
-        // Click anywhere to drop a word if you change your mind
+        // Click anywhere (except the drop zone) to drop the entire stack
         document.addEventListener('click', (e) => {
-            if(attachedNode && !e.target.closest('#ibex-bin')) {
-                attachedNode.classList.remove('attached');
-                attachedNode.textContent = generateGarbageText(attachedNode.dataset.word.length);
-                attachedNode = null;
-                ibexBin.classList.remove('blinking-hint'); // Stop the hint pulse
+            if(attachedNodes.length > 0 && !e.target.closest('#ibex-bin')) {
+                attachedNodes.forEach(node => {
+                    node.classList.remove('attached');
+                    node.textContent = generateGarbageText(node.dataset.word.length);
+                });
+                attachedNodes = []; // Empty the stack
+                ibexBin.classList.remove('blinking-hint');
             }
         });
 
@@ -583,21 +586,23 @@
                 node.addEventListener('mouseenter', (e) => {
                     if (node.classList.contains('found')) return;
 
-                    // Catch it!
-                    if (!attachedNode) {
-                        if (item.good) {
-                            attachedNode = node;
+                    if (item.good) {
+                        // Multi-catch: if it's good and not attached yet, add to our stack
+                        if (!attachedNodes.includes(node)) {
+                            attachedNodes.push(node);
                             node.classList.add('attached');
                             node.textContent = item.word;
                             
-                            // Offset by 15px so it trails smoothly alongside the cursor
+                            // Immediately position it at the bottom of the stack
+                            const stackIndex = attachedNodes.length - 1;
                             node.style.left = (e.clientX + 15) + 'px';
-                            node.style.top = (e.clientY + 15) + 'px';
+                            node.style.top = (e.clientY + 15 + (stackIndex * 30)) + 'px';
                             
-                            // Make the target box blink so the user knows where to drop it
                             ibexBin.classList.add('blinking-hint');
-                        } else {
-                            // Bad word penalty
+                        }
+                    } else {
+                        // Bad word penalty - flashes error but keeps your stack safe!
+                        if (!attachedNodes.includes(node)) {
                             node.textContent = item.word;
                             node.classList.add('bad');
                             setTimeout(() => { 
@@ -606,9 +611,6 @@
                             }, 500);
                             printToCLI(`> SYSTEM WARNING: Unstable background metric detected.`, 'error');
                         }
-                    } else if (!node.classList.contains('attached')) {
-                        // Just reveal the word briefly if you're already holding one
-                        node.textContent = item.word;
                     }
                 });
 
@@ -631,26 +633,35 @@
             }, 2000);
         }
 
-        // Hover over the Bin to integrate the attached word
+        // Hover over the Bin to integrate ALL attached words
         ibexBin.addEventListener('mouseenter', () => {
-            if (attachedNode) {
-                const word = attachedNode.dataset.word;
+            if (attachedNodes.length > 0) {
+                const wordsProcessed = [];
                 
-                // Hide and resolve the word
-                attachedNode.classList.remove('attached');
-                attachedNode.classList.add('found');
-                attachedNode.style.visibility = 'hidden';
+                // Process the entire stack at once
+                attachedNodes.forEach(node => {
+                    wordsProcessed.push(node.dataset.word);
+                    node.classList.remove('attached');
+                    node.classList.add('found');
+                    node.style.visibility = 'hidden';
+                    wordsFound++;
+                });
                 
-                attachedNode = null;
-                ibexBin.classList.remove('blinking-hint'); // Stop the hint pulse
+                const droppedCount = attachedNodes.length;
+                attachedNodes = []; // Empty the stack
+                ibexBin.classList.remove('blinking-hint');
 
-                wordsFound++;
                 updateMDRProgress();
                 
                 ibexBin.classList.add('drag-over');
                 setTimeout(() => ibexBin.classList.remove('drag-over'), 300);
                 
-                printToCLI(`> BACKGROUND PROCESS: Metric '${word}' extracted.`, 'success');
+                // Log what was collected
+                if (droppedCount === 1) {
+                    printToCLI(`> BACKGROUND PROCESS: Metric '${wordsProcessed[0]}' extracted.`, 'success');
+                } else {
+                    printToCLI(`> BACKGROUND PROCESS: ${droppedCount} Metrics extracted: ${wordsProcessed.join(', ')}`, 'success');
+                }
             }
         });
 

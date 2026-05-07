@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IBEX Staffing Solutions</title>
+    <title>Ibex Staffing Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,7 +16,7 @@
             --ibex-gold: #ffcc00;
             --ibex-orange: #ff5500;
             --ibex-rust: #8b3a00;
-            --ibex-green: #c9d3cb;
+            --ibex-green: #33ff66;
             --ibex-alert: #ff2200;
 
             --text-main: #ffe6cc;
@@ -26,10 +26,62 @@
             --glow-amber: 0 0 10px rgba(255, 170, 0, 0.5);
             --glow-gold: 0 0 10px rgba(255, 204, 0, 0.5);
             --glow-orange: 0 0 10px rgba(255, 85, 0, 0.5);
-            --glow-green: 0 0 10px rgba(201, 211, 203, 0.5);
+            --glow-green: 0 0 10px rgba(51, 255, 102, 0.5);
             --glow-alert: 0 0 10px rgba(255, 34, 0, 0.5);
 
             --font-mono: 'Share Tech Mono', monospace;
+        }
+
+        /* --- UNLOCKABLE THEMES --- */
+        body[data-theme="matrix"] {
+            --ibex-amber: #00ff41;
+            --ibex-gold: #008f11;
+            --ibex-orange: #003b00;
+            --ibex-rust: #001a00;
+            --ibex-green: #ffffff;
+            --ibex-alert: #ff003c;
+            --bg-base: #020202;
+            --bg-panel: rgba(0, 10, 0, 0.85);
+            --text-main: #00ff41;
+            --text-dim: #008f11;
+            --glow-amber: 0 0 10px rgba(0, 255, 65, 0.5);
+            --glow-gold: 0 0 10px rgba(0, 143, 17, 0.5);
+            --glow-orange: 0 0 10px rgba(0, 59, 0, 0.5);
+            --glow-green: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        body[data-theme="cyberpunk"] {
+            --ibex-amber: #ff00ff;
+            --ibex-gold: #00ffff;
+            --ibex-orange: #ff0055;
+            --ibex-rust: #440044;
+            --ibex-green: #ffff00;
+            --ibex-alert: #ff0000;
+            --bg-base: #050011;
+            --bg-panel: rgba(15, 0, 30, 0.85);
+            --text-main: #e0eaff;
+            --text-dim: #a0aacc;
+            --glow-amber: 0 0 10px rgba(255, 0, 255, 0.5);
+            --glow-gold: 0 0 10px rgba(0, 255, 255, 0.5);
+            --glow-orange: 0 0 10px rgba(255, 0, 85, 0.5);
+            --glow-green: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        body[data-theme="lumon"] {
+            --ibex-amber: #0088ff;
+            --ibex-gold: #00ccff;
+            --ibex-orange: #0044aa;
+            --ibex-rust: #001133;
+            --ibex-green: #ffffff;
+            --ibex-alert: #ff0055;
+            --bg-base: #000511;
+            --bg-panel: rgba(0, 10, 30, 0.85);
+            --text-main: #ccddff;
+            --text-dim: #5577aa;
+            --glow-amber: 0 0 10px rgba(0, 136, 255, 0.5);
+            --glow-gold: 0 0 10px rgba(0, 204, 255, 0.5);
+            --glow-orange: 0 0 10px rgba(0, 68, 170, 0.5);
+            --glow-green: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
         /* --- Reset & Base --- */
@@ -49,6 +101,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: background-color 0.5s ease;
         }
 
         .visually-hidden {
@@ -69,7 +122,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: radial-gradient(circle at center, #140d08 0%, #000 100%);
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
             box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.9);
             z-index: 1;
         }
@@ -81,11 +134,11 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: linear-gradient(rgba(255, 170, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 170, 0, 0.03) 1px, transparent 1px);
+            background-image: linear-gradient(var(--ibex-rust) 1px, transparent 1px), linear-gradient(90deg, var(--ibex-rust) 1px, transparent 1px);
             background-size: 30px 30px;
             z-index: -1;
             pointer-events: none;
-            opacity: 0.5;
+            opacity: 0.1;
         }
 
         .system-wrapper::after {
@@ -114,14 +167,14 @@
             position: absolute;
             padding: 4px 8px;
             text-align: center;
-            color: var(--ibex-green);
+            color: #ffffff;
             font-size: 0.85rem;
-            opacity: 0.2;
+            opacity: 0.3;
             transition: opacity 0.2s, background 0.2s, font-size 0.2s;
             user-select: none;
             pointer-events: auto;
             border-radius: 3px;
-            /* Slow, organic floating animation */
+            cursor: default;
             animation: ambient-float 15s ease-in-out infinite alternate;
         }
 
@@ -143,18 +196,20 @@
             }
         }
 
-        /* Fluid Trailing State (Multi-Select Stack) */
+        /* Fluid Trailing State (Hardware Accelerated) */
         .data-node.attached {
-            position: fixed; 
-            opacity: 1 !important; border: 1px dashed var(--ibex-green); background: rgba(0,0,0,0.9);
-            z-index: 9999; pointer-events: none;
-            
-            /* Anchor to top-left so the GPU can handle the movement */
-            top: 0 !important; left: 0 !important; 
-            transition: transform 0.1s ease-out; 
-            will-change: transform; /* Forces Safari to use the GPU */
-            
-            text-shadow: var(--glow-green); box-shadow: var(--glow-green);
+            position: fixed;
+            top: 0 !important;
+            left: 0 !important;
+            opacity: 1 !important;
+            border: 1px dashed #ffffff;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            pointer-events: none;
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             animation: none !important;
         }
 
@@ -162,8 +217,8 @@
             opacity: 1;
             z-index: 998;
             background: rgba(0, 0, 0, 0.9);
-            text-shadow: var(--glow-green);
-            border: 1px solid rgba(201, 211, 203, 0.4);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             font-size: 1.1rem;
             animation-play-state: paused;
         }
@@ -196,6 +251,9 @@
         main,
         footer {
             pointer-events: auto;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: border-color 0.5s, box-shadow 0.5s, background-color 0.5s;
         }
 
         .sys-element {
@@ -252,10 +310,10 @@
             justify-content: space-between;
             align-items: flex-end;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--ibex-amber);
-            box-shadow: 0 4px 10px -4px rgba(255, 170, 0, 0.3);
+            border-bottom: 2px solid var(--ibex-rust);
             background: var(--bg-panel);
             padding: 15px;
+            border-radius: 4px;
         }
 
         h1 {
@@ -263,6 +321,7 @@
             color: var(--ibex-amber);
             text-shadow: var(--glow-amber);
             letter-spacing: 2px;
+            transition: color 0.5s;
             margin: 0;
         }
 
@@ -270,6 +329,9 @@
             text-align: right;
             color: var(--ibex-orange);
             font-size: 1.1rem;
+            display: flex;
+            gap: 20px;
+            transition: color 0.5s;
         }
 
         /* --- Middle Section (Nav + Content) --- */
@@ -294,7 +356,8 @@
             --btn-border: var(--ibex-rust);
             --btn-bg: var(--bg-panel);
             background: linear-gradient(135deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px),
-                linear-gradient(-45deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px), var(--btn-bg);
+                linear-gradient(-45deg, transparent 7px, var(--btn-border) 7px, var(--btn-border) 8.5px, transparent 8.5px),
+                var(--btn-bg);
             color: var(--ibex-gold);
             border: 1px solid var(--btn-border);
             padding: 15px;
@@ -335,9 +398,25 @@
             color: var(--bg-base);
         }
 
+        .ibex-logo-container {
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 10px;
+        }
+
+        .ibex-logo-img {
+            max-width: 140px;
+            width: 100%;
+            height: auto;
+            opacity: 0.9;
+            filter: drop-shadow(0 0 8px var(--ibex-amber));
+            transition: filter 0.5s;
+        }
+
         /* The Drop Zone */
         .ibex-dropzone {
-            margin-top: auto;
             height: 90px;
             border: 1px dashed var(--ibex-green);
             background: rgba(10, 10, 25, 0.85);
@@ -353,9 +432,9 @@
             transition: all 0.3s ease;
             text-align: center;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
-        /* Pulsing Hint Animation for Drop Zone */
         @keyframes hint-blink {
 
             0%,
@@ -376,7 +455,7 @@
         }
 
         .ibex-dropzone.drag-over {
-            background: rgba(201, 211, 203, 0.2);
+            background: rgba(51, 255, 102, 0.2);
             box-shadow: inset 0 0 30px var(--ibex-green);
             transform: scale(1.02);
             border: 1px solid var(--ibex-green);
@@ -427,19 +506,58 @@
             display: block;
         }
 
+        .section-pre-header {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            border-bottom: 1px solid var(--ibex-rust);
+            padding-bottom: 5px;
+            flex-wrap: wrap;
+        }
+
+        .section-pre-header a {
+            color: var(--ibex-gold);
+            text-decoration: none;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .section-pre-header a:hover {
+            color: var(--ibex-amber);
+            text-shadow: var(--glow-amber);
+        }
+
         .page h2 {
             color: var(--ibex-orange);
-            border-bottom: 1px dashed var(--ibex-orange);
             padding-bottom: 10px;
             margin-bottom: 20px;
+            font-size: 2rem;
             text-shadow: var(--glow-orange);
+            text-transform: uppercase;
+            transition: color 0.5s;
+            line-height: 1.1;
+        }
+
+        .page h3 {
+            color: var(--ibex-gold);
+            margin: 25px 0 10px 0;
+            font-size: 1.3rem;
+            border-bottom: 1px dashed var(--ibex-rust);
+            padding-bottom: 5px;
+            transition: color 0.5s;
         }
 
         .page p {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             line-height: 1.6;
             margin-bottom: 15px;
             color: var(--text-main);
+            transition: color 0.5s;
         }
 
         .highlight-text {
@@ -447,18 +565,247 @@
             text-shadow: var(--glow-gold);
         }
 
-        /* --- Telemetry Stream --- */
+        /* --- Components & Grids --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-box {
+            border: 1px solid var(--ibex-rust);
+            padding: 15px;
+            background: rgba(255, 170, 0, 0.05);
+            text-align: center;
+            transition: border-color 0.5s;
+        }
+
+        .metric-val {
+            font-size: 2.5rem;
+            color: var(--ibex-green);
+            text-shadow: var(--glow-green);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .role-item {
+            padding: 8px 12px;
+            border-left: 2px solid var(--ibex-orange);
+            background: rgba(0, 0, 0, 0.5);
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .portfolio-item {
+            border: 1px solid var(--ibex-rust);
+            padding: 15px;
+            background: rgba(255, 170, 0, 0.05);
+            transition: transform 0.2s, border-color 0.5s;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--glow-amber);
+            border-color: var(--ibex-amber);
+        }
+
+        .portfolio-item h3 {
+            color: var(--ibex-amber);
+            margin-bottom: 8px;
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-top: 0;
+        }
+
+        /* --- Forms --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .ibex-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--ibex-rust);
+            color: var(--ibex-gold);
+            padding: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+            margin-top: 5px;
+        }
+
+        .ibex-input:focus {
+            border-color: var(--ibex-amber);
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.2);
+        }
+
+        .ibex-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .checkbox-label input {
+            accent-color: var(--ibex-orange);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            background: rgba(255, 85, 0, 0.1);
+            border: 1px solid var(--ibex-orange);
+            color: var(--ibex-orange);
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        .btn-submit:hover {
+            background: var(--ibex-orange);
+            color: var(--bg-base);
+            box-shadow: var(--glow-orange);
+        }
+
+        /* --- ROI Calculator --- */
+        .roi-container {
+            border: 1px solid var(--ibex-rust);
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            margin-bottom: 30px;
+            transition: border-color 0.5s;
+        }
+
+        .roi-inputs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .roi-output-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            border-top: 1px dashed var(--ibex-rust);
+            padding-top: 20px;
+        }
+
+        .roi-result {
+            font-size: 2rem;
+            color: var(--ibex-green);
+            text-shadow: var(--glow-green);
+            transition: color 0.5s;
+        }
+
+        /* --- DASHBOARD RADAR & TELEMETRY GRID --- */
+        .dashboard-telemetry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: 220px;
+            margin-top: 15px;
+        }
+
+       .radar-box {
+            border: 1px solid var(--ibex-rust); 
+            background: rgba(0, 0, 0, 0.5); 
+            position: relative; 
+            overflow: hidden;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 0; /* Ensures the image touches the borders */
+        }
+        
+        .radar-map-img {
+            width: 100%; 
+            height: 100%; 
+            object-fit: fill; /* Stretches the image to perfectly hit all 4 corners without cropping */
+            opacity: 0.8;
+            filter: contrast(1.2); 
+            transition: filter 0.5s;
+        }
+
+        .radar-ping {
+            position: absolute;
+            color: var(--ibex-green);
+            text-shadow: var(--glow-green);
+            font-weight: bold;
+            font-size: 1.2rem;
+            pointer-events: none;
+            animation: ping-fade 2s ease-out forwards;
+        }
+
+        @keyframes ping-fade {
+            0% {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
         .telemetry-box {
             border: 1px solid var(--ibex-rust);
             background: rgba(0, 0, 0, 0.5);
             padding: 15px;
-            margin-top: 20px;
-            height: 160px;
+            height: 100%;
             overflow: hidden;
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
+            transition: border-color 0.5s;
         }
 
         .telemetry-box::before {
@@ -488,40 +835,16 @@
             color: var(--ibex-amber);
         }
 
-        /* --- Projects/Services Grid --- */
-        .portfolio-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .portfolio-item {
-            border: 1px solid var(--ibex-rust);
-            padding: 15px;
-            background: rgba(255, 170, 0, 0.05);
-            transition: transform 0.2s;
-        }
-
-        .portfolio-item:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--glow-amber);
-            border-color: var(--ibex-amber);
-        }
-
-        .portfolio-item h3 {
-            color: var(--ibex-amber);
-            margin-bottom: 8px;
-        }
-
         /* --- CLI Terminal Footer --- */
         footer {
             height: 160px;
             display: flex;
             flex-direction: column;
-            background: rgba(0, 0, 0, 0.85);
+            background: var(--bg-panel);
             border: 1px solid var(--ibex-rust);
             border-left: 5px solid var(--ibex-orange);
             padding: 10px;
+            transition: border-color 0.5s;
         }
 
         #cli-output {
@@ -566,6 +889,7 @@
             margin-right: 10px;
             white-space: nowrap;
             color: var(--ibex-orange);
+            transition: color 0.5s;
         }
 
         #cli-input {
@@ -587,19 +911,11 @@
             0% {
                 opacity: 0;
                 transform: translateX(-10px);
-                filter: contrast(200%);
-            }
-
-            50% {
-                opacity: 0.8;
-                transform: translateX(5px);
-                filter: contrast(50%);
             }
 
             100% {
                 opacity: 1;
                 transform: translateX(0);
-                filter: contrast(100%);
             }
         }
 
@@ -619,50 +935,26 @@
             }
         }
 
-        .kernel-panic {
-            animation: extreme-glitch 0.2s infinite;
+       /* --- Classic CRT TV Power Off --- */
+        body.tv-off { background-color: #000; }
+        body.tv-off .system-wrapper {
+            animation: crt-power-off 0.7s cubic-bezier(0.8, 0, 0.2, 1) forwards;
             pointer-events: none;
         }
+        
+        @keyframes crt-power-off {
+            0% { transform: scale(1, 1); filter: brightness(1); opacity: 1; }
+            50% { transform: scale(1, 0.005); filter: brightness(5); opacity: 1; }
+            90% { transform: scale(0, 0.005); filter: brightness(5); opacity: 1; }
+            100% { transform: scale(0, 0); filter: brightness(0); opacity: 0; }
+        } 
 
-        @keyframes extreme-glitch {
-            0% {
-                transform: translate(0);
-                filter: hue-rotate(0deg) contrast(100%);
-            }
-
-            20% {
-                transform: translate(-10px, 5px);
-                filter: hue-rotate(90deg) contrast(200%);
-            }
-
-            40% {
-                transform: translate(-5px, -10px);
-                filter: hue-rotate(180deg) contrast(300%);
-            }
-
-            60% {
-                transform: translate(10px, 5px);
-                filter: hue-rotate(270deg) invert(100%);
-            }
-
-            80% {
-                transform: translate(5px, -5px);
-                filter: hue-rotate(360deg) contrast(50%);
-            }
-
-            100% {
-                transform: translate(0);
-                filter: hue-rotate(0deg);
-            }
-        }
-
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--bg-base);
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
@@ -674,12 +966,26 @@
             background: var(--ibex-orange);
         }
 
-        /* --- Responsive Adjustments --- */
-        @media (max-width: 768px) {
+        /* --- MOBILE RESPONSIVENESS --- */
+        .desktop-only {
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            .desktop-only {
+                display: none !important;
+            }
+
+            /* Hide the game components on mobile */
+            #bg-matrix,
+            .ibex-dropzone {
+                display: none !important;
+            }
+
             .ui-container {
                 width: 95%;
                 height: 95%;
-                padding: 0;
+                padding: 10px;
                 gap: 10px;
             }
 
@@ -687,50 +993,104 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 5px;
+                padding: 10px;
             }
 
             .header-stats {
                 text-align: left;
                 font-size: 0.9rem;
+                flex-wrap: wrap;
+                gap: 10px;
             }
 
             h1 {
                 font-size: 1.8rem;
             }
 
+            /* Stack Nav and Content */
             .middle-tier {
                 flex-direction: column;
+                overflow: hidden;
             }
 
             nav {
                 flex-direction: row;
                 flex-wrap: wrap;
+                flex: 0 0 auto;
+                gap: 5px;
             }
 
             .nav-btn {
-                flex: 1 1 calc(50% - 10px);
-                padding: 10px;
-                font-size: 1rem;
+                flex: 1 1 calc(33.333% - 5px);
+                padding: 10px 5px;
+                font-size: 0.85rem;
                 text-align: center;
+                justify-content: center;
             }
 
             .nav-btn::before {
                 display: none;
             }
 
+            .ibex-logo-container {
+                display: none;
+                /* Hide on mobile to save reading space */
+            }
+
             main {
                 padding: 15px;
+                flex: 1 1 auto;
+            }
+
+            .page h2 {
+                font-size: 1.5rem;
+            }
+
+            .page h3 {
+                font-size: 1.1rem;
+            }
+
+            .page p {
+                font-size: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .roi-inputs {
+                flex-direction: column;
+            }
+
+            .roi-output-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-telemetry-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .radar-box {
+                height: 180px;
+            }
+
+            .telemetry-box {
+                height: 180px;
             }
 
             footer {
-                height: 120px;
+                height: 110px;
                 padding: 8px;
+                flex: 0 0 auto;
             }
 
-            .ibex-dropzone {
-                width: 100%;
-                margin-top: 10px;
-                height: 60px;
+            .cli-input-wrapper {
+                font-size: 1rem;
+            }
+
+            #cli-input {
+                font-size: 1rem;
             }
         }
     </style>
@@ -739,7 +1099,6 @@
 <body>
 
     <div class="system-wrapper">
-
         <div id="bg-matrix"></div>
 
         <div class="ui-container" id="main-ui">
@@ -754,8 +1113,15 @@
                 <nav aria-label="Main Navigation" class="sys-element">
                     <button class="nav-btn" aria-selected="true" data-target="home">Dashboard</button>
                     <button class="nav-btn" aria-selected="false" data-target="about">About Ibex</button>
-                    <button class="nav-btn" aria-selected="false" data-target="projects">Services</button>
-                    <button class="nav-btn" aria-selected="false" data-target="contact">Directory</button>
+                    <button class="nav-btn" aria-selected="false" data-target="talent">Talent Solutions</button>
+                    <button class="nav-btn" aria-selected="false" data-target="customer-care">Customer Care</button>
+                    <button class="nav-btn" aria-selected="false" data-target="blog">Blog</button>
+                    <button class="nav-btn" aria-selected="false" data-target="roi">ROI</button>
+
+                    <div class="ibex-logo-container">
+                        <img src="IBEXlogo.svg" alt="IBEX Logo" class="ibex-logo-img"
+                            onerror="this.style.display='none'">
+                    </div>
 
                     <div class="ibex-dropzone" id="ibex-bin">
                         [ IBEX POOL ]
@@ -768,59 +1134,372 @@
                 </nav>
 
                 <main id="viewport" aria-live="polite" class="sys-element">
-                    <section id="home" class="page active">
-                        <h2>WELCOME TO IBEX</h2>
-                        <p>Connection securely established to the primary staffing dashboard. You are currently viewing
-                            the talent management interface.</p>
-                        <p><strong class="highlight-text">SYSTEM NOTE:</strong> You can navigate this workspace using
-                            the side menu or utilize the command line terminal below. Press the <kbd
-                                style="color:var(--ibex-amber)">/</kbd> key to instantly focus the terminal.</p>
-                        <p><strong class="highlight-text">MDR PROCESS:</strong> Sweep your cursor over positive
-                            organizational traits floating in the outer void to extract them. You may catch multiple
-                            metrics simultaneously. Move the extracted data stack into the [IBEX POOL] to integrate.</p>
 
-                        <h3
-                            style="color: var(--ibex-orange); border-bottom: 1px solid var(--ibex-rust); margin-top: 30px; padding-bottom: 5px;">
-                            LIVE TALENT TELEMETRY</h3>
-                        <div class="telemetry-box" id="telemetry-output">
+                    <section id="home" class="page active">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>EXCEED YOUR BUSINESS GOALS, NOT YOUR BUDGET</h2>
+                        <p>Ibex recruits the best technical talent from around the globe, providing the resources that
+                            you need to stay ahead of the curve.</p>
+
+                        <h3>Conquer Your Goals</h3>
+                        <p>Ibex is founded on a passion for connecting brilliant talent with brilliant organizations.
+                            Find out for yourself what talent is out there for you.</p>
+
+                        <h3>Future-Forward</h3>
+                        <p>Enable a truly global workforce. Tap into the world’s best talent from our 700k+ talent
+                            database. We are not a traditional outsourcer – you directly manage your dedicated full-time
+                            employees, while we enable seamless employment and co-invest with you in parallel to get
+                            great results.</p>
+
+                        <h3>Our Metrics Tell the Story</h3>
+                        <p>Our metrics component gives you the inside scoop on your success and helps you stay on top of
+                            your game in style.</p>
+
+                        <div class="metrics-grid">
+                            <div class="metric-box">
+                                <div class="metric-val"><span class="count-up" data-target="55">0</span>K+</div>
+                                <div class="metric-label">Total Work Hours Saved</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-val"><span class="count-up" data-target="107">0</span></div>
+                                <div class="metric-label">Additional Projects Completed</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-val">$<span class="count-up" data-target="3">0</span>M</div>
+                                <div class="metric-label">Labor Dollars Saved</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-val"><span class="count-up" data-target="107">0</span></div>
+                                <div class="metric-label">Deadlines Met</div>
+                            </div>
+                        </div>
+
+                        <p><strong class="highlight-text">Remote staffing just got easier.</strong> See how Ibex enables
+                            talent to meet your goals.</p>
+                        <button class="btn-submit" onclick="navigateTo('roi')">ROI Calculator</button>
+
+                        <div class="desktop-only">
+                            <h3 style="margin-top: 40px; border-bottom: 1px solid var(--ibex-rust);">MACRODATA
+                                REFINEMENT PROCESS</h3>
+                            <p><strong class="highlight-text">MDR INSTRUCTIONS:</strong> Sweep your cursor over positive
+                                organizational traits floating in the outer void to extract them. You may catch multiple
+                                metrics simultaneously. Move the extracted data stack into the [IBEX POOL] to integrate.
+                            </p>
+                        </div>
+
+                        <h3 style="margin-top: 40px; border-bottom: 1px solid var(--ibex-rust);">GLOBAL TALENT RADAR &
+                            TELEMETRY</h3>
+
+                        <div class="dashboard-telemetry-grid">
+                            <div class="radar-box" id="radar-container">
+                                <img src="ascii_map.jpg" alt="Global Radar Map" class="radar-map-img"
+                                    onerror="this.style.display='none'">
+                            </div>
+                            <div class="telemetry-box" id="telemetry-output"></div>
                         </div>
                     </section>
 
                     <section id="about" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
                         <h2>ABOUT IBEX</h2>
-                        <p>Ibex is a premier talent acquisition and professional staffing firm. We specialize in
-                            connecting top-tier candidates with industry-leading organizations through precision
-                            data-matching and a highly refined evaluation process.</p>
-                        <p>Our proprietary systems ensure that every placement aligns with both technical requirements
-                            and organizational culture.</p>
+
+                        <h3>In less than 30 seconds, here is what you need to know:</h3>
+                        <p>Ibex is a tech talent solutions provider, led by IT service industry veteran Alex Joy, with
+                            decades of experience, focusing on remote contract-based resources. Ibex provides an
+                            experienced, proven IT talent pool with the resumes and skills required to help you meet
+                            your technological goals. Our resources will maximize the efficiency of your IT labor
+                            budget, provide cost-flexibility and labor-scalability, all without compromising the quality
+                            of the user-experience.</p>
+
+                        <h3>What makes Ibex different than any other staffing firm or BPO?</h3>
+                        <p>Ibex believes that a great experience starts with great people that understand how to deliver
+                            that experience. Our team is comprised of IT service and staffing industry veterans that
+                            understand urgency and know what is expected at the highest levels of tech teams. We will
+                            never waste your time at any point in the process, whether it be our first conversation or
+                            after you’ve completed your onboarding of your first Ibex resource. We will provide you with
+                            the talent that knows how to do the job and will work well within your team.</p>
+                        <p>Ibex Staffing Solutions was founded on the idea that the customer must come first. We know
+                            that this statement can be seen as cliché, but our founders all came from former businesses
+                            that over time transformed from customer-focused organizations into revenue-focused
+                            organizations. Over time, these organizations lost track of what really mattered to the
+                            customer and forgot how they became the successful companies that they were; establishing
+                            relationships at the singular level and developing those relationships over time.</p>
+                        <p>We believe that the best way to develop our business is by showing each of our customers that
+                            you can provide top tier service each day and that the work will speak for itself and word
+                            will spread.</p>
+                        <p>Finding a business that is committed to your success in a cost effective, time-sensitive
+                            manner is not an easy task and we are dead set on showing you what we can provide in the
+                            short and long term. Across our founders, we have a combined 30 years of IT and staffing
+                            experience and the knowledge and track record of building out very successful IT
+                            organizations from the ground up and can very promptly and effectively augment your existing
+                            IT staff with exceptional talent wherever any gaps exist.</p>
+
+                        <h3>Who are our ideal customers?</h3>
+                        <p>In general, if you have an internal IT team or if your company builds software of any kind,
+                            we have resources that can help you. Ibex can provide value to tech teams of all sizes,
+                            whether you need a single resource to help bolster off-hours support, or an entire fleet of
+                            developers to aid in finishing a sprint. With that said, tech-forward industries like SaaS,
+                            FinTech, Cloud, MSP / MSSP are firmly in our focus because of the extraordinary value that
+                            Ibex can provide across their entire workforce.</p>
+
+                        <h3>Who is Alex Joy?</h3>
+                        <p>Alex Joy is an IT industry veteran, who has served in technical, project management,
+                            managerial and leadership capacities over the course of his nearly two-decade long career in
+                            the IT field. Alex is a college drop out who became self-taught as a systems engineer and
+                            field technician, eventually joining an MSP in the Boston area where he evolved his role in
+                            numerous capacities throughout his tenure. Alex eventually served as the CEO of this then
+                            nation-wide MSP, with more than 300+ employees and hundreds of clients all over the country
+                            being supported by him and his great team.</p>
+                        <p>Throughout his career and as CEO, Alex was always a fervent believer in providing exceptional
+                            service to his customers through an employee-first mind set. He understood that if you hire
+                            great talent and treat them as you would want to be, they will do their best work for the
+                            customer. That same mindset is what brought Alex to launch Ibex Staffing Solutions, where
+                            his passion for identifying and fostering talent could be combined with his love of building
+                            long-standing relationships with partners and customers.</p>
                     </section>
 
-                    <section id="projects" class="page">
-                        <h2>OUR SERVICES</h2>
-                        <div class="portfolio-grid">
-                            <div class="portfolio-item">
-                                <h3>Executive Search</h3>
-                                <p style="font-size: 0.9rem;">Targeted placement services for C-suite executives,
-                                    directors, and senior management roles.</p>
+                    <section id="talent" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>TALENT SOLUTIONS</h2>
+                        <p><strong class="highlight-text">Ibex is a global talent provider, bringing the world's best
+                                talent, to the US.</strong></p>
+                        <p>Ibex is a global talent provider, leveraging the strength of the US economy to bring the best
+                            talent from the rest of the world to American companies. We can deliver augmented contract
+                            talent quickly and efficiently. Our clients' urgency is only outpaced by our urgency and
+                            capability to deliver immediate effective IT resources. Our talent has already been
+                            hand-selected, pre-screened, and personally signed off on by our CEO to ensure that when
+                            your needs are identified the resources are already available.</p>
+
+                        <h3>The type of talent we offer and how we deliver it:</h3>
+                        <p>All of our talent goes through a background check, third-party skills assessment, and
+                            multiple rounds of interviews before being selected to represent Ibex for our clients. This
+                            process, while rigorous and time-intensive, is handled at the front end well before being
+                            assigned to your organization which ensures smooth delivery of resources from the start.</p>
+                        <p>Furthermore, our offshore talent is provided all of the necessary equipment needed to perform
+                            their work, in turn saving our clients time and resources having to requisition and ship out
+                            equipment. No need to wait for your IT departments to identify, purchase, and ship, we
+                            provide our contractors with equipment that exceeds minimum requirements to work effectively
+                            and without interruptions.</p>
+                        <p>We can provide our resources at below market rates, meaning our clients can hire more
+                            resources for less cost and meet your goals faster. No need to cover benefits, unemployment,
+                            severance, etc. We handle all of this for you.</p>
+
+                        <h3>Popular Job Roles</h3>
+                        <p>IT Managers and Service Operations, gone are the days of struggling to staff off-hours
+                            shifts, or having to increase SLAs due to inadequate staffing. By injecting Ibex talent,
+                            you’ll be able to add reliable redundancy and off-hours team members to your labor pool.
+                            Weekends are back!</p>
+
+                        <div class="roles-grid">
+                            <div class="role-item">Help Desk Technicians</div>
+                            <div class="role-item">Systems Administrators</div>
+                            <div class="role-item">(NOC) Network Engineers</div>
+                            <div class="role-item">Linux Administrators</div>
+                            <div class="role-item">Full Stack Developers</div>
+                            <div class="role-item">DevOps Engineers</div>
+                            <div class="role-item">Cloud Architects</div>
+                            <div class="role-item">Cybersecurity Analysts</div>
+                            <div class="role-item">UI/UX Designer</div>
+                            <div class="role-item">Penetration Testers</div>
+                            <div class="role-item">GRC Analysts</div>
+                            <div class="role-item">Technical Project Manager</div>
+                            <div class="role-item">AI/ML Engineer</div>
+                            <div class="role-item">Technical Writer</div>
+                            <div class="role-item">Database Architect</div>
+                            <div class="role-item">Mobile App Developer</div>
+                            <div class="role-item">Embedded Systems Developer</div>
+                            <div class="role-item">Vulnerability Researcher</div>
+                            <div class="role-item">Digital Forensics Analyst</div>
+                            <div class="role-item">Social Media Manager</div>
+                            <div class="role-item">Marketing Manager</div>
+                            <div class="role-item">Executive Assistant</div>
+                            <div class="role-item">Procurement Specialists</div>
+                            <div class="role-item">Sales Ops Specialists</div>
+                            <div class="role-item">Finance Assistants</div>
+                        </div>
+
+                        <h3>Let's start building your team today!</h3>
+                        <p>Is it because we obsessively chase after the next innovation, or that we go above and beyond
+                            for customers big and small? Find out for yourself. Please fill out the form and we'll get
+                            back to you as soon as possible.</p>
+
+                        <div class="form-grid">
+                            <div>
+                                <label class="metric-label">First Name</label>
+                                <input type="text" class="ibex-input" placeholder="First Name">
                             </div>
-                            <div class="portfolio-item">
-                                <h3>Technical Staffing</h3>
-                                <p style="font-size: 0.9rem;">Rapid deployment of highly specialized engineering, IT,
-                                    and software development talent.</p>
+                            <div>
+                                <label class="metric-label">Last Name</label>
+                                <input type="text" class="ibex-input" placeholder="Last Name">
                             </div>
-                            <div class="portfolio-item">
-                                <h3>Contract Solutions</h3>
-                                <p style="font-size: 0.9rem;">Flexible workforce management for project-based
-                                    initiatives and temporary scaling needs.</p>
+                            <div class="form-full">
+                                <label class="metric-label">Company Email</label>
+                                <input type="email" class="ibex-input" placeholder="user@company.com">
+                            </div>
+                            <div class="form-full">
+                                <label class="metric-label">Phone Number</label>
+                                <input type="text" class="ibex-input" placeholder="+1">
+                            </div>
+                            <div class="form-full">
+                                <label class="metric-label">What kind of engagement are you looking for?</label>
+                                <input type="text" class="ibex-input" placeholder="Describe your needs...">
+                            </div>
+                            <div class="form-full">
+                                <label class="metric-label">What kind of support do you need? (Select all that
+                                    apply)</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label"><input type="checkbox"> Help Desk</label>
+                                    <label class="checkbox-label"><input type="checkbox"> Cybersecurity</label>
+                                    <label class="checkbox-label"><input type="checkbox"> Infrastructure Support</label>
+                                    <label class="checkbox-label"><input type="checkbox"> Project Management</label>
+                                    <label class="checkbox-label"><input type="checkbox"> Linux</label>
+                                    <label class="checkbox-label"><input type="checkbox"> Development</label>
+                                </div>
+                            </div>
+                            <div class="form-full">
+                                <button class="btn-submit">Submit Transmission</button>
                             </div>
                         </div>
                     </section>
 
-                    <section id="contact" class="page">
-                        <h2>INTERNAL DIRECTORY</h2>
-                        <p><strong class="highlight-text">Support Email:</strong> admin@ibex-staffing.tech</p>
-                        <p><strong class="highlight-text">Network Status:</strong> Optimal</p>
+                    <section id="customer-care" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>CUSTOMER CARE</h2>
+                        <p><strong class="highlight-text">Ibex was founded by professionals, delivering exceptional
+                                customer service.</strong></p>
+                        <p>Ibex was founded by professionals who are uncompromising when it comes to delivering
+                            exceptional customer service. We understand that in partnering with Ibex, you are bestowing
+                            trust on our team as well as all of the resources that you bring on to work within your
+                            organization. We reward that trust by being responsive to your requests when you need us and
+                            being proactive in ensuring your needs are being met fully.</p>
+
+                        <h3>How we operate</h3>
+                        <p>Our clients are assigned a dedicated Account Manager that is responsive, communicative,
+                            proactive and efficient. Our goal is to ensure that you get the best service available in
+                            the industry. We know from our strong history of staffing and IT service that having
+                            responsive customer service is essential to maximizing the results. No client wants to be
+                            ignored when something is time sensitive and we are always an email, phone call, or text
+                            away.</p>
+
+                        <h3>After Hours Help Desk Support</h3>
+                        <p>As a global team, Ibex can be responsive to our Clients needs around the clock. Let us show
+                            you the Ibex difference. Ibex’s Customer Care team will maintain regular communication with
+                            every client. Ensuring proactive attention and commitment to getting ahead of your needs.
+                            New business challenges arise daily, and it’s imperative that you have a partner that you
+                            can rely on to meet these challenges. Our team makes it a point to understand our customers
+                            at all levels, including looking ahead to the future to understand the one-, three-, and
+                            five-year goals.</p>
                     </section>
+
+                    <section id="blog" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>IBEX TRANSMISSIONS // BLOG</h2>
+                        <p>Access the latest industry insights, staffing trends, and corporate updates.</p>
+
+                        <div class="portfolio-grid" style="margin-top: 20px;">
+                            <div class="portfolio-item">
+                                <span style="font-size: 0.8rem; color: var(--text-dim);">LATEST UPDATE</span>
+                                <h3>The Future of Remote IT</h3>
+                                <p style="font-size: 0.9rem;">How global workforces are reshaping the infrastructure of
+                                    tech companies in 2024.</p>
+                                <a href="#" style="color: var(--ibex-gold); text-decoration: none; font-size: 0.9rem;">[
+                                    READ MORE ]</a>
+                            </div>
+                            <div class="portfolio-item">
+                                <span style="font-size: 0.8rem; color: var(--text-dim);">CASE STUDY</span>
+                                <h3>Scaling Security Ops</h3>
+                                <p style="font-size: 0.9rem;">Learn how Ibex helped a leading MSP expand their SOC to
+                                    24/7 coverage efficiently.</p>
+                                <a href="#" style="color: var(--ibex-gold); text-decoration: none; font-size: 0.9rem;">[
+                                    READ MORE ]</a>
+                            </div>
+                            <div class="portfolio-item">
+                                <span style="font-size: 0.8rem; color: var(--text-dim);">INDUSTRY INSIGHT</span>
+                                <h3>Combating Turnover</h3>
+                                <p style="font-size: 0.9rem;">Effective strategies for retaining top-tier engineering
+                                    talent in a competitive market.</p>
+                                <a href="#" style="color: var(--ibex-gold); text-decoration: none; font-size: 0.9rem;">[
+                                    READ MORE ]</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="roi" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>HIRING COST CALCULATOR</h2>
+                        <p><strong class="highlight-text">MSP Leaders Looking to Save on Staffing</strong></p>
+                        <p>Discover how much you can save and how many more talented professionals you can hire with
+                            Ibex.</p>
+
+                        <div class="roi-container">
+                            <div class="roi-inputs">
+                                <div style="flex: 1;">
+                                    <label class="metric-label">How many resources (FTEs) are you looking to
+                                        hire?</label>
+                                    <input type="number" id="roi-ftes" class="ibex-input" value="1" min="1">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label class="metric-label">Average Hiring Budget per FTE? ($)</label>
+                                    <input type="number" id="roi-budget" class="ibex-input" value="80000" min="0"
+                                        step="1000">
+                                </div>
+                            </div>
+
+                            <div class="roi-output-grid">
+                                <div>
+                                    <div class="metric-label">Total Potential Savings</div>
+                                    <div class="roi-result" id="res-savings">$0</div>
+                                </div>
+                                <div>
+                                    <div class="metric-label">Budget Savings per FTE</div>
+                                    <div class="roi-result" id="res-per-fte">$0</div>
+                                </div>
+                                <div>
+                                    <div class="metric-label">Additional Hires You Could Make</div>
+                                    <div class="roi-result" id="res-hires" style="color: var(--ibex-amber);">0</div>
+                                </div>
+                                <div>
+                                    <div class="metric-label">Additional Labor Hrs Gained/Month</div>
+                                    <div class="roi-result" id="res-hours" style="color: var(--ibex-amber);">0</div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim); line-height: 1.4;">
+                                * Cost savings is dependent upon the specific role and candidate.<br>
+                                ** Additional hires dependent upon total cost savings.<br>
+                                *** Assumes full-time, 40 hours per week, based upon the average hours per month over
+                                the course of a calendar year (~174 hours).
+                            </div>
+                        </div>
+
+                        <h3>Ready to optimize your workforce?</h3>
+                        <div class="form-grid">
+                            <div><input type="text" class="ibex-input" placeholder="First Name"></div>
+                            <div><input type="text" class="ibex-input" placeholder="Last Name"></div>
+                            <div class="form-full"><input type="email" class="ibex-input" placeholder="Company Email">
+                            </div>
+                            <div class="form-full"><button class="btn-submit">Request Consultation</button></div>
+                        </div>
+                    </section>
+
                 </main>
             </div>
 
@@ -839,31 +1518,35 @@
     <script>
         const mainUI = document.getElementById('main-ui');
 
-        // --- Initiate Sequence on Page Load ---
-        window.onload = () => {
+       window.onload = () => {
             mainUI.style.opacity = '1';
-
-            // Sequence the flicker-on animation (50% faster)
             const uiElements = document.querySelectorAll('.sys-element');
-            uiElements.forEach((el, index) => {
-                setTimeout(() => {
-                    el.classList.add('flicker-on');
-                }, index * 125);
-            });
-
-            setTimeout(() => {
-                initTelemetry();
-                initMDR(); // Boot the background data stream
+            uiElements.forEach((el, index) => { setTimeout(() => { el.classList.add('flicker-on'); }, index * 125); });
+            setTimeout(() => { 
+                initTelemetry(); 
+                initMDR(); 
+                calculateROI(); 
+                animateCounters(); 
             }, uiElements.length * 125 + 300);
         };
 
         // --- Clock System ---
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('sys-time').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+        function updateClock() { document.getElementById('sys-time').textContent = new Date().toLocaleTimeString('en-US', { hour12: false }); }
+        setInterval(updateClock, 1000); updateClock();
+
+        // --- Radar Ping Logic ---
+        function triggerRadarPing() {
+            const radarContainer = document.getElementById('radar-container');
+            if (!radarContainer) return;
+            const ping = document.createElement('div');
+            ping.className = 'radar-ping';
+            ping.textContent = '[+]';
+            // Random coordinate on the map
+            ping.style.left = (Math.random() * 80 + 10) + '%';
+            ping.style.top = (Math.random() * 80 + 10) + '%';
+            radarContainer.appendChild(ping);
+            setTimeout(() => ping.remove(), 2000);
         }
-        setInterval(updateClock, 1000);
-        updateClock();
 
         // --- Telemetry Stream Logic ---
         const telemetryOutput = document.getElementById('telemetry-output');
@@ -885,14 +1568,75 @@
                 line.className = 'telemetry-line';
                 line.innerHTML = `> PROFILE <span class="t-id">#${id}</span> - STATUS: <span class="${status.class}">${status.text}</span> - DEPT: <span class="t-sector">[${sector}]</span>`;
 
-                telemetryOutput.appendChild(line);
-                if (telemetryOutput.children.length > 6) {
-                    telemetryOutput.removeChild(telemetryOutput.firstChild);
+                if (telemetryOutput) {
+                    telemetryOutput.appendChild(line);
+                    if (telemetryOutput.children.length > 6) telemetryOutput.removeChild(telemetryOutput.firstChild);
                 }
+
+                // Fire the visual ping on the radar image to sync with telemetry
+                triggerRadarPing();
+
             }, 2500);
         }
 
+        // --- ROI Calculator Logic ---
+        const roiFtes = document.getElementById('roi-ftes');
+        const roiBudget = document.getElementById('roi-budget');
+
+        function calculateROI() {
+            if (!roiFtes || !roiBudget) return;
+            const ftes = parseInt(roiFtes.value) || 0;
+            const budget = parseInt(roiBudget.value) || 0;
+
+            const savingsRate = 0.50;
+            const budgetPerFteSaved = budget * savingsRate;
+            const totalSavings = budgetPerFteSaved * ftes;
+            const ibexRate = budget * (1 - savingsRate);
+            const additionalHires = ibexRate > 0 ? Math.floor(totalSavings / ibexRate) : 0;
+            const extraHours = additionalHires * 174;
+
+            document.getElementById('res-savings').textContent = '$' + totalSavings.toLocaleString();
+            document.getElementById('res-per-fte').textContent = '$' + budgetPerFteSaved.toLocaleString();
+            document.getElementById('res-hires').textContent = additionalHires.toLocaleString();
+            document.getElementById('res-hours').textContent = extraHours.toLocaleString();
+        }
+
+        if (roiFtes && roiBudget) {
+            roiFtes.addEventListener('input', calculateROI);
+            roiBudget.addEventListener('input', calculateROI);
+        }
+
         // --- GUI Navigation Logic ---
+
+        function animateCounters() {
+            const counters = document.querySelectorAll('.count-up');
+            const duration = 2000; // Animation lasts 2 seconds
+
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const startTime = performance.now();
+                counter.innerText = '0';
+
+                function updateCounter(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+                    
+                    // Ease-out math so it slows down as it reaches the target
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    const currentVal = Math.floor(easeOut * target);
+                    
+                    counter.innerText = currentVal;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.innerText = target; // Lock it exactly on target at the end
+                    }
+                }
+                requestAnimationFrame(updateCounter);
+            });
+        }
+
         const navBtns = document.querySelectorAll('.nav-btn[data-target]');
         const pages = document.querySelectorAll('.page');
         const cliOutput = document.getElementById('cli-output');
@@ -906,18 +1650,27 @@
             if (targetBtn) targetBtn.setAttribute('aria-selected', 'true');
             targetPage.classList.add('active');
             if (!fromCli) printToCLI(`> GUI Navigating to module: ${targetId}`, 'system');
+
+            // On mobile, scroll back to the top of the main container when navigating
+            if (window.innerWidth <= 900) {
+                document.getElementById('viewport').scrollTop = 0;
+            }
+
+            if(targetId === 'home') {
+                animateCounters(); 
+            }
+
             return true;
         }
         navBtns.forEach(btn => btn.addEventListener('click', () => navigateTo(btn.getAttribute('data-target'))));
 
-        // --- CLI System Logic ---
+        // --- CLI System Logic & Themes ---
         const cliInput = document.getElementById('cli-input');
-        const validPaths = ['home', 'about', 'projects', 'contact'];
+        const validPaths = ['home', 'about', 'talent', 'customer-care', 'blog', 'roi'];
 
         function printToCLI(text, type = 'normal') {
             const line = document.createElement('div');
-            line.className = `cli-line ${type}`;
-            line.textContent = text;
+            line.className = `cli-line ${type}`; line.textContent = text;
             cliOutput.appendChild(line);
             setTimeout(() => { cliOutput.scrollTop = cliOutput.scrollHeight; }, 10);
         }
@@ -935,36 +1688,34 @@
                 const cmd = parts[0], arg = parts[1];
 
                 switch (cmd) {
-                    case 'help': printToCLI("AVAILABLE COMMANDS: cd, ls, clear, admin", "normal"); break;
-                    case 'ls': printToCLI("AVAILABLE MODULES: home/  about/  projects/  contact/", "success"); break;
+                    case 'help': printToCLI("COMMANDS: cd [module], ls, theme [name], clear, reboot", "normal"); break;
+                    case 'ls': printToCLI("MODULES: home/ about/ talent/ customer-care/ blog/ roi/", "success"); break;
                     case 'cd':
                         if (!arg) printToCLI("Error: Target module required.", "error");
-                        else if (validPaths.includes(arg)) { printToCLI(`> Accessing ${arg}...`, "system"); navigateTo(arg, true); }
+                        else if (validPaths.includes(arg)) { navigateTo(arg, true); printToCLI(`> Accessing ${arg}...`, "system"); }
                         else printToCLI(`Error: Module '${arg}' not found.`, "error");
+                        break;
+                    case 'theme':
+                        if (arg === 'matrix') { document.body.setAttribute('data-theme', 'matrix'); printToCLI("> Theme updated: NEON MATRIX", "success"); }
+                        else if (arg === 'cyberpunk') { document.body.setAttribute('data-theme', 'cyberpunk'); printToCLI("> Theme updated: CYBERPUNK", "success"); }
+                        else if (arg === 'lumon') { document.body.setAttribute('data-theme', 'lumon'); printToCLI("> Theme updated: LUMON MACRODATA", "success"); }
+                        else if (arg === 'default') { document.body.removeAttribute('data-theme'); printToCLI("> Theme updated: DEFAULT", "success"); }
+                        else { printToCLI("Error: Unknown theme. Available: default, matrix, cyberpunk, lumon", "error"); }
                         break;
                     case 'clear': cliOutput.innerHTML = ''; break;
                     case 'sudo':
                     case 'admin': printToCLI("ADMINISTRATOR PRIVILEGES REQUIRED. PLEASE CONTACT IT SUPPORT.", "error"); break;
-                    case 'read':
-                        if (arg === 'manual') {
-                            printToCLI("IBEX CORE VALUES:", "system");
-                            printToCLI("1. Integrity in Placement", "normal");
-                            printToCLI("2. Precision in Evaluation", "normal");
-                        } else printToCLI("Error: Document not found.", "error");
-                        break;
                     case 'reboot':
                         printToCLI("INITIATING SYSTEM REBOOT...", "system");
-                        document.body.classList.add('kernel-panic');
-                        setTimeout(() => location.reload(), 2000);
+                        document.body.classList.add('tv-off'); 
+                        setTimeout(() => location.reload(), 1000);
                         break;
                     default: printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
                 }
             }
         });
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); }
-        });
+        document.addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); } });
 
         // --- AMBIENT BACKGROUND TRAILING MDR GAME (MULTI-SELECT) ---
         const ibexWords = ["TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING"];
@@ -976,11 +1727,8 @@
         const fillBar = document.getElementById('mdr-fill');
         const statusText = document.getElementById('mdr-status');
         const ibexBin = document.getElementById('ibex-bin');
-
-        // Array to hold all currently attached words
         let attachedNodes = [];
 
-        // Make all attached words fluidly trail the mouse using Safari-friendly transforms
         document.addEventListener('mousemove', (e) => {
             if (attachedNodes.length > 0) {
                 attachedNodes.forEach((node, index) => {
@@ -991,155 +1739,100 @@
             }
         });
 
-        // Click anywhere (except the drop zone) to drop the entire stack
         document.addEventListener('click', (e) => {
-            if(attachedNodes.length > 0 && !e.target.closest('#ibex-bin')) {
+            if (attachedNodes.length > 0 && !e.target.closest('#ibex-bin')) {
                 attachedNodes.forEach(node => {
                     node.classList.remove('attached');
                     node.textContent = generateGarbageText(node.dataset.word.length);
-                    node.style.transform = ''; // Clear the GPU transform
-                    
-                    // Scatter them back to new random outer coordinates
+                    node.style.transform = '';
                     const pos = getRandomOuterPosition();
-                    node.style.left = pos.left;
-                    node.style.top = pos.top;
+                    node.style.left = pos.left; node.style.top = pos.top;
                 });
-                attachedNodes = []; // Empty the stack
-                ibexBin.classList.remove('blinking-hint');
+                attachedNodes = [];
+                if (ibexBin) ibexBin.classList.remove('blinking-hint');
             }
         });
 
-        // Function to calculate a position strictly in the outer 5-10% margins
         function getRandomOuterPosition() {
-            const edge = Math.floor(Math.random() * 4); // 0=Top, 1=Right, 2=Bottom, 3=Left
+            const edge = Math.floor(Math.random() * 4);
             let left, top;
-
-            if (edge === 0) { // Top
-                left = Math.random() * 90 + '%';
-                top = Math.random() * 4 + '%';
-            } else if (edge === 1) { // Right
-                left = Math.random() * 3 + 92 + '%';
-                top = Math.random() * 90 + '%';
-            } else if (edge === 2) { // Bottom
-                left = Math.random() * 90 + '%';
-                top = Math.random() * 4 + 92 + '%';
-            } else { // Left
-                left = Math.random() * 3 + 1 + '%';
-                top = Math.random() * 90 + '%';
-            }
+            if (edge === 0) { left = Math.random() * 90 + '%'; top = Math.random() * 4 + '%'; }
+            else if (edge === 1) { left = Math.random() * 3 + 92 + '%'; top = Math.random() * 90 + '%'; }
+            else if (edge === 2) { left = Math.random() * 90 + '%'; top = Math.random() * 4 + 92 + '%'; }
+            else { left = Math.random() * 3 + 1 + '%'; top = Math.random() * 90 + '%'; }
             return { left, top };
         }
 
         function initMDR() {
+            // STOP EXECUTION ON MOBILE TO SAVE MASSIVE BATTERY / RAM
+            if (window.innerWidth <= 900) return;
+
             bgMatrix.innerHTML = '';
-            wordsFound = 0;
-            updateMDRProgress();
+            wordsFound = 0; updateMDRProgress();
 
             let allNodes = [...ibexWords.map(w => ({ word: w, good: true }))];
-
-            // Pad the background with junk data
-            for (let i = 0; i < 40; i++) {
-                allNodes.push({ word: badWords[Math.floor(Math.random() * badWords.length)], good: false });
-            }
+            for (let i = 0; i < 40; i++) allNodes.push({ word: badWords[Math.floor(Math.random() * badWords.length)], good: false });
 
             allNodes.forEach((item, index) => {
                 const node = document.createElement('div');
-                node.className = 'data-node';
-                node.textContent = generateGarbageText(item.word.length);
-
-                // Spawn strictly in the outer void
+                node.className = 'data-node'; node.textContent = generateGarbageText(item.word.length);
                 const pos = getRandomOuterPosition();
-                node.style.left = pos.left;
-                node.style.top = pos.top;
-
-                // Add a random animation delay so they don't all float in sync
+                node.style.left = pos.left; node.style.top = pos.top;
                 node.style.animationDelay = `-${Math.random() * 15}s`;
-
-                node.dataset.id = index;
-                node.dataset.good = item.good;
-                node.dataset.word = item.word;
+                node.dataset.id = index; node.dataset.good = item.good; node.dataset.word = item.word;
 
                 node.addEventListener('mouseenter', (e) => {
                     if (node.classList.contains('found')) return;
-
                     if (item.good) {
                         if (!attachedNodes.includes(node)) {
                             attachedNodes.push(node);
-                            node.classList.add('attached');
-                            node.textContent = item.word;
-                            
-                            // Hardware-accelerated positioning
+                            node.classList.add('attached'); node.textContent = item.word;
                             const stackIndex = attachedNodes.length - 1;
-                            const x = e.clientX + 15;
-                            const y = e.clientY + 15 + (stackIndex * 30);
-                            node.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                            
-                            ibexBin.classList.add('blinking-hint');
+                            node.style.transform = `translate3d(${e.clientX + 15}px, ${e.clientY + 15 + (stackIndex * 30)}px, 0)`;
+                            if (ibexBin) ibexBin.classList.add('blinking-hint');
                         }
                     } else {
-                        // Bad word penalty
                         if (!attachedNodes.includes(node)) {
-                            node.textContent = item.word;
-                            node.classList.add('bad');
-                            setTimeout(() => { 
-                                node.classList.remove('bad'); 
-                                node.textContent = generateGarbageText(item.word.length); 
-                            }, 500);
+                            node.textContent = item.word; node.classList.add('bad');
+                            setTimeout(() => { node.classList.remove('bad'); node.textContent = generateGarbageText(item.word.length); }, 500);
                             printToCLI(`> SYSTEM WARNING: Unstable background metric detected.`, 'error');
                         }
                     }
                 });
 
-                node.addEventListener('mouseleave', () => {
-                    if (!node.classList.contains('attached') && !node.classList.contains('found')) {
-                        node.textContent = generateGarbageText(item.word.length);
-                    }
-                });
-
+                node.addEventListener('mouseleave', () => { if (!node.classList.contains('attached') && !node.classList.contains('found')) node.textContent = generateGarbageText(item.word.length); });
                 bgMatrix.appendChild(node);
             });
 
-            // Randomly scramble untouched background nodes to look "alive"
             setInterval(() => {
                 document.querySelectorAll('.data-node:not(.found):not(.attached):not(:hover)').forEach(node => {
-                    if (Math.random() > 0.8) {
-                        node.textContent = generateGarbageText(node.dataset.word.length);
-                    }
+                    if (Math.random() > 0.8) node.textContent = generateGarbageText(node.dataset.word.length);
                 });
             }, 2000);
         }
 
-        // Hover over the Bin to integrate ALL attached words
-        ibexBin.addEventListener('mouseenter', () => {
-            if (attachedNodes.length > 0) {
-                const wordsProcessed = [];
+        if (ibexBin) {
+            ibexBin.addEventListener('mouseenter', () => {
+                if (attachedNodes.length > 0) {
+                    const wordsProcessed = [];
+                    attachedNodes.forEach(node => {
+                        wordsProcessed.push(node.dataset.word);
+                        node.classList.remove('attached'); node.classList.add('found'); node.style.visibility = 'hidden';
+                        wordsFound++;
+                    });
 
-                // Process the entire stack at once
-                attachedNodes.forEach(node => {
-                    wordsProcessed.push(node.dataset.word);
-                    node.classList.remove('attached');
-                    node.classList.add('found');
-                    node.style.visibility = 'hidden';
-                    wordsFound++;
-                });
+                    const droppedCount = attachedNodes.length;
+                    attachedNodes = []; ibexBin.classList.remove('blinking-hint');
+                    updateMDRProgress();
 
-                const droppedCount = attachedNodes.length;
-                attachedNodes = []; // Empty the stack
-                ibexBin.classList.remove('blinking-hint');
+                    ibexBin.classList.add('drag-over');
+                    setTimeout(() => ibexBin.classList.remove('drag-over'), 300);
 
-                updateMDRProgress();
-
-                ibexBin.classList.add('drag-over');
-                setTimeout(() => ibexBin.classList.remove('drag-over'), 300);
-
-                // Log what was collected
-                if (droppedCount === 1) {
-                    printToCLI(`> BACKGROUND PROCESS: Metric '${wordsProcessed[0]}' extracted.`, 'success');
-                } else {
-                    printToCLI(`> BACKGROUND PROCESS: ${droppedCount} Metrics extracted: ${wordsProcessed.join(', ')}`, 'success');
+                    if (droppedCount === 1) printToCLI(`> BACKGROUND PROCESS: Metric '${wordsProcessed[0]}' extracted.`, 'success');
+                    else printToCLI(`> BACKGROUND PROCESS: ${droppedCount} Metrics extracted: ${wordsProcessed.join(', ')}`, 'success');
                 }
-            }
-        });
+            });
+        }
 
         function generateGarbageText(length) {
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$&*";
@@ -1149,14 +1842,13 @@
         }
 
         function updateMDRProgress() {
+            if (!fillBar || !statusText || !ibexBin) return;
             const percentage = (wordsFound / totalWords) * 100;
             fillBar.style.width = `${percentage}%`;
             statusText.textContent = `${Math.round(percentage)}% OPTIMIZED`;
-
             if (wordsFound === totalWords) {
                 setTimeout(() => {
-                    ibexBin.innerHTML = "[ OPTIMIZED ]";
-                    ibexBin.classList.remove('blinking-hint');
+                    ibexBin.innerHTML = "[ OPTIMIZED ]"; ibexBin.classList.remove('blinking-hint');
                     printToCLI("> SYSTEM: Background metrics fully optimized.", "success");
                 }, 500);
             }

@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ibex Staffing Solutions</title>
+    <title>IBEX STAFFING SOLUTIONS</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Cohesive Amber & Warm Palette */
+            /* DEFAULT AMBER THEME */
             --bg-base: #0c0804;
             --bg-panel: rgba(26, 18, 10, 0.85);
 
@@ -154,28 +154,66 @@
             pointer-events: none;
         }
 
+        /* --- Classic CRT TV Power Off --- */
+        body.tv-off {
+            background-color: #000;
+        }
+
+        body.tv-off .system-wrapper {
+            animation: crt-power-off 0.7s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+
+        @keyframes crt-power-off {
+            0% {
+                transform: scale(1, 1);
+                filter: brightness(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1, 0.005);
+                filter: brightness(5);
+                opacity: 1;
+            }
+
+            90% {
+                transform: scale(0, 0.005);
+                filter: brightness(5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0, 0);
+                filter: brightness(0);
+                opacity: 0;
+            }
+        }
+
         /* --- AMBIENT BACKGROUND MACRODATA PROCESS --- */
-       /* --- AMBIENT BACKGROUND MACRODATA PROCESS --- */
-        #bg-matrix { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+        #bg-matrix {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: auto;
+            overflow: hidden;
+        }
 
         .data-node {
-            position: absolute; padding: 4px 8px; text-align: center;
-            color: #ffffff;
-            font-size: 0.85rem; opacity: 0.3;
+            position: absolute;
+            padding: 4px 8px;
+            text-align: center;
+            color: #4b4b4b;
+            font-size: 0.85rem;
+            opacity: 0.3;
             transition: opacity 0.2s, font-size 0.2s;
-            user-select: none; pointer-events: auto; cursor: default;
-            white-space: nowrap; /* Keeps words from breaking into two lines */
-            animation: ambient-float 15s ease-in-out infinite alternate;
+            user-select: none;
+            pointer-events: auto;
+            cursor: default;
+            white-space: nowrap;
         }
 
-        @keyframes ambient-float {
-            0% { transform: translate(0px, 0px); }
-            33% { transform: translate(20px, -15px); }
-            66% { transform: translate(-15px, 20px); }
-            100% { transform: translate(0px, 0px); }
-        }
-
-        /* Fluid Trailing State (No Boxes) */
+        /* Fluid Trailing State */
         .data-node.attached {
             position: fixed; top: 0 !important; left: 0 !important;
             opacity: 1 !important; 
@@ -183,18 +221,27 @@
             transition: transform 0.05s linear; will-change: transform;
             transform: translateZ(0); 
             font-weight: bold;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
             animation: none !important;
+
+            /* FIX: Light up the text when caught */
+            color: #dbdbdb; 
+            background: rgba(0, 0, 0, 0.9);
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
         }
         
         .data-node:hover:not(.attached) {
             opacity: 1; z-index: 998; 
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
             font-size: 1.1rem; animation-play-state: paused;
+
+            /* FIX: Light up the text on hover */
+            color: #ffffff; 
+            background: rgba(0, 0, 0, 0.9);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
 
         .data-node.bad {
-            color: var(--ibex-alert); text-shadow: var(--glow-alert);
+            color: var(--ibex-alert) !important;
+            text-shadow: var(--glow-alert) !important;
             animation: shake 0.3s;
         }
 
@@ -427,15 +474,6 @@
             box-shadow: inset 0 0 30px var(--ibex-green);
             transform: scale(1.02);
             border: 1px solid var(--ibex-green);
-        }
-
-        .ibex-dropzone.error {
-            border-color: var(--ibex-alert);
-            color: var(--ibex-alert);
-            background: rgba(255, 34, 0, 0.1);
-            text-shadow: var(--glow-alert);
-            box-shadow: inset 0 0 20px var(--ibex-alert);
-            animation: shake 0.3s;
         }
 
         .bin-container {
@@ -721,23 +759,23 @@
             margin-top: 15px;
         }
 
-       .radar-box {
-            border: 1px solid var(--ibex-rust); 
-            background: rgba(0, 0, 0, 0.5); 
-            position: relative; 
+        .radar-box {
+            border: 1px solid var(--ibex-rust);
+            background: rgba(0, 0, 0, 0.5);
+            position: relative;
             overflow: hidden;
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 0; /* Ensures the image touches the borders */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
         }
-        
+
         .radar-map-img {
-            width: 100%; 
-            height: 100%; 
-            object-fit: fill; /* Stretches the image to perfectly hit all 4 corners without cropping */
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
             opacity: 0.8;
-            filter: contrast(1.2); 
+            filter: contrast(1.2);
             transition: filter 0.5s;
         }
 
@@ -903,20 +941,6 @@
             }
         }
 
-       /* --- Classic CRT TV Power Off --- */
-        body.tv-off { background-color: #000; }
-        body.tv-off .system-wrapper {
-            animation: crt-power-off 0.7s cubic-bezier(0.8, 0, 0.2, 1) forwards;
-            pointer-events: none;
-        }
-        
-        @keyframes crt-power-off {
-            0% { transform: scale(1, 1); filter: brightness(1); opacity: 1; }
-            50% { transform: scale(1, 0.005); filter: brightness(5); opacity: 1; }
-            90% { transform: scale(0, 0.005); filter: brightness(5); opacity: 1; }
-            100% { transform: scale(0, 0); filter: brightness(0); opacity: 0; }
-        } 
-
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -944,7 +968,6 @@
                 display: none !important;
             }
 
-            /* Hide the game components on mobile */
             #bg-matrix,
             .ibex-dropzone {
                 display: none !important;
@@ -975,7 +998,6 @@
                 font-size: 1.8rem;
             }
 
-            /* Stack Nav and Content */
             .middle-tier {
                 flex-direction: column;
                 overflow: hidden;
@@ -1002,7 +1024,6 @@
 
             .ibex-logo-container {
                 display: none;
-                /* Hide on mobile to save reading space */
             }
 
             main {
@@ -1096,8 +1117,7 @@
                         <div class="bin-container">
                             <div class="bin-fill" id="mdr-fill"></div>
                         </div>
-                        <div id="mdr-status" style="font-size: 0.8rem; margin-top: 5px; font-weight: normal;">0%
-                            OPTIMIZED</div>
+                        <div id="mdr-status" style="font-size: 0.8rem; margin-top: 5px; font-weight: normal;">0%</div>
                     </div>
                 </nav>
 
@@ -1486,15 +1506,16 @@
     <script>
         const mainUI = document.getElementById('main-ui');
 
-       window.onload = () => {
+        // --- Initiate Sequence on Page Load ---
+        window.onload = () => {
             mainUI.style.opacity = '1';
             const uiElements = document.querySelectorAll('.sys-element');
             uiElements.forEach((el, index) => { setTimeout(() => { el.classList.add('flicker-on'); }, index * 125); });
-            setTimeout(() => { 
-                initTelemetry(); 
-                initMDR(); 
-                calculateROI(); 
-                animateCounters(); 
+            setTimeout(() => {
+                initTelemetry();
+                initMDR();
+                calculateROI();
+                animateCounters();
             }, uiElements.length * 125 + 300);
         };
 
@@ -1509,7 +1530,6 @@
             const ping = document.createElement('div');
             ping.className = 'radar-ping';
             ping.textContent = '[+]';
-            // Random coordinate on the map
             ping.style.left = (Math.random() * 80 + 10) + '%';
             ping.style.top = (Math.random() * 80 + 10) + '%';
             radarContainer.appendChild(ping);
@@ -1541,10 +1561,37 @@
                     if (telemetryOutput.children.length > 6) telemetryOutput.removeChild(telemetryOutput.firstChild);
                 }
 
-                // Fire the visual ping on the radar image to sync with telemetry
                 triggerRadarPing();
-
             }, 2500);
+        }
+
+        // --- Metrics Count-Up Animation ---
+        function animateCounters() {
+            const counters = document.querySelectorAll('.count-up');
+            const duration = 2000;
+
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const startTime = performance.now();
+                counter.innerText = '0';
+
+                function updateCounter(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    const currentVal = Math.floor(easeOut * target);
+
+                    counter.innerText = currentVal;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.innerText = target;
+                    }
+                }
+                requestAnimationFrame(updateCounter);
+            });
         }
 
         // --- ROI Calculator Logic ---
@@ -1575,36 +1622,6 @@
         }
 
         // --- GUI Navigation Logic ---
-
-        function animateCounters() {
-            const counters = document.querySelectorAll('.count-up');
-            const duration = 2000; // Animation lasts 2 seconds
-
-            counters.forEach(counter => {
-                const target = parseInt(counter.getAttribute('data-target'));
-                const startTime = performance.now();
-                counter.innerText = '0';
-
-                function updateCounter(currentTime) {
-                    const elapsedTime = currentTime - startTime;
-                    const progress = Math.min(elapsedTime / duration, 1);
-                    
-                    // Ease-out math so it slows down as it reaches the target
-                    const easeOut = 1 - Math.pow(1 - progress, 3);
-                    const currentVal = Math.floor(easeOut * target);
-                    
-                    counter.innerText = currentVal;
-
-                    if (progress < 1) {
-                        requestAnimationFrame(updateCounter);
-                    } else {
-                        counter.innerText = target; // Lock it exactly on target at the end
-                    }
-                }
-                requestAnimationFrame(updateCounter);
-            });
-        }
-
         const navBtns = document.querySelectorAll('.nav-btn[data-target]');
         const pages = document.querySelectorAll('.page');
         const cliOutput = document.getElementById('cli-output');
@@ -1619,13 +1636,12 @@
             targetPage.classList.add('active');
             if (!fromCli) printToCLI(`> GUI Navigating to module: ${targetId}`, 'system');
 
-            // On mobile, scroll back to the top of the main container when navigating
             if (window.innerWidth <= 900) {
                 document.getElementById('viewport').scrollTop = 0;
             }
 
-            if(targetId === 'home') {
-                animateCounters(); 
+            if (targetId === 'home') {
+                animateCounters();
             }
 
             return true;
@@ -1675,7 +1691,7 @@
                     case 'admin': printToCLI("ADMINISTRATOR PRIVILEGES REQUIRED. PLEASE CONTACT IT SUPPORT.", "error"); break;
                     case 'reboot':
                         printToCLI("INITIATING SYSTEM REBOOT...", "system");
-                        document.body.classList.add('tv-off'); 
+                        document.body.classList.add('tv-off');
                         setTimeout(() => location.reload(), 1000);
                         break;
                     default: printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
@@ -1685,98 +1701,130 @@
 
         document.addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); } });
 
-        // --- AMBIENT BACKGROUND TRAILING MDR GAME (MULTI-SELECT) ---
-        const ibexWords = ["TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING"];
-        const badWords = ["TURNOVER", "STAGNATION", "ATTRITION", "MISMATCH", "INEFFICIENCY", "GAPS", "UNRELIABLE", "CONFLICT"];
+        // --- AMBIENT BACKGROUND TRAILING MDR GAME (HIGH PERFORMANCE) ---
+        const ibexWords = [
+            "TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING",
+            "LEADERSHIP", "INNOVATION", "CULTURE", "SCALABILITY", "EXPERTISE", "AGILITY", "RELIABILITY",
+            "INTEGRITY", "VISION", "STRATEGY", "EXCELLENCE", "EMPATHY", "ADAPTABILITY", "COLLABORATION"
+        ];
+
+        const badWords = [
+            "TURNOVER", "STAGNATION", "ATTRITION", "MISMATCH", "GAPS", "UNRELIABLE", "CONFLICT",
+            "DELAYS", "BURNOUT", "OVERHEAD", "FRICTION", "SILOS", "DOWNTIME", "RISK", "RIGIDITY"
+        ];
 
         let wordsFound = 0;
-        const totalWords = ibexWords.length;
+        const targetGoal = 20; // Reaching 20 words = 100% on the progress bar
         const bgMatrix = document.getElementById('bg-matrix');
         const fillBar = document.getElementById('mdr-fill');
         const statusText = document.getElementById('mdr-status');
         const ibexBin = document.getElementById('ibex-bin');
         let attachedNodes = [];
 
-        document.addEventListener('mousemove', (e) => {
+        let mouseX = 0; let mouseY = 0;
+        document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+
+        function renderTrailingNodes() {
             if (attachedNodes.length > 0) {
                 attachedNodes.forEach((node, index) => {
-                    const x = e.clientX + 15;
-                    const y = e.clientY + 15 + (index * 30);
+                    const x = mouseX + 15;
+                    const y = mouseY + 15 + (index * 30);
                     node.style.transform = `translate3d(${x}px, ${y}px, 0)`;
                 });
             }
-        });
+            requestAnimationFrame(renderTrailingNodes);
+        }
+        requestAnimationFrame(renderTrailingNodes);
 
         document.addEventListener('click', (e) => {
             if (attachedNodes.length > 0 && !e.target.closest('#ibex-bin')) {
                 attachedNodes.forEach(node => {
                     node.classList.remove('attached');
-                    node.textContent = generateGarbageText(node.dataset.word.length);
                     node.style.transform = '';
-                    const pos = getRandomOuterPosition();
-                    node.style.left = pos.left; node.style.top = pos.top;
+                    node.style.left = node.dataset.origLeft;
+                    node.style.top = node.dataset.origTop;
                 });
                 attachedNodes = [];
                 if (ibexBin) ibexBin.classList.remove('blinking-hint');
             }
         });
 
-        function getRandomOuterPosition() {
-            const edge = Math.floor(Math.random() * 4);
-            let left, top;
-            if (edge === 0) { left = Math.random() * 90 + '%'; top = Math.random() * 4 + '%'; }
-            else if (edge === 1) { left = Math.random() * 3 + 92 + '%'; top = Math.random() * 90 + '%'; }
-            else if (edge === 2) { left = Math.random() * 90 + '%'; top = Math.random() * 4 + 92 + '%'; }
-            else { left = Math.random() * 3 + 1 + '%'; top = Math.random() * 90 + '%'; }
-            return { left, top };
+        // Event Delegation for highly performant hovers
+        if (bgMatrix) {
+            bgMatrix.addEventListener('mouseover', (e) => {
+                const node = e.target;
+                if (!node.classList.contains('data-node') || node.classList.contains('found') || node.classList.contains('attached')) return;
+
+                const isGood = node.dataset.good === 'true';
+
+                if (isGood) {
+                    if (!attachedNodes.includes(node)) {
+                        attachedNodes.push(node);
+                        node.classList.add('attached');
+                        const stackIndex = attachedNodes.length - 1;
+                        node.style.transform = `translate3d(${mouseX + 15}px, ${mouseY + 15 + (stackIndex * 30)}px, 0)`;
+                        if (ibexBin) ibexBin.classList.add('blinking-hint');
+                    }
+                } else {
+                    if (!attachedNodes.includes(node)) {
+                        node.classList.add('bad');
+                        setTimeout(() => { node.classList.remove('bad'); }, 500);
+                        //printToCLI(`> SYSTEM WARNING: Unstable background metric detected.`, 'error');
+                    }
+                }
+            });
         }
 
         function initMDR() {
-            // STOP EXECUTION ON MOBILE TO SAVE MASSIVE BATTERY / RAM
-            if (window.innerWidth <= 900) return;
+            if (window.innerWidth <= 900) return; // Disable on mobile to save battery
+            if (!bgMatrix) return;
 
             bgMatrix.innerHTML = '';
             wordsFound = 0; updateMDRProgress();
 
-            let allNodes = [...ibexWords.map(w => ({ word: w, good: true }))];
-            for (let i = 0; i < 70; i++) allNodes.push({ word: badWords[Math.floor(Math.random() * badWords.length)], good: false });
+            let allNodes = [];
+
+            // Spawn 100 good words
+            for (let i = 0; i < 100; i++) {
+                allNodes.push({ word: ibexWords[Math.floor(Math.random() * ibexWords.length)], good: true });
+            }
+
+            // Spawn 700 bad words for a total of 800
+            for (let i = 0; i < 700; i++) {
+                allNodes.push({ word: badWords[Math.floor(Math.random() * badWords.length)], good: false });
+            }
+
+            allNodes.sort(() => Math.random() - 0.5);
+
+            // Columns math
+            const numColumns = 24;
+            const numRows = Math.ceil(allNodes.length / numColumns);
+
+            const fragment = document.createDocumentFragment();
 
             allNodes.forEach((item, index) => {
                 const node = document.createElement('div');
-                node.className = 'data-node'; node.textContent = generateGarbageText(item.word.length);
-                const pos = getRandomOuterPosition();
-                node.style.left = pos.left; node.style.top = pos.top;
-                node.style.animationDelay = `-${Math.random() * 15}s`;
-                node.dataset.id = index; node.dataset.good = item.good; node.dataset.word = item.word;
+                node.className = 'data-node';
+                node.textContent = item.word;
 
-                node.addEventListener('mouseenter', (e) => {
-                    if (node.classList.contains('found')) return;
-                    if (item.good) {
-                        if (!attachedNodes.includes(node)) {
-                            attachedNodes.push(node);
-                            node.classList.add('attached'); node.textContent = item.word;
-                            const stackIndex = attachedNodes.length - 1;
-                            node.style.transform = `translate3d(${e.clientX + 15}px, ${e.clientY + 15 + (stackIndex * 30)}px, 0)`;
-                            if (ibexBin) ibexBin.classList.add('blinking-hint');
-                        }
-                    } else {
-                        if (!attachedNodes.includes(node)) {
-                            node.textContent = item.word; node.classList.add('bad');
-                            setTimeout(() => { node.classList.remove('bad'); node.textContent = generateGarbageText(item.word.length); }, 500);
-                            //printToCLI(`> SYSTEM WARNING: Unstable background metric detected.`, 'error');
-                        }
-                    }
-                });
+                const colIndex = index % numColumns;
+                const rowIndex = Math.floor(index / numColumns);
 
-                node.addEventListener('mouseleave', () => { if (!node.classList.contains('attached') && !node.classList.contains('found')) node.textContent = generateGarbageText(item.word.length); });
-                bgMatrix.appendChild(node);
+                const leftPos = (colIndex * (100 / numColumns)) + 0.5 + '%';
+                const topPos = (rowIndex * (100 / numRows)) + 1 + '%';
+
+                node.style.left = leftPos;
+                node.style.top = topPos;
+
+                node.dataset.origLeft = leftPos;
+                node.dataset.origTop = topPos;
+                node.dataset.good = item.good;
+                node.dataset.word = item.word;
+
+                fragment.appendChild(node);
             });
 
-            setInterval(() => {
-                document.querySelectorAll('.data-node:not(.found):not(.attached):not(:hover)').forEach(node => {
-                    if (Math.random() > 0.8) node.textContent = generateGarbageText(node.dataset.word.length);
-                });
-            }, 2000);
+            bgMatrix.appendChild(fragment);
         }
 
         if (ibexBin) {
@@ -1796,31 +1844,33 @@
                     ibexBin.classList.add('drag-over');
                     setTimeout(() => ibexBin.classList.remove('drag-over'), 300);
 
-                    if (droppedCount === 1) printToCLI(`> BACKGROUND PROCESS: Metric '${wordsProcessed[0]}' extracted.`, 'success');
-                    else printToCLI(`> BACKGROUND PROCESS: ${droppedCount} Metrics extracted: ${wordsProcessed.join(', ')}`, 'success');
+                    //if (droppedCount === 1) printToCLI(`> BACKGROUND PROCESS: Metric '${wordsProcessed[0]}' extracted.`, 'success');
+                    //else printToCLI(`> BACKGROUND PROCESS: ${droppedCount} Metrics extracted: ${wordsProcessed.join(', ')}`, 'success');
                 }
             });
         }
 
-        function generateGarbageText(length) {
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$&*";
-            let result = "";
-            for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
-            return result;
-        }
-
         function updateMDRProgress() {
             if (!fillBar || !statusText || !ibexBin) return;
-            const percentage = (wordsFound / totalWords) * 100;
+
+            // Calculate percentage but cap the visual bar at 100%
+            let percentage = (wordsFound / targetGoal) * 100;
+            if (percentage >= 100) percentage = 100;
+
             fillBar.style.width = `${percentage}%`;
-            statusText.textContent = `${Math.round(percentage)}%`;
-            //if (wordsFound === totalWords) {
-            //    setTimeout(() => {
-            //        ibexBin.innerHTML = "[ OPTIMIZED ]"; ibexBin.classList.remove('blinking-hint');
-            //        printToCLI("> SYSTEM: Background metrics fully optimized.", "success");
-            //    }, 500);
-            //}
+
+            if (percentage < 100) {
+                statusText.textContent = `${Math.round(percentage)}%`;
+            } else {
+                statusText.textContent = `100%`;
+
+                // Print completion only exactly when the threshold is crossed
+                if (wordsFound === targetGoal || (wordsFound > targetGoal && wordsFound - attachedNodes.length < targetGoal)) {
+                    printToCLI("> SYSTEM: Background metrics optimized. Continuous extraction active.", "success");
+                }
+            }
         }
     </script>
 </body>
+
 </html>

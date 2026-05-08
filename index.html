@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ibex Staffing Solutions</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -1162,6 +1165,129 @@
                 font-size: 1rem;
             }
         }
+      /* --- 3D ROI CALCULATOR STYLES --- */
+        #roi.page.active {
+            display: block; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            margin: 0; padding: 0; overflow: hidden;
+        }
+        .roi-3d-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: #020118; border: none;
+        }
+        .grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+            background-image: linear-gradient(rgba(255, 170, 0, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 170, 0, 0.08) 1px, transparent 1px);
+            background-size: 40px 40px; background-position: center bottom;
+        }
+        #stars-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .sun-container { position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%); width: 60vw; max-width: 800px; z-index: 2; }
+        .retro-sun {
+            width: 100%; aspect-ratio: 1 / 1; border-radius: 50%;
+            background: linear-gradient(to bottom, #ffcc00 0%, #ff5500 50%, #8b3a00 100%);
+            box-shadow: 0 0 150px #ff5500, 0 0 300px #8b3a00;
+            mask-image: repeating-linear-gradient(to bottom, #000 0%, #000 3%, transparent 3%, transparent 4%);
+            -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0%, #000 3%, transparent 3%, transparent 4%);
+        }
+        #renderCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; touch-action: none; outline: none; }
+        #birds-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
+        
+        .scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 170, 0, 0.04), rgba(255, 204, 0, 0.02), rgba(255, 85, 0, 0.04));
+            background-size: 100% 4px, 6px 100%; z-index: 10; pointer-events: none; animation: scanlineScroll 8s linear infinite;
+        }
+        @keyframes scanlineScroll { 0% { background-position: 0 0, 0 0; } 100% { background-position: 0 800px, 0 0; } }
+        
+        .toggle-btn {
+            position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(40, 20, 0, 0.6); border: 2px solid rgba(255, 170, 0, 0.5); color: #ffaa00;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;
+            backdrop-filter: blur(8px); box-shadow: 0 0 15px rgba(255, 85, 0, 0.3); transition: all 0.3s ease;
+        }
+        .toggle-btn:hover { box-shadow: 0 0 25px rgba(255, 170, 0, 0.8); background: rgba(80, 40, 0, 0.8); transform: scale(1.1); }
+        .toggle-btn svg { width: 24px; height: 24px; stroke: #ffaa00; filter: drop-shadow(0 0 5px rgba(255, 170, 0, 0.8)); }
+
+        .holo-panel {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            z-index: 20; width: 480px; max-width: 90%; padding: 36px 40px; box-sizing: border-box;
+            background: linear-gradient(135deg, rgba(40, 20, 0, 0.6), rgba(20, 10, 0, 0.8));
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 170, 0, 0.25); border-radius: 16px;
+            box-shadow: 0 0 30px rgba(255, 85, 0, 0.15), 0 0 80px rgba(255, 85, 0, 0.05), inset 0 0 30px rgba(255, 85, 0, 0.05);
+            font-family: 'Arial', sans-serif; color: rgba(255, 204, 0, 0.9); opacity: 0; pointer-events: none; transition: all 0.4s ease;
+        }
+        .holo-panel.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+        .holo-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 170, 0, 0.6), transparent); }
+        
+        .holo-title { font-size: 15px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 28px; text-shadow: 0 0 12px rgba(255, 170, 0, 0.5); }
+        
+        .landscape-slider { display: flex; position: relative; background: rgba(40, 20, 0, 0.4); border: 1px solid rgba(255, 170, 0, 0.15); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        .slider-option { flex: 1; text-align: center; padding: 12px 8px; cursor: pointer; font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255, 204, 0, 0.5); transition: color 0.4s ease; position: relative; z-index: 1; user-select: none; }
+        .slider-option:hover { color: rgba(255, 170, 0, 0.8); }
+        .slider-option.active { color: #fff; text-shadow: 0 0 10px rgba(255, 170, 0, 0.8); }
+        .slider-indicator { position: absolute; top: 2px; bottom: 2px; width: calc(33.333% - 4px); background: rgba(255, 85, 0, 0.25); border: 1px solid rgba(255, 170, 0, 0.4); border-radius: 6px; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px rgba(255, 85, 0, 0.2); left: calc(33.333% + 2px); }
+        
+        .fte-label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255, 204, 0, 0.7); margin-bottom: 10px; }
+        .fte-row { display: flex; gap: 16px; } .fte-col { flex: 1; }
+        
+        .fte-input { width: 100%; padding: 14px 16px; background: rgba(40, 20, 0, 0.4); border: 1px solid rgba(255, 170, 0, 0.2); border-radius: 8px; color: #fff; font-size: 20px; font-family: 'Arial', sans-serif; letter-spacing: 2px; outline: none; transition: 0.3s; box-sizing: border-box; }
+        .fte-input:focus { border-color: rgba(255, 170, 0, 0.5); box-shadow: 0 0 20px rgba(255, 85, 0, 0.15); }
+        .fte-input::placeholder { color: rgba(255, 204, 0, 0.25); font-size: 14px; letter-spacing: 1px; }
+
+        .budget-wrap { position: relative; display: flex; align-items: center; }
+        .budget-wrap .currency-prefix { position: absolute; left: 16px; color: rgba(255, 204, 0, 0.5); font-size: 20px; font-family: 'Arial', sans-serif; pointer-events: none; letter-spacing: 1px; }
+        .budget-wrap .currency-suffix { position: absolute; right: 16px; color: rgba(255, 204, 0, 0.35); font-size: 11px; font-family: 'Arial', sans-serif; letter-spacing: 2px; text-transform: uppercase; pointer-events: none; }
+        
+        /* Fixed: Re-added the padding so the input text doesn't overlap the $ and USD */
+        .budget-wrap .fte-input { padding-left: 32px; padding-right: 52px; }
+
+        .roi-panel-h { margin-top: 24px; background: linear-gradient(135deg, rgba(60, 40, 0, 0.35), rgba(40, 25, 0, 0.5)); border: 1px solid rgba(255, 200, 50, 0.3); border-radius: 12px; box-shadow: 0 0 30px rgba(255, 180, 0, 0.1); position: relative; overflow: hidden; opacity: 0; max-height: 0; transition: all 0.8s ease; padding: 0 20px; box-sizing: border-box; }
+        .roi-panel-h.visible { opacity: 1; max-height: 550px; padding: 24px 20px; }
+        .roi-panel-h::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 200, 50, 0.7), transparent); }
+        
+        .roi-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 20px; color: rgba(255, 200, 50, 0.9); text-shadow: 0 0 12px rgba(255, 180, 0, 0.5); }
+        .roi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        .roi-stat { text-align: center; position: relative; }
+.roi-stat-value { 
+            font-size: clamp(16px, 4vw, 28px); 
+            font-weight: 700; color: rgba(255, 220, 80, 1); 
+            text-shadow: 0 0 15px rgba(255, 180, 0, 0.6); letter-spacing: 1px; 
+            transition: color 0.15s ease; position: relative; 
+            word-break: break-word;
+        }        .roi-stat-value.glitching { animation: roiGlitch 0.08s steps(1) infinite; }
+        .roi-stat-value.glitch-settle { animation: roiSettle 0.3s ease-out forwards; }
+        
+        @keyframes roiGlitch { 0% { text-shadow: 0 0 15px rgba(255,180,0,0.6), -2px 0 rgba(255,50,50,0.5); } 50% { text-shadow: 0 0 20px rgba(255,220,80,0.9), 0 -1px rgba(50,50,255,0.5); } 100% { text-shadow: 0 0 15px rgba(255,180,0,0.6), 1px -1px rgba(255,50,255,0.5); } }
+        @keyframes roiSettle { 0% { text-shadow: 0 0 25px rgba(255,220,80,1), 0 0 40px rgba(255,180,0,0.5); transform: scale(1.08); } 100% { text-shadow: 0 0 15px rgba(255,180,0,0.6); transform: scale(1); } }
+        
+        .roi-stat-label { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255, 200, 50, 0.6); margin-top: 6px; line-height: 1.4; }
+
+        /* --- 3D Scene Logo --- */
+        .logo-glow-wrap {
+            position: absolute;
+            top: 6%; /* Floats in the sky above the mountain */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20vw;
+            max-width: 250px;
+            min-width: 180px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .ibex-logo-3d {
+            position: relative;
+            width: 100%;
+            opacity: 0.95;
+            /* Turns the SVG pure white and adds a heavy Amber/Gold neon glow */
+            filter: brightness(0) invert(1) drop-shadow(0 0 12px rgba(255, 170, 0, 0.9)) drop-shadow(0 0 5px rgba(255, 204, 0, 1));
+        }
+
+        .hero-text-container { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5; width: 90%; pointer-events: none; color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 20px rgba(255, 170, 0, 1), 0 0 30px rgba(255, 170, 0, 0.6); }
+        .hero-headline { font-size: 22px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1.5px;}
+        .hero-subheadline { font-size: 16px; font-family: 'Arial', sans-serif; line-height: 1.8; letter-spacing: 0.5px; text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.8), 1px -1px 0 rgba(0, 0, 0, 0.8), -1px 1px 0 rgba(0, 0, 0, 0.8), 1px 1px 0 rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 170, 0, 1), 0 0 20px rgba(255, 170, 0, 0.5); font-weight: 500; }
+        
+        .flip-board { display: inline-block; font-family: 'Courier New', monospace; font-size: 22px; font-weight: bold; color: #ffcc00; text-shadow: 0 0 12px rgba(255, 170, 0, 0.8); margin-top: 8px; background: rgba(40, 20, 0, 0.6); padding: 6px 16px; border: 1px solid rgba(255, 170, 0, 0.5); border-radius: 6px; box-shadow: inset 0 0 10px rgba(255, 170, 0, 0.2);} 
     </style>
 </head>
 
@@ -1467,47 +1593,72 @@
                         </div>
                     </section>
 
-                    <section id="roi" class="page">
-                        <div class="section-pre-header">
-                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
-                                Resume</a>
-                        </div>
-                        <h2>HIRING COST CALCULATOR</h2>
-                        <p><strong class="highlight-text">MSP Leaders Looking to Save on Staffing</strong></p>
-                        <p>Discover how much you can save and how many more talented professionals you can hire with
-                            Ibex.</p>
+                 <section id="roi" class="page" style="padding: 0; overflow: hidden;">
+                        <div class="roi-3d-wrapper">
+                            <div class="grid-bg"></div>
+                            <canvas id="stars-canvas"></canvas>
+                            <div class="sun-container" id="sun-container">
+                                <div class="retro-sun"></div>
+                            </div>
+                            <canvas id="renderCanvas"></canvas>
+                            <canvas id="birds-canvas"></canvas>
+                            <div class="scanlines"></div>
 
-                        <div class="roi-container">
-                            <div class="roi-inputs">
-                                <div style="flex: 1;">
-                                    <label class="metric-label">How many resources (FTEs) are you looking to
-                                        hire?</label>
-                                    <input type="number" id="roi-ftes" class="ibex-input" value="1" min="1">
-                                </div>
-                                <div style="flex: 1;">
-                                    <label class="metric-label">Average Hiring Budget per FTE? ($)</label>
-                                    <input type="number" id="roi-budget" class="ibex-input" value="80000" min="0"
-                                        step="1000">
-                                </div>
+                            <div class="logo-glow-wrap">
+                                <img class="ibex-logo-3d" src="IBEXlogo.svg" alt="IBEX Logo" onerror="this.style.display='none'">
                             </div>
 
-                            <div class="roi-output-grid">
-                                <div>
-                                    <div class="metric-label">Total Potential Savings</div>
-                                    <div class="roi-result" id="res-savings">$0</div>
+                            <div class="hero-text-container">
+                                </p>
+                            </div>
+
+                            <button id="toggle-ui-btn" class="toggle-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                            </button>
+
+                            <div id="holo-panel" class="holo-panel visible">
+                                <div class="holo-title">Control Interface</div>
+                                <div class="landscape-slider">
+                                    <div id="slider-indicator" class="slider-indicator"></div>
+                                    <div class="slider-option" data-value="small">Small</div>
+                                    <div class="slider-option active" data-value="medium">Medium</div>
+                                    <div class="slider-option" data-value="large">Large</div>
                                 </div>
-                                <div>
-                                    <div class="metric-label">Budget Savings per FTE</div>
-                                    <div class="roi-result" id="res-per-fte">$0</div>
+                                <div class="fte-row">
+                                    <div class="fte-col">
+                                        <div class="fte-label">Team Size (FTE)</div>
+                                        <input type="number" id="fte-input" class="fte-input" placeholder="e.g. 10">
+                                    </div>
+                                    <div class="fte-col">
+                                        <div class="fte-label">Budget</div>
+                                        <div class="budget-wrap">
+                                            <span class="currency-prefix">$</span>
+                                            <input type="text" id="budget-input" class="fte-input" placeholder="50,000">
+                                            <span class="currency-suffix">USD</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="metric-label">Additional Hires You Could Make</div>
-                                    <div class="roi-result" id="res-hires" style="color: var(--ibex-amber);">0</div>
-                                    <div id="res-hires-visual" class="roi-visual-stack"></div>
-                                </div>
-                                <div>
-                                    <div class="metric-label">Additional Labor Hrs Gained/Month</div>
-                                    <div class="roi-result" id="res-hours" style="color: var(--ibex-amber);">0</div>
+                                <div id="roi-panel-h" class="roi-panel-h">
+                                    <div class="roi-title">Projected Impact</div>
+                                    <div class="roi-grid">
+                                        <div class="roi-stat">
+                                            <div id="roi-savings" class="roi-stat-value">$0</div>
+                                            <div class="roi-stat-label">Savings</div>
+                                        </div>
+                                        <div class="roi-stat">
+                                            <div id="roi-hires" class="roi-stat-value">0</div>
+                                            <div class="roi-stat-label">Extra Hires</div>
+                                            <div id="res-hires-visual" class="roi-visual-stack"></div>
+                                        </div>
+                                        <div class="roi-stat">
+                                            <div id="roi-hours" class="roi-stat-value">0</div>
+                                            <div class="roi-stat-label">Hours Saved</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1823,35 +1974,7 @@
             });
         }
 
-        // --- ROI Calculator Logic ---
-        const roiFtes = document.getElementById('roi-ftes');
-        const roiBudget = document.getElementById('roi-budget');
-
-        function calculateROI() {
-            if (!roiFtes || !roiBudget) return;
-            const ftes = parseInt(roiFtes.value) || 0;
-            const budget = parseInt(roiBudget.value) || 0;
-
-            const savingsRate = 0.50;
-            const budgetPerFteSaved = budget * savingsRate;
-            const totalSavings = budgetPerFteSaved * ftes;
-            const ibexRate = budget * (1 - savingsRate);
-            const additionalHires = ibexRate > 0 ? Math.floor(totalSavings / ibexRate) : 0;
-            const extraHours = additionalHires * 174;
-
-            document.getElementById('res-savings').textContent = '$' + totalSavings.toLocaleString();
-            document.getElementById('res-per-fte').textContent = '$' + budgetPerFteSaved.toLocaleString();
-            document.getElementById('res-hires').textContent = additionalHires.toLocaleString();
-            document.getElementById('res-hours').textContent = extraHours.toLocaleString();
-
-        }
-
-        if (roiFtes && roiBudget) {
-            roiFtes.addEventListener('input', calculateROI);
-            roiBudget.addEventListener('input', calculateROI);
-        }
-
-        // --- GUI Navigation Logic ---
+        // --- 3D ROI CALCULATOR & NAVIGATION LOGIC ---
         const navBtns = document.querySelectorAll('.nav-btn[data-target]');
         const pages = document.querySelectorAll('.page');
         const cliOutput = document.getElementById('cli-output');
@@ -1869,10 +1992,495 @@
             if (window.innerWidth <= 900) document.getElementById('viewport').scrollTop = 0;
             if (targetId === 'home') animateCounters();
             if (targetId === 'talent') setTimeout(resizeCanvas, 50);
+
+            // FIX: Resize Babylon and 2D Canvases when ROI tab is opened
+            if (targetId === 'roi') {
+                setTimeout(() => {
+                    if (window.roiEngine) window.roiEngine.resize();
+                    if (window.resize2DROICanvases) window.resize2DROICanvases();
+                }, 50);
+            }
             return true;
         }
         navBtns.forEach(btn => btn.addEventListener('click', () => navigateTo(btn.getAttribute('data-target'))));
+
+        // Wait to init 3D engine until main app is ready
+        setTimeout(init3DROI, 500);
+
         window.addEventListener('resize', resizeCanvas);
+
+   function init3DROI() {
+            // --- Holo Panel Toggles ---
+            const toggleBtn = document.getElementById('toggle-ui-btn');
+            const holoPanel = document.getElementById('holo-panel');
+            if(toggleBtn && holoPanel) {
+                toggleBtn.addEventListener('click', () => {
+                    holoPanel.classList.toggle('visible');
+                });
+            }
+
+            const sliderOptions = document.querySelectorAll('.slider-option');
+            const sliderIndicator = document.getElementById('slider-indicator');
+            let selectedLandscape = 'medium';
+
+            function selectLandscape(value) {
+                if (selectedLandscape === value) return;
+                selectedLandscape = value;
+                sliderOptions.forEach(opt => opt.classList.toggle('active', opt.dataset.value === value));
+                const positions = { small: '2px', medium: 'calc(33.333% + 2px)', large: 'calc(66.667% + 2px)' };
+                sliderIndicator.style.left = positions[value];
+                if(value === 'small') window.targetMountainScaleY = 0.4;
+                if(value === 'medium') window.targetMountainScaleY = 1.0;
+                if(value === 'large') window.targetMountainScaleY = 1.6;
+                startFadeOut(); 
+            }
+            sliderOptions.forEach(opt => opt.addEventListener('click', () => selectLandscape(opt.dataset.value)));
+
+            // --- ROI Glitch Logic & Uncapped Inputs ---
+            const fteInput = document.getElementById('fte-input');
+            const budgetInput = document.getElementById('budget-input');
+            const roiPanelH = document.getElementById('roi-panel-h');
+            const roiSavings = document.getElementById('roi-savings');
+            const roiHires = document.getElementById('roi-hires');
+            const roiHours = document.getElementById('roi-hours');
+            let roiVisible = false;
+
+            function formatCurrency(n) {
+                if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+                if (n >= 1000) return '$' + (n / 1000).toFixed(1) + 'K';
+                return '$' + n.toFixed(0);
+            }
+            
+            function formatCompact(n) {
+                if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+                if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+                return n.toLocaleString('en-US');
+            }
+
+            function parseBudget(str) { return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0; }
+            function formatBudgetDisplay(val) { return Math.min(Math.max(0, Math.round(val)), 300000).toLocaleString('en-US'); }
+
+           const glitchTimers = new Map();
+            function glitchTo(el, finalText) {
+                if (glitchTimers.has(el)) { clearInterval(glitchTimers.get(el).iv); clearTimeout(glitchTimers.get(el).to); }
+                if (el.textContent === finalText) return;
+                el.classList.remove('glitch-settle'); el.classList.add('glitching');
+                const chars = finalText.split(''); const steps = 12; let step = 0;
+                const iv = setInterval(() => {
+                    step++; const locked = Math.floor((step / steps) * chars.length); let scrambled = '';
+                    for (let i = 0; i < chars.length; i++) {
+                        if (i < locked) scrambled += chars[i];
+                        else if (/[0-9]/.test(chars[i])) scrambled += Math.floor(Math.random() * 10);
+                        else scrambled += chars[i];
+                    }
+                    el.textContent = scrambled;
+                    if (step >= steps) {
+                        clearInterval(iv); el.textContent = finalText; el.classList.remove('glitching'); el.classList.add('glitch-settle'); glitchTimers.delete(el);
+                    }
+                }, 52);
+                glitchTimers.set(el, { iv, to: setTimeout(() => {}, 0) });
+            }
+
+            function updateHoloROI() {
+                if(!fteInput || !budgetInput) return;
+                
+                const fte = Math.max(0, parseInt(fteInput.value, 10) || 0);
+                const budget = Math.min(Math.max(0, parseBudget(budgetInput.value)), 300000);
+                
+                if (fte > 0 && budget > 0) {
+                    const savingsPerFTE = budget * 0.70; const totalSavings = savingsPerFTE * fte;
+                    const additionalHires = budget > 0 ? Math.floor(totalSavings / budget) : 0;
+                    const additionalHours = additionalHires * 174;
+                    
+                    window.fteTarget = additionalHires; 
+
+                    glitchTo(roiSavings, formatCurrency(totalSavings));
+                    
+                    // Uses new formatCompact helper so large numbers say "1.5M+"
+                    glitchTo(roiHires, formatCompact(additionalHires) + '+');
+                    glitchTo(roiHours, formatCompact(additionalHours) + '+');
+                    
+                    if (!roiVisible) { roiVisible = true; roiPanelH.classList.add('visible'); }
+                } else {
+                    window.fteTarget = 0;
+                    if (roiVisible) { roiVisible = false; roiPanelH.classList.remove('visible'); }
+                }
+            }
+
+            if(fteInput) {
+                fteInput.addEventListener('input', updateHoloROI);
+                // Removed the Math.min(val, 100) here so they can type anything
+                fteInput.addEventListener('blur', () => { let val = parseInt(fteInput.value, 10); fteInput.value = (isNaN(val) || val<0)?0:val; updateHoloROI(); });
+                budgetInput.addEventListener('input', () => { let raw = Math.min(parseBudget(budgetInput.value), 300000); budgetInput.value = formatBudgetDisplay(raw); updateHoloROI(); });
+            }
+
+            // --- 2D Canvas Setup (Stars & Birds) ---
+            const starsCanvas = document.getElementById('stars-canvas');
+            const birdsCanvas = document.getElementById('birds-canvas');
+            const renderCanvas = document.getElementById('renderCanvas');
+            if(!renderCanvas) return;
+
+            const ctx2d = starsCanvas.getContext('2d');
+            const birdsCtx = birdsCanvas.getContext('2d');
+            
+            window.resize2DROICanvases = function() {
+                const w = renderCanvas.parentElement.clientWidth;
+                const h = renderCanvas.parentElement.clientHeight;
+                starsCanvas.width = w; starsCanvas.height = h;
+                birdsCanvas.width = w; birdsCanvas.height = h;
+            }
+            window.resize2DROICanvases();
+
+            const stars = Array.from({length: 200}, () => ({
+                x: Math.random() * starsCanvas.width, y: Math.random() * starsCanvas.height * 0.65,
+                size: Math.random() < 0.1 ? 2 + Math.random() * 2 : 1 + Math.random(),
+                brightness: 0.3 + Math.random() * 0.7, twinkleSpeed: 0.5 + Math.random() * 3
+            }));
+
+            const birds = [];
+            function spawnBird() {
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                const speedFactor = 0.85 + Math.random() * 0.30;
+                birds.push({
+                    x: dir > 0 ? -30 : starsCanvas.width + 30,
+                    y: 30 + Math.random() * starsCanvas.height * 0.25,
+                    vx: dir * (0.4 + Math.random() * 0.6) * speedFactor,
+                    wingPhase: Math.random() * Math.PI * 2,
+                    wingSpeed: (1.2 + Math.random() * 1.5) * speedFactor,
+                    scale: 2 + Math.random() * 3
+                });
+            }
+
+            let stars2dTime = 0;
+            function drawStarsLayer() {
+                stars2dTime += 0.016;
+                ctx2d.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+                stars.forEach(s => {
+                    const alpha = s.brightness * (0.5 + 0.5 * Math.sin(stars2dTime * s.twinkleSpeed + s.x));
+                    ctx2d.fillStyle = `rgba(255, 200, 150, ${alpha})`; // Warmer stars
+                    ctx2d.fillRect(Math.floor(s.x), Math.floor(s.y), Math.ceil(s.size), Math.ceil(s.size));
+                });
+                if (Math.random() < 0.0005) spawnBird();
+            }
+
+            function drawBirdsLayer() {
+                birdsCtx.clearRect(0, 0, birdsCanvas.width, birdsCanvas.height);
+                for (let i = birds.length - 1; i >= 0; i--) {
+                    const b = birds[i];
+                    b.x += b.vx; b.wingPhase += b.wingSpeed * 0.016;
+                    if (b.x < -50 || b.x > birdsCanvas.width + 50) { birds.splice(i, 1); continue; }
+                    const wingY = Math.sin(b.wingPhase) * b.scale * 1.5; const px = Math.floor(b.scale);
+                    birdsCtx.fillStyle = 'rgba(255, 170, 0, 0.85)'; // Amber Birds
+                    birdsCtx.fillRect(Math.floor(b.x), Math.floor(b.y), px, px);
+                    birdsCtx.fillRect(Math.floor(b.x) - px * 2, Math.floor(b.y + wingY), px, px); birdsCtx.fillRect(Math.floor(b.x) - px, Math.floor(b.y + wingY * 0.5), px, px);
+                    birdsCtx.fillRect(Math.floor(b.x) + px * 2, Math.floor(b.y + wingY), px, px); birdsCtx.fillRect(Math.floor(b.x) + px, Math.floor(b.y + wingY * 0.5), px, px);
+                }
+            }
+
+            // --- Babylon Engine Setup ---
+            const engine = new BABYLON.Engine(renderCanvas, true, { preserveDrawingBuffer: true, stencil: true, alpha: true });
+            window.roiEngine = engine;
+            window.babylonMountain = null;
+            window.targetMountainScaleY = 1.0;
+
+            const scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+
+            const cameraAngle = Math.PI / 2.5; 
+            
+            // Decrease the radius from 115 to 85 to zoom in closer
+            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, cameraAngle, 80, new BABYLON.Vector3(0, 7, 0), scene);
+            camera.attachControl(renderCanvas, true);
+            
+            // Update the scroll limits to match the new zoom level so it stays locked
+            camera.lowerRadiusLimit = 85; 
+            camera.upperRadiusLimit = 85; 
+            camera.panningSensibility = 0;
+            
+            camera.lowerBetaLimit = cameraAngle - 0.001; 
+            camera.upperBetaLimit = cameraAngle + 0.001;
+            camera.inertia = 0.98; 
+            camera.angularSensibilityX = 1500;
+
+            // Warm Lights
+            const ll = new BABYLON.DirectionalLight("ll", new BABYLON.Vector3(1, -0.3, 0.5), scene); 
+            ll.diffuse = new BABYLON.Color3(1.0, 0.6, 0.1); ll.intensity = 1.6;
+            const rl = new BABYLON.DirectionalLight("rl", new BABYLON.Vector3(-1, -0.3, 0.5), scene); 
+            rl.diffuse = new BABYLON.Color3(0.3, 0.1, 0.02); rl.intensity = 1.8;
+
+            // --- Restored: Stick Figure Engine ---
+            const figCanvas = document.createElement('canvas');
+            figCanvas.width = 32; figCanvas.height = 64;
+            const fCtx = figCanvas.getContext('2d');
+            fCtx.strokeStyle = '#ffffff'; fCtx.lineWidth = 3; fCtx.lineCap = 'round';
+            fCtx.beginPath(); fCtx.arc(16, 8, 5, 0, Math.PI * 2); fCtx.stroke(); 
+            fCtx.beginPath(); fCtx.moveTo(16, 13); fCtx.lineTo(16, 38); fCtx.stroke(); 
+            fCtx.beginPath(); fCtx.moveTo(6, 24); fCtx.lineTo(16, 20); fCtx.lineTo(26, 24); fCtx.stroke(); 
+            fCtx.beginPath(); fCtx.moveTo(8, 56); fCtx.lineTo(16, 38); fCtx.lineTo(24, 56); fCtx.stroke(); 
+            const figDataUrl = figCanvas.toDataURL();
+
+            const smokeCanvas = document.createElement('canvas');
+            smokeCanvas.width = 16; smokeCanvas.height = 16;
+            const smCtx = smokeCanvas.getContext('2d');
+            smCtx.fillStyle = '#00ffff'; // Changed to High-Contrast Cyan
+            [[3,2],[4,2],[3,3],[4,3],[5,3],[2,4],[3,4],[4,4],[5,4],[2,5],[3,5],[4,5],[5,5],[3,6],[4,6]].forEach(([gx,gy]) => smCtx.fillRect(gx * 2, gy * 2, 2, 2));
+            const smokeDataUrl = smokeCanvas.toDataURL();
+
+            const figManager = new BABYLON.SpriteManager("figManager", figDataUrl, 1000, {width: 32, height: 64}, scene);
+            const smokeManager = new BABYLON.SpriteManager("smokeManager", smokeDataUrl, 3000, {width: 16, height: 16}, scene);
+
+            const figSprites = [];
+            const smokePuffs = [];
+            window.fteTarget = 0;
+            let fadingOut = false;
+            let figWaveTime = 0;
+            let figWaveTimer = 0;
+            let figWaveInterval = 4;
+
+            function sampleMountainPositions(count, scene) {
+                const positions = [];
+                let attempts = 0;
+                while (positions.length < count && attempts < count * 20) {
+                    attempts++;
+                    const radius = 30;
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = Math.sqrt(Math.random()) * radius;
+                    const x = Math.cos(angle) * r;
+                    const z = Math.sin(angle) * r;
+                    if (!window.babylonMountain) continue;
+                    const ray = new BABYLON.Ray(new BABYLON.Vector3(x, 100, z), new BABYLON.Vector3(0, -1, 0), 200);
+                    const pick = scene.pickWithRay(ray, (m) => m === window.babylonMountain);
+                    if (pick.hit && pick.pickedPoint.y > 1.0) positions.push(pick.pickedPoint.clone());
+                }
+                return positions;
+            }
+
+            function spawnSmokePuff(pos) {
+                if (!smokeManager) return;
+                const count = 4 + Math.floor(Math.random() * 4);
+                for (let i = 0; i < count; i++) {
+                    const s = new BABYLON.Sprite("smoke", smokeManager);
+                    s.position.copyFrom(pos);
+                    s.position.x += (Math.random() - 0.5) * 0.6;
+                    s.position.y += Math.random() * 0.4;
+                    s.position.z += (Math.random() - 0.5) * 0.6;
+                    s.size = 0.3 + Math.random() * 0.4;
+                    s.color = new BABYLON.Color4(1, 1, 1, 0.9);
+                    smokePuffs.push({ sprite: s, vx: (Math.random() - 0.5) * 0.05, vy: 0.02 + Math.random() * 0.03, life: 1.0, decay: 0.02 + Math.random() * 0.02 });
+                }
+            }
+
+            function spawnFigure(pos) {
+                if (!figManager) return;
+                const s = new BABYLON.Sprite("fig", figManager);
+                s.position.copyFrom(pos); s.position.y += 0.8; s.width = 0.8; s.height = 1.6; 
+                
+                // Changed to invisible Cyan instead of Amber
+                s.color = new BABYLON.Color4(0, 1.0, 1.0, 0); 
+                
+                spawnSmokePuff(s.position);
+                const dist = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+                figSprites.push({ sprite: s, targetOpacity: 1.0, currentOpacity: 0, blinkTime: 0, blinkPhase: 0, dist: dist });
+            }
+
+            function removeFigure(index) {
+                const fig = figSprites[index];
+                spawnSmokePuff(fig.sprite.position);
+                fig.sprite.dispose();
+                figSprites.splice(index, 1);
+            }
+
+            function updateFigures(scene) {
+                if (fadingOut) return; 
+                
+                // VISUAL CAPPED TO 100 FIGURES MAX
+                const renderCount = window.fteTarget <= 0 ? 0 : Math.min(window.fteTarget, 100);
+                const current = figSprites.length;
+                const maxChangePerFrame = 1; 
+                if (current < renderCount) {
+                    const toSpawn = Math.min(maxChangePerFrame, renderCount - current);
+                    const pts = sampleMountainPositions(toSpawn, scene);
+                    pts.forEach(p => spawnFigure(p));
+                } else if (current > renderCount) {
+                    const toRemove = Math.min(maxChangePerFrame, current - renderCount);
+                    for(let i = 0; i < toRemove; i++) removeFigure(figSprites.length - 1);
+                }
+            }
+
+            function updateFigureAnimation(scene) {
+                figWaveTimer += 0.016;
+                if (figWaveTimer >= figWaveInterval) { figWaveTimer = 0; figWaveTime = 0; figWaveInterval = 4 + Math.random() * 4; }
+                figWaveTime += 0.016;
+                const waveFront = figWaveTime * 20; 
+                const waveWidth = 8;
+
+                for (let i = figSprites.length - 1; i >= 0; i--) {
+                    const f = figSprites[i];
+                    const diff = f.targetOpacity - f.currentOpacity;
+                    f.currentOpacity += diff * 0.08;
+                    
+                    if (!fadingOut && waveFront >= f.dist && waveFront < f.dist + waveWidth && f.blinkPhase === 0) { f.blinkPhase = 1; f.blinkTime = 0; }
+                    if (f.blinkPhase === 1) { f.blinkTime += 0.16; if (f.blinkTime >= 1.0) { f.blinkTime = 1.0; f.blinkPhase = 2; } }
+                    if (f.blinkPhase === 2) { f.blinkTime -= 0.005; if (f.blinkTime <= 0) { f.blinkTime = 0; f.blinkPhase = 0; } }
+
+                    const t = f.blinkTime;
+                    f.sprite.color.r = t;           // Fades to 1 (white) during blink
+                    f.sprite.color.g = 1.0;         // Always bright green/cyan
+                    f.sprite.color.b = 1.0;         // Always bright blue/cyan
+                    f.sprite.color.a = f.currentOpacity;
+
+                    if (fadingOut && f.currentOpacity < 0.01) { f.sprite.dispose(); figSprites.splice(i, 1); }
+                }
+
+                if (fadingOut && figSprites.length === 0) fadingOut = false;
+
+                for (let i = smokePuffs.length - 1; i >= 0; i--) {
+                    const p = smokePuffs[i];
+                    p.life -= p.decay; p.sprite.position.x += p.vx; p.sprite.position.y += p.vy;
+                    p.sprite.color.a = Math.max(0, p.life * 0.8); p.sprite.size = 0.3 + (1 - p.life) * 0.5;
+                    if (p.life <= 0) { p.sprite.dispose(); smokePuffs.splice(i, 1); }
+                }
+
+                if (!fadingOut) updateFigures(scene);
+            }
+
+            function startFadeOut() {
+                fadingOut = true;
+                figSprites.forEach(f => f.targetOpacity = 0);
+            }
+
+            // --- Stag Model Setup ---
+            let stagModel = null, stagTimer = 0, isStagRunning = true, angle = 0;
+            const stagAnims = [];
+
+            BABYLON.SceneLoader.ImportMesh("", "./", "stag_test.glb", scene, (meshes, ps, skel, anims) => {
+                stagModel = meshes[0]; stagModel.scaling = new BABYLON.Vector3(0.9, 0.9, 0.9);
+                const wireMat = new BABYLON.StandardMaterial("wireMat", scene);
+                wireMat.wireframe = true; wireMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                meshes.forEach(m => { if(m.getTotalVertices()>0) m.material = wireMat; });
+                stagAnims.push(...anims);
+                if(stagAnims[4]) stagAnims[4].play(true);
+            });
+
+            const mMat = new BABYLON.StandardMaterial("mMat", scene);
+            mMat.specularColor = new BABYLON.Color3(0,0,0); mMat.diffuseColor = new BABYLON.Color3(0.65,0.65,0.65);
+            
+            const floor = BABYLON.MeshBuilder.CreateGround("floor", { width: 500, height: 500 }, scene); floor.position.y = -0.1;
+            const gridMat = new BABYLON.GridMaterial("gridMat", scene);
+            gridMat.mainColor = new BABYLON.Color3(0,0,0); 
+            gridMat.lineColor = new BABYLON.Color3(1.0, 0.66, 0); // Amber Floor Grid
+            gridMat.majorUnitFrequency = 10; gridMat.opacity = 0.9; floor.material = gridMat;
+
+            // --- Mountain Generation ---
+            const size = 70;
+            const subdivisions = 45;
+            const mountain = BABYLON.MeshBuilder.CreateGround("mountain", { width: size, height: size, subdivisions: subdivisions }, scene);
+            window.babylonMountain = mountain;
+
+            const pos = mountain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+            const maxDist = size / 2;
+
+            for (let i = 0; i < pos.length; i += 3) {
+                const x = pos[i]; const z = pos[i + 2]; const distance = Math.sqrt(x * x + z * z);
+                let y = 0;
+                if (distance < maxDist) {
+                    let normalizedDist = 1.0 - (distance / maxDist);
+                    y = Math.pow(normalizedDist, 2.5) * 28;
+                    let macroNoise = Math.sin(x * 0.2) * Math.cos(z * 0.2) * 5.0;
+                    let sharpRidges = Math.abs(Math.sin(x * 0.4 + z * 0.3)) * 3.5;
+                    let detailNoise = (Math.sin(x * 0.8 - z * 0.7) + Math.cos(x * 0.7 + z * 0.8)) * 1.5;
+                    y += (macroNoise + sharpRidges + detailNoise) * Math.pow(normalizedDist, 1.2);
+                    let peakDist = Math.sqrt((x - 1.5)*(x - 1.5) + (z + 1.0)*(z + 1.0));
+                    let peakInfluence = Math.max(0, 1.0 - (peakDist / 12));
+                    y += Math.pow(peakInfluence, 2.0) * 6;
+                }
+                y = Math.round(Math.max(0, y) * 1.0) / 1.0; 
+                pos[i + 1] = y;
+            }
+
+            mountain.setVerticesData(BABYLON.VertexBuffer.PositionKind, pos);
+            mountain.convertToFlatShadedMesh(); 
+            mountain.material = mMat;
+            mountain.enableEdgesRendering(0.94); 
+            mountain.edgesWidth = 16.0; 
+            mountain.edgesColor = new BABYLON.Color4(1.0, 0.66, 0, 1.0); // Amber Mountain Edges
+
+            const basePoints = [new BABYLON.Vector3(-250, 0.05, 0), new BABYLON.Vector3(250, 0.05, 0)];
+            const baseLine = BABYLON.MeshBuilder.CreateLines("baseLine", { points: basePoints }, scene);
+            baseLine.color = new BABYLON.Color3(1.0, 0.66, 0); // Amber Horizon Line
+            
+            for(let i=1; i<=3; i++) {
+                let t1 = baseLine.clone("bl1"+i); t1.position.z += i*.08;
+                let t2 = baseLine.clone("bl2"+i); t2.position.z -= i*.08;
+            }
+
+            const pipeline = new BABYLON.DefaultRenderingPipeline("pipe", true, scene, [camera]);
+            pipeline.bloomEnabled = true; pipeline.bloomThreshold = 0.8; pipeline.bloomWeight = 1.2;
+
+            engine.runRenderLoop(() => {
+                drawStarsLayer();
+                drawBirdsLayer();
+                if (window.babylonMountain) window.babylonMountain.scaling.y += (window.targetMountainScaleY - window.babylonMountain.scaling.y) * 0.05;
+                
+                updateFigureAnimation(scene);
+
+                if (stagModel && window.babylonMountain) {
+                    stagTimer += scene.getEngine().getDeltaTime();
+                    if(isStagRunning) {
+                        if(stagTimer >= 4000) {
+                            isStagRunning = false; stagTimer = 0;
+                            if(stagAnims[4]) stagAnims[4].stop();
+                            if(stagAnims[0]) stagAnims[0].play(true); // Idle
+                        } else {
+                            angle += 0.009; const r = 18;
+                            const sx = Math.cos(angle)*r, sz = Math.sin(angle)*r;
+                            const pick = scene.pickWithRay(new BABYLON.Ray(new BABYLON.Vector3(sx,50,sz), new BABYLON.Vector3(0,-1,0), 100), m => m === mountain);
+                            if(pick.hit) {
+                                stagModel.position.set(sx, pick.pickedPoint.y, sz);
+                                const np = scene.pickWithRay(new BABYLON.Ray(new BABYLON.Vector3(Math.cos(angle+.05)*r,50,Math.sin(angle+.05)*r), new BABYLON.Vector3(0,-1,0), 100), m=>m===mountain);
+                                if(np.hit) stagModel.lookAt(np.pickedPoint);
+                            }
+                        }
+                    } else if (stagTimer >= 2000) {
+                        isStagRunning = true; stagTimer = 0;
+                        if(stagAnims[0]) stagAnims[0].stop();
+                        if(stagAnims[4]) stagAnims[4].play(true);
+                    }
+                }
+                scene.render();
+            });
+
+            // Typewriter Flip-board (Amber Colors)
+            const flipWords = ['PENTESTING', 'DEVELOPMENT', 'ANALYTICS', 'SUPPORT', 'ENGINEERING', 'MAINTENANCE', 'MONITORING'];
+            const fb = document.getElementById('flip-board');
+            let fbIdx = 0;
+            function triggerNextWord() {
+                if(!fb) return;
+                fbIdx = (fbIdx + 1) % flipWords.length;
+                const targetText = '[ ' + flipWords[fbIdx] + ' ]';
+                let text = fb.innerText.replace('█', '');
+                
+                // Set to Amber/Gold palette
+                fb.style.color = '#ffcc00';
+                fb.style.textShadow = '0 0 12px rgba(255, 170, 0, 0.8)';
+                fb.style.borderColor = 'rgba(255, 170, 0, 0.5)';
+                fb.style.boxShadow = 'inset 0 0 10px rgba(255, 170, 0, 0.2)';
+
+                let isDeleting = true;
+                if(fb.iv) clearInterval(fb.iv);
+                fb.iv = setInterval(() => {
+                    if(isDeleting) {
+                        if(text.length > 2) text = text.substring(0, text.length-1);
+                        else isDeleting = false;
+                    } else {
+                        if(text.length < targetText.length) text = targetText.substring(0, text.length+1);
+                        else { clearInterval(fb.iv); fb.innerText = targetText; return; }
+                    }
+                    fb.innerText = text + '█';
+                }, 40);
+            }
+            triggerNextWord(); setInterval(triggerNextWord, 4000);
+        } 
 
         // --- CLI System Logic ---
         const cliInput = document.getElementById('cli-input');

@@ -127,7 +127,7 @@
             z-index: 1;
         }
 
-        /*
+        
         .system-wrapper::before {
             content: "";
             position: absolute;
@@ -154,7 +154,7 @@
             z-index: 100;
             pointer-events: none;
         }
-        */
+        
         /* --- Classic CRT TV Power Off --- */
         body.tv-off {
             background-color: #000;
@@ -240,21 +240,6 @@
             cursor: default;
         }
 
-        /* Fluid Trailing Clones (No Boxes, No Glow) */
-        .data-node.attached {
-            position: fixed; top: 0 !important; left: 0 !important; opacity: 1 !important; 
-            z-index: 9999; pointer-events: none; will-change: transform;
-            
-            /* Pure text, no boxes */
-            background: transparent; border: none; padding: 0 2px; margin: 0;
-            font-weight: bold; font-size: 1.1rem; text-transform: uppercase;
-            
-            /* Changed to solid white and removed the text-shadow completely */
-            color: #33c216; 
-            text-shadow: none; 
-        }
-
-        /*
         .data-node.attached {
             position: fixed;
             top: 0 !important;
@@ -268,14 +253,11 @@
             border: none;
             padding: 0 2px;
             margin: 0;
-            font-weight: bold;
             font-size: 1.1rem;
             text-transform: uppercase;
             color: var(--ibex-green);
             text-shadow: 0 0 12px rgba(27, 117, 50, 0.9);
-
         }
-        */
 
         /* --- Main Layout --- */
         .ui-container {

@@ -1176,13 +1176,18 @@
             background-color: var(--bg-base); border: none; transition: background-color 0.5s ease;
         }
         .grid-bg {
+            display: none;
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
             background-image: linear-gradient(var(--ibex-amber) 1px, transparent 1px), linear-gradient(90deg, var(--ibex-amber) 1px, transparent 1px);
             background-size: 40px 40px; background-position: center bottom; opacity: 0.15;
             transition: all 0.5s ease;
         }
         #stars-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .sun-container { position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%); width: 60vw; max-width: 800px; z-index: 2; }
+        .sun-container { 
+            position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%); 
+            width: min(60vw, 55vh); 
+            max-width: 800px; z-index: 2; 
+        }
         .retro-sun {
             width: 100%; aspect-ratio: 1 / 1; border-radius: 50%;
             background: linear-gradient(to bottom, var(--ibex-gold) 0%, var(--ibex-orange) 50%, var(--ibex-rust) 100%);
@@ -1213,15 +1218,33 @@
         .toggle-btn:hover { box-shadow: 0 0 25px var(--ibex-gold); background: var(--ibex-rust); transform: scale(1.1); }
         .toggle-btn svg { width: 24px; height: 24px; stroke: var(--ibex-amber); filter: drop-shadow(0 0 5px var(--ibex-amber)); transition: all 0.5s; }
 
+       /* --- BULLETPROOF DESKTOP CENTERING --- */
         .holo-panel {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
-            z-index: 20; width: 480px; max-width: 90%; padding: 36px 40px; box-sizing: border-box;
+            position: absolute; 
+            /* Locks it horizontally to the center */
+            left: 50%; transform: translateX(-50%) scale(0.9);
+            
+            /* Safe Vertical Centering: Auto-centers but guarantees a 20px buffer so it NEVER clips the top */
+            top: 20px; bottom: 20px; margin: auto 0;
+            height: max-content; 
+            max-height: calc(100% - 40px); 
+            overflow-y: auto;
+            
+            z-index: 20; width: 480px; max-width: 90%; padding: 30px; box-sizing: border-box;
             background: var(--bg-panel); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--ibex-amber); border-radius: 16px;
             box-shadow: var(--glow-amber), inset 0 0 30px rgba(0,0,0,0.5);
-            font-family: 'Arial', sans-serif; color: var(--ibex-gold); opacity: 0; pointer-events: none; transition: all 0.4s ease;
+            font-family: 'Arial', sans-serif; color: var(--ibex-gold); opacity: 0; pointer-events: none; 
+            transition: all 0.4s ease;
         }
-        .holo-panel.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+        .holo-panel.visible { 
+            opacity: 1; pointer-events: auto; transform: translateX(-50%) scale(1); 
+        }
+        
+        /* Optional: Makes the scrollbar inside the card look sleek */
+        .holo-panel::-webkit-scrollbar { width: 6px; }
+        .holo-panel::-webkit-scrollbar-thumb { background: var(--ibex-rust); border-radius: 4px; }
+        .holo-panel::-webkit-scrollbar-thumb:hover { background: var(--ibex-amber); }
         .holo-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--ibex-amber), transparent); }
         
         .holo-title { font-size: 15px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 28px; text-shadow: var(--glow-amber); transition: color 0.5s; }
@@ -1233,7 +1256,9 @@
         .slider-indicator { position: absolute; top: 2px; bottom: 2px; width: calc(33.333% - 4px); background: rgba(255,255,255,0.1); border: 1px solid var(--ibex-amber); border-radius: 6px; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--glow-amber); left: calc(33.333% + 2px); }
         
         .fte-label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ibex-gold); margin-bottom: 10px; transition: color 0.5s;}
-        .fte-row { display: flex; gap: 16px; } .fte-col { flex: 1; }
+        
+        .fte-row { display: flex; gap: 16px; flex-wrap: wrap; } 
+        .fte-col { flex: 1; min-width: 180px; }
         
         .fte-input { width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--ibex-rust); border-radius: 8px; color: #fff; font-size: 20px; font-family: 'Arial', sans-serif; letter-spacing: 2px; outline: none; transition: 0.3s; box-sizing: border-box; }
         .fte-input:focus { border-color: var(--ibex-amber); box-shadow: var(--glow-amber); }
@@ -1270,6 +1295,65 @@
         .roi-visual-stack { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; min-height: 24px; }
         .roi-figure { color: var(--ibex-amber); font-weight: bold; font-size: 1.1rem; text-shadow: var(--glow-amber); opacity: 0; transform: scale(0.5); animation: pop-in 0.2s ease-out forwards; transition: color 0.5s, text-shadow 0.5s;}
         @keyframes pop-in { to { opacity: 1; transform: scale(1); } }
+
+       /* --- 1. MOBILE FIXES (Narrow Screens) --- */
+        @media (max-width: 768px) {
+            .sun-container { width: min(80vw, 45vh); bottom: 35%; }
+            .logo-glow-wrap { width: 35vw; top: 2%; }
+            .hero-text-container { top: 12%; }
+            .hero-headline { font-size: 16px; margin-bottom: 8px; }
+            .hero-subheadline { font-size: 14px; line-height: 1.4; }
+            .flip-board { font-size: 16px; padding: 4px 10px; }
+
+            .holo-panel { 
+                /* Limits width so it never stretches too far on a tablet */
+                width: 92%; max-width: 400px; padding: 15px 20px; 
+                top: auto; bottom: 85px; margin: 0;
+                transform: translateX(-50%) scale(0.95); max-height: calc(100% - 120px); 
+            }
+            .holo-panel.visible { transform: translateX(-50%) scale(1); }
+            
+            .holo-title { margin-bottom: 15px; font-size: 13px; }
+            .landscape-slider { margin-bottom: 12px; }
+            .slider-option { padding: 8px 4px; font-size: 11px; }
+            
+            .fte-row { flex-direction: column; gap: 10px; }
+            .fte-label { margin-bottom: 5px; font-size: 11px; }
+            .fte-input { padding: 10px 12px; font-size: 16px; }
+            
+            .budget-wrap .fte-input { padding-left: 24px; padding-right: 38px; }
+            .budget-wrap .currency-prefix { font-size: 16px; left: 10px; }
+            .budget-wrap .currency-suffix { font-size: 9px; right: 10px; }
+            
+            .roi-panel-h { margin-top: 15px; }
+            .roi-panel-h.visible { padding: 15px 10px; max-height: 500px; }
+            .roi-title { margin-bottom: 12px; font-size: 11px; }
+            
+            .roi-grid { gap: 5px; }
+            .roi-stat-value { font-size: clamp(14px, 4.5vw, 20px); }
+            .roi-stat-label { font-size: 9px; letter-spacing: 0.5px; }
+            .roi-figure { font-size: 0.9rem; }
+        }
+
+        /* --- 2. SHORT DESKTOP FIXES (Wide but vertically squashed) --- */
+        @media (max-height: 750px) and (min-width: 769px) {
+            .hero-text-container { top: 15%; }
+            .logo-glow-wrap { width: 180px; top: 2%; }
+            
+            /* Keeps the desktop layout, but scales it down proportionally to fit the screen */
+            .holo-panel {
+                padding: 20px 30px;
+                transform: translateX(-50%) scale(0.85);
+            }
+            .holo-panel.visible {
+                transform: translateX(-50%) scale(0.9);
+            }
+            
+            /* Tightens up the internal margins */
+            .holo-title { margin-bottom: 15px; }
+            .roi-panel-h { margin-top: 15px; }
+            .roi-panel-h.visible { padding: 15px 20px; }
+        }
       
     </style>
 </head>

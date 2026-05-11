@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ibex Staffing Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+
     <style>
         :root {
             /* DEFAULT AMBER THEME */
@@ -156,7 +161,7 @@
         }
 
         .scanlines {
-             height: 100%;
+            height: 100%;
             left: 0;
             position: absolute;
             top: 0;
@@ -1350,6 +1355,694 @@
                 font-size: 1rem;
             }
         }
+
+        /* --- 3D ROI CALCULATOR STYLES --- */
+        #roi.page.active {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .roi-3d-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-base);
+            border: none;
+            transition: background-color 0.5s ease;
+        }
+
+        .grid-bg {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background-image: linear-gradient(var(--ibex-amber) 1px, transparent 1px), linear-gradient(90deg, var(--ibex-amber) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center bottom;
+            opacity: 0.15;
+            transition: all 0.5s ease;
+        }
+
+        #stars-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .sun-container {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(60vw, 55vh);
+            max-width: 800px;
+            z-index: 2;
+        }
+
+        .retro-sun {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, var(--ibex-gold) 0%, var(--ibex-orange) 50%, var(--ibex-rust) 100%);
+            box-shadow: 0 0 150px var(--ibex-orange), 0 0 300px var(--ibex-rust);
+            mask-image: repeating-linear-gradient(to bottom, #000 0%, #000 3%, transparent 3%, transparent 4%);
+            -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0%, #000 3%, transparent 3%, transparent 4%);
+            transition: all 0.5s ease;
+        }
+
+        #renderCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            touch-action: none;
+            outline: none;
+        }
+
+        #birds-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .logo-glow-wrap {
+            position: absolute;
+            top: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20vw;
+            max-width: 250px;
+            min-width: 180px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .ibex-logo-3d {
+            position: relative;
+            width: 100%;
+            opacity: 0.95;
+            filter: brightness(0) invert(1) drop-shadow(0 0 12px var(--ibex-amber)) drop-shadow(0 0 5px var(--ibex-gold));
+            transition: filter 0.5s ease;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-panel);
+            border: 2px solid var(--ibex-amber);
+            color: var(--ibex-amber);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--glow-amber);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            box-shadow: 0 0 25px var(--ibex-gold);
+            background: var(--ibex-rust);
+            transform: scale(1.1);
+        }
+
+        .toggle-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--ibex-amber);
+            filter: drop-shadow(0 0 5px var(--ibex-amber));
+            transition: all 0.5s;
+        }
+
+        /* --- BULLETPROOF DESKTOP CENTERING --- */
+        .holo-panel {
+            position: absolute;
+            /* Locks it horizontally to the center */
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+
+            /* Safe Vertical Centering: Auto-centers but guarantees a 20px buffer so it NEVER clips the top */
+            top: 20px;
+            bottom: 20px;
+            margin: auto 0;
+            height: max-content;
+            max-height: calc(100% - 40px);
+            overflow-y: auto;
+
+            z-index: 20;
+            width: 480px;
+            max-width: 90%;
+            padding: 30px;
+            box-sizing: border-box;
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--ibex-amber);
+            border-radius: 16px;
+            box-shadow: var(--glow-amber), inset 0 0 30px rgba(0, 0, 0, 0.5);
+            font-family: 'Arial', sans-serif;
+            color: var(--ibex-gold);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .holo-panel.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Optional: Makes the scrollbar inside the card look sleek */
+        .holo-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .holo-panel::-webkit-scrollbar-thumb {
+            background: var(--ibex-rust);
+            border-radius: 4px;
+        }
+
+        .holo-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--ibex-amber);
+        }
+
+        .holo-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--ibex-amber), transparent);
+        }
+
+        .holo-title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 28px;
+            text-shadow: var(--glow-amber);
+            transition: color 0.5s;
+        }
+
+        .landscape-slider {
+            display: flex;
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--ibex-rust);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            transition: border-color 0.5s;
+        }
+
+        .slider-option {
+            flex: 1;
+            text-align: center;
+            padding: 12px 8px;
+            cursor: pointer;
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            transition: color 0.4s ease;
+            position: relative;
+            z-index: 1;
+            user-select: none;
+        }
+
+        .slider-option:hover {
+            color: var(--ibex-amber);
+        }
+
+        .slider-option.active {
+            color: #fff;
+            text-shadow: var(--glow-amber);
+        }
+
+        .slider-indicator {
+            position: absolute;
+            top: 2px;
+            bottom: 2px;
+            width: calc(33.333% - 4px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--ibex-amber);
+            border-radius: 6px;
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--glow-amber);
+            left: calc(33.333% + 2px);
+        }
+
+        .fte-label {
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--ibex-gold);
+            margin-bottom: 10px;
+            transition: color 0.5s;
+        }
+
+        .fte-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .fte-col {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .fte-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--ibex-rust);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 20px;
+            font-family: 'Arial', sans-serif;
+            letter-spacing: 2px;
+            outline: none;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .fte-input:focus {
+            border-color: var(--ibex-amber);
+            box-shadow: var(--glow-amber);
+        }
+
+        .fte-input::placeholder {
+            color: var(--text-dim);
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .budget-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .budget-wrap .currency-prefix {
+            position: absolute;
+            left: 16px;
+            color: var(--ibex-gold);
+            font-size: 20px;
+            font-family: 'Arial', sans-serif;
+            pointer-events: none;
+            letter-spacing: 1px;
+            transition: color 0.5s;
+        }
+
+        .budget-wrap .currency-suffix {
+            position: absolute;
+            right: 16px;
+            color: var(--text-dim);
+            font-size: 11px;
+            font-family: 'Arial', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            pointer-events: none;
+            transition: color 0.5s;
+        }
+
+        .budget-wrap .fte-input {
+            padding-left: 32px;
+            padding-right: 52px;
+        }
+
+        .roi-panel-h {
+            margin-top: 24px;
+            background: var(--bg-panel);
+            border: 1px solid var(--ibex-rust);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            max-height: 0;
+            transition: all 0.8s ease;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .roi-panel-h.visible {
+            opacity: 1;
+            max-height: 550px;
+            padding: 24px 20px;
+            box-sizing: border-box;
+        }
+
+        .roi-panel-h::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--ibex-gold), transparent);
+        }
+
+        .roi-title {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--ibex-gold);
+            text-shadow: var(--glow-gold);
+            transition: color 0.5s;
+        }
+
+        .roi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .roi-stat {
+            text-align: center;
+            position: relative;
+        }
+
+        .roi-stat-value {
+            font-size: clamp(16px, 4vw, 28px);
+            font-weight: 700;
+            color: var(--ibex-green);
+            text-shadow: var(--glow-green);
+            letter-spacing: 1px;
+            transition: color 0.15s ease;
+            position: relative;
+            word-break: break-word;
+        }
+
+        .roi-stat-value.glitching {
+            animation: roiGlitch 0.08s steps(1) infinite;
+        }
+
+        .roi-stat-value.glitch-settle {
+            animation: roiSettle 0.3s ease-out forwards;
+        }
+
+        @keyframes roiGlitch {
+            0% {
+                text-shadow: var(--glow-alert), -2px 0 var(--ibex-alert);
+            }
+
+            50% {
+                text-shadow: var(--glow-amber), 0 -1px var(--ibex-amber);
+            }
+
+            100% {
+                text-shadow: var(--glow-green), 1px -1px var(--ibex-green);
+            }
+        }
+
+        @keyframes roiSettle {
+            0% {
+                text-shadow: 0 0 25px var(--ibex-green);
+                transform: scale(1.08);
+            }
+
+            100% {
+                text-shadow: var(--glow-green);
+                transform: scale(1);
+            }
+        }
+
+        .roi-stat-label {
+            font-size: 10px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-top: 6px;
+            line-height: 1.4;
+            transition: color 0.5s;
+        }
+
+        .hero-text-container {
+            position: absolute;
+            top: 22%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 5;
+            width: 90%;
+            pointer-events: none;
+            color: #fff;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 20px var(--ibex-amber), 0 0 30px var(--ibex-amber);
+            transition: text-shadow 0.5s ease;
+        }
+
+        .hero-headline {
+            font-size: 22px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 1.5px;
+        }
+
+        .hero-subheadline {
+            font-size: 16px;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.8;
+            letter-spacing: 0.5px;
+            text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.8), 1px -1px 0 rgba(0, 0, 0, 0.8), -1px 1px 0 rgba(0, 0, 0, 0.8), 1px 1px 0 rgba(0, 0, 0, 0.8), 0 0 10px var(--ibex-amber), 0 0 20px var(--ibex-amber);
+            font-weight: 500;
+            transition: text-shadow 0.5s ease;
+        }
+
+        .flip-board {
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--ibex-gold);
+            text-shadow: 0 0 12px var(--ibex-amber);
+            margin-top: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px 16px;
+            border: 1px solid var(--ibex-amber);
+            border-radius: 6px;
+            box-shadow: inset 0 0 10px var(--ibex-amber);
+            transition: all 0.5s ease;
+        }
+
+        .roi-visual-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+            min-height: 24px;
+        }
+
+        .roi-figure {
+            color: var(--ibex-amber);
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: var(--glow-amber);
+            opacity: 0;
+            transform: scale(0.5);
+            animation: pop-in 0.2s ease-out forwards;
+            transition: color 0.5s, text-shadow 0.5s;
+        }
+
+        @keyframes pop-in {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* --- 1. MOBILE FIXES (Narrow Screens) --- */
+        @media (max-width: 768px) {
+            .sun-container {
+                width: min(80vw, 45vh);
+                bottom: 35%;
+            }
+
+            .logo-glow-wrap {
+                width: 35vw;
+                top: 2%;
+            }
+
+            .hero-text-container {
+                top: 12%;
+            }
+
+            .hero-headline {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .hero-subheadline {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+
+            .flip-board {
+                font-size: 16px;
+                padding: 4px 10px;
+            }
+
+            .holo-panel {
+                /* Limits width so it never stretches too far on a tablet */
+                width: 92%;
+                max-width: 400px;
+                padding: 15px 20px;
+                top: auto;
+                bottom: 85px;
+                margin: 0;
+                transform: translateX(-50%) scale(0.95);
+                max-height: calc(100% - 120px);
+            }
+
+            .holo-panel.visible {
+                transform: translateX(-50%) scale(1);
+            }
+
+            .holo-title {
+                margin-bottom: 15px;
+                font-size: 13px;
+            }
+
+            .landscape-slider {
+                margin-bottom: 12px;
+            }
+
+            .slider-option {
+                padding: 8px 4px;
+                font-size: 11px;
+            }
+
+            .fte-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .fte-label {
+                margin-bottom: 5px;
+                font-size: 11px;
+            }
+
+            .fte-input {
+                padding: 10px 12px;
+                font-size: 16px;
+            }
+
+            .budget-wrap .fte-input {
+                padding-left: 24px;
+                padding-right: 38px;
+            }
+
+            .budget-wrap .currency-prefix {
+                font-size: 16px;
+                left: 10px;
+            }
+
+            .budget-wrap .currency-suffix {
+                font-size: 9px;
+                right: 10px;
+            }
+
+            .roi-panel-h {
+                margin-top: 15px;
+            }
+
+            .roi-panel-h.visible {
+                padding: 15px 10px;
+                max-height: 500px;
+            }
+
+            .roi-title {
+                margin-bottom: 12px;
+                font-size: 11px;
+            }
+
+            .roi-grid {
+                gap: 5px;
+            }
+
+            .roi-stat-value {
+                font-size: clamp(14px, 4.5vw, 20px);
+            }
+
+            .roi-stat-label {
+                font-size: 9px;
+                letter-spacing: 0.5px;
+            }
+
+            .roi-figure {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* --- 2. SHORT DESKTOP FIXES (Wide but vertically squashed) --- */
+        @media (max-height: 750px) and (min-width: 769px) {
+            .hero-text-container {
+                top: 15%;
+            }
+
+            .logo-glow-wrap {
+                width: 180px;
+                top: 2%;
+            }
+
+            /* Keeps the desktop layout, but scales it down proportionally to fit the screen */
+            .holo-panel {
+                padding: 20px 30px;
+                transform: translateX(-50%) scale(0.85);
+            }
+
+            .holo-panel.visible {
+                transform: translateX(-50%) scale(0.9);
+            }
+
+            /* Tightens up the internal margins */
+            .holo-title {
+                margin-bottom: 15px;
+            }
+
+            .roi-panel-h {
+                margin-top: 15px;
+            }
+
+            .roi-panel-h.visible {
+                padding: 15px 20px;
+            }
+        }
     </style>
 </head>
 
@@ -1362,7 +2055,7 @@
             </div>
         </div>
     </div>
-                <!--
+    <!--
     <div id="website-frame-container">
         <div class="frame-line top"></div>
         <div class="frame-line right"></div>
@@ -1371,555 +2064,565 @@
 <div class="screen-cutout"></div>
     </div>
     -->
-                <div class="system-wrapper">
-                    <div id="bg-matrix"></div>
+    <div class="system-wrapper">
+        <div id="bg-matrix"></div>
 
-                    <div class="ui-container" id="main-ui">
-                        <header class="sys-element">
-                            <h1>IBEX // STAFFING SOLUTIONS</h1>
-                            <div class="header-stats">
-                                <span id="sys-time">00:00:00</span> | UPLINK: <span
-                                    style="color:var(--ibex-green)">SECURE</span>
+        <div class="ui-container" id="main-ui">
+            <header class="sys-element">
+                <h1>IBEX // STAFFING SOLUTIONS</h1>
+                <div class="header-stats">
+                    <span id="sys-time">00:00:00</span> | UPLINK: <span style="color:var(--ibex-green)">SECURE</span>
+                </div>
+            </header>
+
+            <div class="middle-tier">
+                <nav aria-label="Main Navigation" class="sys-element">
+                    <button class="nav-btn" aria-selected="true" data-target="home">Dashboard</button>
+                    <button class="nav-btn" aria-selected="false" data-target="about">About Ibex</button>
+                    <button class="nav-btn" aria-selected="false" data-target="talent">Talent
+                        Solutions</button>
+                    <button class="nav-btn" aria-selected="false" data-target="customer-care">Customer
+                        Care</button>
+                    <button class="nav-btn" aria-selected="false" data-target="blog">Blog</button>
+                    <button class="nav-btn" aria-selected="false" data-target="roi">ROI</button>
+
+                    <div class="ibex-logo-container">
+                        <img src="IBEXlogo.svg" alt="IBEX Logo" class="ibex-logo-img"
+                            onerror="this.style.display='none'">
+                    </div>
+
+                    <div class="ibex-dropzone" id="ibex-bin">
+                        [ IBEX POOL ]
+                        <div class="bin-container">
+                            <div class="bin-fill" id="mdr-fill"></div>
+                        </div>
+                        <div id="mdr-status" style="font-size: 0.8rem; margin-top: 5px; font-weight: normal;">0%</div>
+                    </div>
+                </nav>
+
+                <main id="viewport" aria-live="polite" class="sys-element">
+
+                    <section id="home" class="page active">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>EXCEED YOUR BUSINESS GOALS, NOT YOUR BUDGET</h2>
+                        <p>Ibex recruits the best technical <span class="catchable-word">talent</span> from
+                            around the
+                            globe, providing the resources that you need to stay ahead of the curve.</p>
+
+                        <h3>Conquer Your Goals</h3>
+                        <p>Ibex is founded on a <span class="catchable-word">passion</span> for connecting
+                            <span class="catchable-word">brilliant</span> talent with brilliant
+                            organizations. Find out
+                            for yourself what talent is out there for you.
+                        </p>
+
+                        <h3>Future-Forward</h3>
+                        <p>Enable a truly global workforce. Tap into the world’s best talent from our 700k+
+                            talent
+                            database. We are not a traditional outsourcer – you directly manage your
+                            dedicated full-time
+                            employees, while we enable <span class="catchable-word">seamless</span>
+                            employment and
+                            co-invest with you in parallel to get great <span class="catchable-word">results</span>.</p>
+
+                        <h3>Our Metrics Tell the Story</h3>
+                        <p>Our metrics component gives you the inside scoop on your success and helps you
+                            stay on top of
+                            your game in style.</p>
+
+                        <div class="metrics-grid">
+                            <div class="metric-box">
+                                <div class="metric-val"><span class="count-up" data-target="55">0</span>K+
+                                </div>
+                                <div class="metric-label">Total Work Hours Saved</div>
                             </div>
-                        </header>
-
-                        <div class="middle-tier">
-                            <nav aria-label="Main Navigation" class="sys-element">
-                                <button class="nav-btn" aria-selected="true" data-target="home">Dashboard</button>
-                                <button class="nav-btn" aria-selected="false" data-target="about">About Ibex</button>
-                                <button class="nav-btn" aria-selected="false" data-target="talent">Talent
-                                    Solutions</button>
-                                <button class="nav-btn" aria-selected="false" data-target="customer-care">Customer
-                                    Care</button>
-                                <button class="nav-btn" aria-selected="false" data-target="blog">Blog</button>
-                                <button class="nav-btn" aria-selected="false" data-target="roi">ROI</button>
-
-                                <div class="ibex-logo-container">
-                                    <img src="IBEXlogo.svg" alt="IBEX Logo" class="ibex-logo-img"
-                                        onerror="this.style.display='none'">
+                            <div class="metric-box">
+                                <div class="metric-val"><span class="count-up" data-target="107">0</span>
                                 </div>
-
-                                <div class="ibex-dropzone" id="ibex-bin">
-                                    [ IBEX POOL ]
-                                    <div class="bin-container">
-                                        <div class="bin-fill" id="mdr-fill"></div>
-                                    </div>
-                                    <div id="mdr-status"
-                                        style="font-size: 0.8rem; margin-top: 5px; font-weight: normal;">0%</div>
+                                <div class="metric-label">Additional Projects Completed</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-val">$<span class="count-up" data-target="3">0</span>M
                                 </div>
-                            </nav>
-
-                            <main id="viewport" aria-live="polite" class="sys-element">
-
-                                <section id="home" class="page active">
-                                    <div class="section-pre-header">
-                                        <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a
-                                            href="#">Submit
-                                            Resume</a>
-                                    </div>
-                                    <h2>EXCEED YOUR BUSINESS GOALS, NOT YOUR BUDGET</h2>
-                                    <p>Ibex recruits the best technical <span class="catchable-word">talent</span> from
-                                        around the
-                                        globe, providing the resources that you need to stay ahead of the curve.</p>
-
-                                    <h3>Conquer Your Goals</h3>
-                                    <p>Ibex is founded on a <span class="catchable-word">passion</span> for connecting
-                                        <span class="catchable-word">brilliant</span> talent with brilliant
-                                        organizations. Find out
-                                        for yourself what talent is out there for you.</p>
-
-                                    <h3>Future-Forward</h3>
-                                    <p>Enable a truly global workforce. Tap into the world’s best talent from our 700k+
-                                        talent
-                                        database. We are not a traditional outsourcer – you directly manage your
-                                        dedicated full-time
-                                        employees, while we enable <span class="catchable-word">seamless</span>
-                                        employment and
-                                        co-invest with you in parallel to get great <span
-                                            class="catchable-word">results</span>.</p>
-
-                                    <h3>Our Metrics Tell the Story</h3>
-                                    <p>Our metrics component gives you the inside scoop on your success and helps you
-                                        stay on top of
-                                        your game in style.</p>
-
-                                    <div class="metrics-grid">
-                                        <div class="metric-box">
-                                            <div class="metric-val"><span class="count-up" data-target="55">0</span>K+
-                                            </div>
-                                            <div class="metric-label">Total Work Hours Saved</div>
-                                        </div>
-                                        <div class="metric-box">
-                                            <div class="metric-val"><span class="count-up" data-target="107">0</span>
-                                            </div>
-                                            <div class="metric-label">Additional Projects Completed</div>
-                                        </div>
-                                        <div class="metric-box">
-                                            <div class="metric-val">$<span class="count-up" data-target="3">0</span>M
-                                            </div>
-                                            <div class="metric-label">Labor Dollars Saved</div>
-                                        </div>
-                                        <div class="metric-box">
-                                            <div class="metric-val"><span class="count-up" data-target="107">0</span>
-                                            </div>
-                                            <div class="metric-label">Deadlines Met</div>
-                                        </div>
-                                    </div>
-
-                                    <p><strong class="highlight-text">Remote staffing just got easier.</strong> See how
-                                        Ibex enables
-                                        talent to meet your goals.</p>
-                                    <button class="btn-submit" onclick="navigateTo('roi')">ROI Calculator</button>
-
-                                    <div class="desktop-only">
-                                        <h3 style="margin-top: 40px; border-bottom: 1px solid var(--ibex-rust);">
-                                            MACRODATA
-                                            REFINEMENT PROCESS</h3>
-                                        <p><strong class="highlight-text">MDR INSTRUCTIONS:</strong> Sweep your cursor
-                                            over positive
-                                            organizational traits embedded within the site's text to extract them. Move
-                                            the
-                                            extracted stack into the [IBEX POOL] to integrate.</p>
-                                    </div>
-
-                                    <h3 style="margin-top: 40px; border-bottom: 1px solid var(--ibex-rust);">GLOBAL
-                                        TALENT RADAR &
-                                        TELEMETRY</h3>
-                                    <p style="font-size: 0.9rem; color: var(--ibex-gold);">> CLICK INTERCEPTED DATA
-                                        PINGS TO REVEAL
-                                        CANDIDATE DOSSIERS</p>
-
-                                    <div class="dashboard-telemetry-grid">
-                                        <div class="radar-box" id="radar-container">
-                                            <img src="ascii_map.jpg" alt="Global Radar Map" class="radar-map-img"
-                                                onerror="this.style.display='none'">
-                                            <div id="central-dossier" class="dossier-popup"
-                                                style="display: none; top: 50%; left: 50%; box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(51, 255, 102, 0.2);">
-                                            </div>
-                                        </div>
-                                        <div class="telemetry-box" id="telemetry-output"></div>
-                                    </div>
-                                </section>
-
-                                <section id="about" class="page">
-                                    <div class="section-pre-header">
-                                        <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a
-                                            href="#">Submit
-                                            Resume</a>
-                                    </div>
-                                    <h2>ABOUT IBEX</h2>
-
-                                    <h3>In less than 30 seconds, here is what you need to know:</h3>
-                                    <p>Ibex is a tech talent solutions provider, led by IT service industry veteran Alex
-                                        Joy, with
-                                        decades of <span class="catchable-word">experience</span>, focusing on remote
-                                        contract-based
-                                        resources. Ibex provides an experienced, <span
-                                            class="catchable-word">proven</span> IT
-                                        talent pool with the resumes and skills required to help you meet your
-                                        technological goals.
-                                        Our resources will maximize the <span class="catchable-word">efficiency</span>
-                                        of your IT
-                                        labor budget, provide cost-flexibility and labor-scalability, all without
-                                        compromising the
-                                        quality of the user-experience.</p>
-
-                                    <h3>What makes Ibex different than any other staffing firm or BPO?</h3>
-                                    <p>Ibex believes that a great experience starts with great people that understand
-                                        how to deliver
-                                        that experience. Our team is comprised of IT service and staffing industry
-                                        veterans that
-                                        understand <span class="catchable-word">urgency</span> and know what is expected
-                                        at the
-                                        highest levels of tech teams. We will never waste your time at any point in the
-                                        process,
-                                        whether it be our first conversation or after you’ve completed your onboarding
-                                        of your first
-                                        Ibex resource. We will provide you with the talent that knows how to do the job
-                                        and will
-                                        work well within your team.</p>
-                                    <p>Ibex Staffing Solutions was founded on the idea that the customer must come
-                                        first. We know
-                                        that this statement can be seen as cliché, but our founders all came from former
-                                        businesses
-                                        that over time transformed from customer-focused organizations into
-                                        revenue-focused
-                                        organizations. Over time, these organizations lost track of what really mattered
-                                        to the
-                                        customer and forgot how they became the successful companies that they were;
-                                        establishing
-                                        <span class="catchable-word">relationships</span> at the singular level and
-                                        developing those
-                                        relationships over time.
-                                    </p>
-                                    <p>We believe that the best way to develop our business is by showing each of our
-                                        customers that
-                                        you can provide top tier service each day and that the work will speak for
-                                        itself and word
-                                        will spread.</p>
-                                    <p>Finding a business that is committed to your success in a cost effective,
-                                        time-sensitive
-                                        manner is not an easy task and we are dead set on showing you what we can
-                                        provide in the
-                                        short and long term. Across our founders, we have a combined 30 years of IT and
-                                        staffing
-                                        experience and the knowledge and track record of building out very successful IT
-                                        organizations from the ground up and can very promptly and effectively augment
-                                        your existing
-                                        IT staff with <span class="catchable-word">exceptional</span> talent wherever
-                                        any gaps
-                                        exist.</p>
-
-                                    <h3>Who are our ideal customers?</h3>
-                                    <p>In general, if you have an internal IT team or if your company builds software of
-                                        any kind,
-                                        we have resources that can help you. Ibex can provide <span
-                                            class="catchable-word">value</span> to tech teams of all sizes, whether you
-                                        need a
-                                        single resource to help bolster off-hours support, or an entire fleet of
-                                        developers to aid
-                                        in finishing a sprint. With that said, tech-forward industries like SaaS,
-                                        FinTech, Cloud,
-                                        MSP / MSSP are firmly in our focus because of the extraordinary value that Ibex
-                                        can provide
-                                        across their entire workforce.</p>
-
-                                    <h3>Who is Alex Joy?</h3>
-                                    <p>Alex Joy is an IT industry veteran, who has served in technical, project
-                                        management,
-                                        managerial and <span class="catchable-word">leadership</span> capacities over
-                                        the course of
-                                        his nearly two-decade long career in the IT field. Alex is a college drop out
-                                        who became
-                                        self-taught as a systems engineer and field technician, eventually joining an
-                                        MSP in the
-                                        Boston area where he evolved his role in numerous capacities throughout his
-                                        tenure. Alex
-                                        eventually served as the CEO of this then nation-wide MSP, with more than 300+
-                                        employees and
-                                        hundreds of clients all over the country being supported by him and his great
-                                        team.</p>
-                                </section>
-
-                                <section id="talent" class="page">
-                                    <div class="section-pre-header">
-                                        <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a
-                                            href="#">Submit
-                                            Resume</a>
-                                    </div>
-                                    <h2>TALENT SOLUTIONS</h2>
-                                    <p><strong class="highlight-text">Ibex is a global talent provider, bringing the
-                                            world's best
-                                            talent, to the US.</strong></p>
-                                    <p>Ibex is a <span class="catchable-word">global</span> talent provider, leveraging
-                                        the strength
-                                        of the US economy to bring the best talent from the rest of the world to
-                                        American companies.
-                                        We can deliver augmented contract talent quickly and <span
-                                            class="catchable-word">efficiently</span>. Our clients' urgency is only
-                                        outpaced by our
-                                        urgency and capability to deliver immediate effective IT resources. Our talent
-                                        has already
-                                        been hand-selected, pre-screened, and personally signed off on by our CEO to
-                                        ensure that
-                                        when your needs are identified the resources are already available.</p>
-
-                                    <h3>The type of talent we offer and how we deliver it:</h3>
-                                    <p>All of our talent goes through a background check, third-party skills assessment,
-                                        and
-                                        multiple rounds of interviews before being selected to represent Ibex for our
-                                        clients. This
-                                        process, while <span class="catchable-word">rigorous</span> and time-intensive,
-                                        is handled
-                                        at the front end well before being assigned to your organization which ensures
-                                        smooth
-                                        delivery of resources from the start.</p>
-                                    <p>Furthermore, our offshore talent is provided all of the necessary equipment
-                                        needed to perform
-                                        their work, in turn saving our clients time and resources having to requisition
-                                        and ship out
-                                        equipment. No need to wait for your IT departments to identify, purchase, and
-                                        ship, we
-                                        provide our contractors with equipment that exceeds minimum requirements to work
-                                        effectively
-                                        and without interruptions.</p>
-
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px dashed var(--ibex-rust); padding-bottom: 10px;">
-                                        <h3 style="border: none; margin: 0; padding: 0;">Interactive Role Constellation
-                                        </h3>
-                                        <button id="toggle-mesh-btn" class="btn-submit"
-                                            style="margin: 0; padding: 5px 15px; font-size: 0.9rem;">[ Toggle Plain Text
-                                            ]</button>
-                                    </div>
-
-                                    <div id="mesh-view">
-                                        <p>IT Managers and Service Operations: explore our available skill clusters.
-                                            Hover over
-                                            nodes in the global matrix to visualize interconnectivity across our
-                                            available talent
-                                            pools.</p>
-                                        <canvas id="skills-canvas"></canvas>
-                                    </div>
-
-                                    <div id="grid-view" style="display: none;">
-                                        <p>IT Managers and Service Operations, gone are the days of struggling to staff
-                                            off-hours
-                                            shifts, or having to increase SLAs due to inadequate staffing. By injecting
-                                            Ibex talent,
-                                            you’ll be able to add <span class="catchable-word">reliable</span>
-                                            redundancy and
-                                            off-hours team members to your labor pool.</p>
-                                        <div class="roles-grid">
-                                            <div class="role-item">Help Desk Technicians</div>
-                                            <div class="role-item">Systems Administrators</div>
-                                            <div class="role-item">(NOC) Network Engineers</div>
-                                            <div class="role-item">Linux Administrators</div>
-                                            <div class="role-item">Full Stack Developers</div>
-                                            <div class="role-item">DevOps Engineers</div>
-                                            <div class="role-item">Cloud Architects</div>
-                                            <div class="role-item">Cybersecurity Analysts</div>
-                                        </div>
-                                    </div>
-
-                                    <h3>Let's start building your team today!</h3>
-                                    <div class="form-grid">
-                                        <div><input type="text" class="ibex-input" placeholder="First Name"></div>
-                                        <div><input type="text" class="ibex-input" placeholder="Last Name"></div>
-                                        <div class="form-full"><input type="email" class="ibex-input"
-                                                placeholder="Company Email">
-                                        </div>
-                                        <div class="form-full"><button class="btn-submit">Submit Transmission</button>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <section id="customer-care" class="page">
-                                    <div class="section-pre-header">
-                                        <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a
-                                            href="#">Submit
-                                            Resume</a>
-                                    </div>
-                                    <h2>CUSTOMER CARE</h2>
-                                    <p><strong class="highlight-text">Ibex was founded by professionals, delivering
-                                            exceptional
-                                            customer service.</strong></p>
-                                    <p>Ibex was founded by professionals who are <span
-                                            class="catchable-word">uncompromising</span>
-                                        when it comes to delivering exceptional customer service. We understand that in
-                                        partnering
-                                        with Ibex, you are bestowing <span class="catchable-word">trust</span> on our
-                                        team as well
-                                        as all of the resources that you bring on to work within your organization. We
-                                        reward that
-                                        trust by being responsive to your requests when you need us and being proactive
-                                        in ensuring
-                                        your needs are being met fully.</p>
-
-                                    <h3>How we operate</h3>
-                                    <p>Our clients are assigned a dedicated Account Manager that is <span
-                                            class="catchable-word">responsive</span>, communicative, <span
-                                            class="catchable-word">proactive</span> and efficient. Our goal is to ensure
-                                        that you
-                                        get the best service available in the industry. We know from our strong history
-                                        of staffing
-                                        and IT service that having responsive customer service is essential to
-                                        maximizing the
-                                        results. No client wants to be ignored when something is time sensitive and we
-                                        are always an
-                                        email, phone call, or text away.</p>
-
-                                    <h3>After Hours Help Desk Support</h3>
-                                    <p>As a global team, Ibex can be responsive to our Clients needs around the clock.
-                                        Let us show
-                                        you the Ibex difference. Ibex’s Customer Care team will maintain regular
-                                        communication with
-                                        every client. Ensuring proactive attention and <span
-                                            class="catchable-word">commitment</span> to getting ahead of your needs. New
-                                        business
-                                        challenges arise daily, and it’s imperative that you have a partner that you can
-                                        rely on to
-                                        meet these challenges.</p>
-                                </section>
-
-                                <section id="blog" class="page">
-                                    <div class="section-pre-header">
-                                        <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a
-                                            href="#">Submit
-                                            Resume</a>
-                                    </div>
-                                    <h2>IBEX TRANSMISSIONS // BLOG</h2>
-                                    <p>Access the latest industry insights, staffing trends, and corporate updates.</p>
-
-                                    <div class="portfolio-grid" style="margin-top: 20px;">
-                                        <div class="portfolio-item">
-                                            <span style="font-size: 0.8rem; color: var(--text-dim);">LATEST
-                                                UPDATE</span>
-                                            <h3>The Future of Remote IT</h3>
-                                            <p style="font-size: 0.9rem;">How global workforces are reshaping the
-                                                infrastructure of
-                                                tech companies in 2024.</p>
-                                            <a href="#"
-                                                style="color: var(--ibex-gold); text-decoration: none; font-size: 0.9rem;">[
-                                                READ MORE ]</a>
-                                        </div>
-                                        <div class="portfolio-item">
-                                            <span style="font-size: 0.8rem; color: var(--text-dim);">CASE STUDY</span>
-                                            <h3>Scaling Security Ops</h3>
-                                            <p style="font-size: 0.9rem;">Learn how Ibex helped a leading MSP expand
-                                                their SOC to
-                                                24/7 coverage efficiently.</p>
-                                            <a href="#"
-                                                style="color: var(--ibex-gold); text-decoration: none; font-size: 0.9rem;">[
-                                                READ MORE ]</a>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <section id="roi" class="page">
-                                    <div class="section-pre-header">
-                                        <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a
-                                            href="#">Submit
-                                            Resume</a>
-                                    </div>
-                                    <h2>HIRING COST CALCULATOR</h2>
-                                    <p><strong class="highlight-text">MSP Leaders Looking to Save on Staffing</strong>
-                                    </p>
-                                    <p>Discover how much you can save and how many more talented professionals you can
-                                        hire with
-                                        Ibex.</p>
-
-                                    <div class="roi-container">
-                                        <div class="roi-inputs">
-                                            <div style="flex: 1;">
-                                                <label class="metric-label">How many resources (FTEs) are you looking to
-                                                    hire?</label>
-                                                <input type="number" id="roi-ftes" class="ibex-input" value="1" min="1">
-                                            </div>
-                                            <div style="flex: 1;">
-                                                <label class="metric-label">Average Hiring Budget per FTE? ($)</label>
-                                                <input type="number" id="roi-budget" class="ibex-input" value="80000"
-                                                    min="0" step="1000">
-                                            </div>
-                                        </div>
-
-                                        <div class="roi-output-grid">
-                                            <div>
-                                                <div class="metric-label">Total Potential Savings</div>
-                                                <div class="roi-result" id="res-savings">$0</div>
-                                            </div>
-                                            <div>
-                                                <div class="metric-label">Budget Savings per FTE</div>
-                                                <div class="roi-result" id="res-per-fte">$0</div>
-                                            </div>
-                                            <div>
-                                                <div class="metric-label">Additional Hires You Could Make</div>
-                                                <div class="roi-result" id="res-hires"
-                                                    style="color: var(--ibex-amber);">0</div>
-                                                <div id="res-hires-visual" class="roi-visual-stack"></div>
-                                            </div>
-                                            <div>
-                                                <div class="metric-label">Additional Labor Hrs Gained/Month</div>
-                                                <div class="roi-result" id="res-hours"
-                                                    style="color: var(--ibex-amber);">0</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-
-                            </main>
+                                <div class="metric-label">Labor Dollars Saved</div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-val"><span class="count-up" data-target="107">0</span>
+                                </div>
+                                <div class="metric-label">Deadlines Met</div>
+                            </div>
                         </div>
 
-                        <footer class="sys-element">
-                            <div id="cli-output" aria-live="polite"></div>
-                            <div class="cli-input-wrapper">
-                                <label for="cli-input" class="visually-hidden">Terminal Input</label>
-                                <span class="prompt" id="cli-prompt-text">user@ibex:~#</span>
-                                <input type="text" id="cli-input" autocomplete="off" spellcheck="false"
-                                    placeholder="Type 'help' for commands..." />
+                        <p><strong class="highlight-text">Remote staffing just got easier.</strong> See how
+                            Ibex enables
+                            talent to meet your goals.</p>
+                        <button class="btn-submit" onclick="navigateTo('roi')">ROI Calculator</button>
+
+                        <div class="desktop-only">
+                            <h3 style="margin-top: 40px; border-bottom: 1px solid var(--ibex-rust);">
+                                MACRODATA
+                                REFINEMENT PROCESS</h3>
+                            <p><strong class="highlight-text">MDR INSTRUCTIONS:</strong> Sweep your cursor
+                                over positive
+                                organizational traits embedded within the site's text to extract them. Move
+                                the
+                                extracted stack into the [IBEX POOL] to integrate.</p>
+                        </div>
+
+                        <h3 style="margin-top: 40px; border-bottom: 1px solid var(--ibex-rust);">GLOBAL
+                            TALENT RADAR &
+                            TELEMETRY</h3>
+                        <p style="font-size: 0.9rem; color: var(--ibex-gold);">> CLICK INTERCEPTED DATA
+                            PINGS TO REVEAL
+                            CANDIDATE DOSSIERS</p>
+
+                        <div class="dashboard-telemetry-grid">
+                            <div class="radar-box" id="radar-container">
+                                <img src="ascii_map.jpg" alt="Global Radar Map" class="radar-map-img"
+                                    onerror="this.style.display='none'">
+                                <div id="central-dossier" class="dossier-popup"
+                                    style="display: none; top: 50%; left: 50%; box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(51, 255, 102, 0.2);">
+                                </div>
                             </div>
-                        </footer>
-                    </div>
+                            <div class="telemetry-box" id="telemetry-output"></div>
+                        </div>
+                    </section>
+
+                    <section id="about" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>ABOUT IBEX</h2>
+
+                        <h3>In less than 30 seconds, here is what you need to know:</h3>
+                        <p>Ibex is a tech talent solutions provider, led by IT service industry veteran Alex
+                            Joy, with
+                            decades of <span class="catchable-word">experience</span>, focusing on remote
+                            contract-based
+                            resources. Ibex provides an experienced, <span class="catchable-word">proven</span> IT
+                            talent pool with the resumes and skills required to help you meet your
+                            technological goals.
+                            Our resources will maximize the <span class="catchable-word">efficiency</span>
+                            of your IT
+                            labor budget, provide cost-flexibility and labor-scalability, all without
+                            compromising the
+                            quality of the user-experience.</p>
+
+                        <h3>What makes Ibex different than any other staffing firm or BPO?</h3>
+                        <p>Ibex believes that a great experience starts with great people that understand
+                            how to deliver
+                            that experience. Our team is comprised of IT service and staffing industry
+                            veterans that
+                            understand <span class="catchable-word">urgency</span> and know what is expected
+                            at the
+                            highest levels of tech teams. We will never waste your time at any point in the
+                            process,
+                            whether it be our first conversation or after you’ve completed your onboarding
+                            of your first
+                            Ibex resource. We will provide you with the talent that knows how to do the job
+                            and will
+                            work well within your team.</p>
+                        <p>Ibex Staffing Solutions was founded on the idea that the customer must come
+                            first. We know
+                            that this statement can be seen as cliché, but our founders all came from former
+                            businesses
+                            that over time transformed from customer-focused organizations into
+                            revenue-focused
+                            organizations. Over time, these organizations lost track of what really mattered
+                            to the
+                            customer and forgot how they became the successful companies that they were;
+                            establishing
+                            <span class="catchable-word">relationships</span> at the singular level and
+                            developing those
+                            relationships over time.
+                        </p>
+                        <p>We believe that the best way to develop our business is by showing each of our
+                            customers that
+                            you can provide top tier service each day and that the work will speak for
+                            itself and word
+                            will spread.</p>
+                        <p>Finding a business that is committed to your success in a cost effective,
+                            time-sensitive
+                            manner is not an easy task and we are dead set on showing you what we can
+                            provide in the
+                            short and long term. Across our founders, we have a combined 30 years of IT and
+                            staffing
+                            experience and the knowledge and track record of building out very successful IT
+                            organizations from the ground up and can very promptly and effectively augment
+                            your existing
+                            IT staff with <span class="catchable-word">exceptional</span> talent wherever
+                            any gaps
+                            exist.</p>
+
+                        <h3>Who are our ideal customers?</h3>
+                        <p>In general, if you have an internal IT team or if your company builds software of
+                            any kind,
+                            we have resources that can help you. Ibex can provide <span
+                                class="catchable-word">value</span> to tech teams of all sizes, whether you
+                            need a
+                            single resource to help bolster off-hours support, or an entire fleet of
+                            developers to aid
+                            in finishing a sprint. With that said, tech-forward industries like SaaS,
+                            FinTech, Cloud,
+                            MSP / MSSP are firmly in our focus because of the extraordinary value that Ibex
+                            can provide
+                            across their entire workforce.</p>
+
+                        <h3>Who is Alex Joy?</h3>
+                        <p>Alex Joy is an IT industry veteran, who has served in technical, project
+                            management,
+                            managerial and <span class="catchable-word">leadership</span> capacities over
+                            the course of
+                            his nearly two-decade long career in the IT field. Alex is a college drop out
+                            who became
+                            self-taught as a systems engineer and field technician, eventually joining an
+                            MSP in the
+                            Boston area where he evolved his role in numerous capacities throughout his
+                            tenure. Alex
+                            eventually served as the CEO of this then nation-wide MSP, with more than 300+
+                            employees and
+                            hundreds of clients all over the country being supported by him and his great
+                            team.</p>
+                    </section>
+
+                    <section id="talent" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>TALENT SOLUTIONS</h2>
+                        <p><strong class="highlight-text">Ibex is a global talent provider, bringing the
+                                world's best
+                                talent, to the US.</strong></p>
+                        <p>Ibex is a <span class="catchable-word">global</span> talent provider, leveraging
+                            the strength
+                            of the US economy to bring the best talent from the rest of the world to
+                            American companies.
+                            We can deliver augmented contract talent quickly and <span
+                                class="catchable-word">efficiently</span>. Our clients' urgency is only
+                            outpaced by our
+                            urgency and capability to deliver immediate effective IT resources. Our talent
+                            has already
+                            been hand-selected, pre-screened, and personally signed off on by our CEO to
+                            ensure that
+                            when your needs are identified the resources are already available.</p>
+
+                        <h3>The type of talent we offer and how we deliver it:</h3>
+                        <p>All of our talent goes through a background check, third-party skills assessment,
+                            and
+                            multiple rounds of interviews before being selected to represent Ibex for our
+                            clients. This
+                            process, while <span class="catchable-word">rigorous</span> and time-intensive,
+                            is handled
+                            at the front end well before being assigned to your organization which ensures
+                            smooth
+                            delivery of resources from the start.</p>
+                        <p>Furthermore, our offshore talent is provided all of the necessary equipment
+                            needed to perform
+                            their work, in turn saving our clients time and resources having to requisition
+                            and ship out
+                            equipment. No need to wait for your IT departments to identify, purchase, and
+                            ship, we
+                            provide our contractors with equipment that exceeds minimum requirements to work
+                            effectively
+                            and without interruptions.</p>
+
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px dashed var(--ibex-rust); padding-bottom: 10px;">
+                            <h3 style="border: none; margin: 0; padding: 0;">Interactive Role Constellation
+                            </h3>
+                            <button id="toggle-mesh-btn" class="btn-submit"
+                                style="margin: 0; padding: 5px 15px; font-size: 0.9rem;">[ Toggle Plain Text
+                                ]</button>
+                        </div>
+
+                        <div id="mesh-view">
+                            <p>IT Managers and Service Operations: explore our available skill clusters.
+                                Hover over
+                                nodes in the global matrix to visualize interconnectivity across our
+                                available talent
+                                pools.</p>
+                            <canvas id="skills-canvas"></canvas>
+                        </div>
+
+                        <div id="grid-view" style="display: none;">
+                            <p>IT Managers and Service Operations, gone are the days of struggling to staff
+                                off-hours
+                                shifts, or having to increase SLAs due to inadequate staffing. By injecting
+                                Ibex talent,
+                                you’ll be able to add <span class="catchable-word">reliable</span>
+                                redundancy and
+                                off-hours team members to your labor pool.</p>
+                            <div class="roles-grid">
+                                <div class="role-item">Help Desk Technicians</div>
+                                <div class="role-item">Systems Administrators</div>
+                                <div class="role-item">(NOC) Network Engineers</div>
+                                <div class="role-item">Linux Administrators</div>
+                                <div class="role-item">Full Stack Developers</div>
+                                <div class="role-item">DevOps Engineers</div>
+                                <div class="role-item">Cloud Architects</div>
+                                <div class="role-item">Cybersecurity Analysts</div>
+                            </div>
+                        </div>
+
+                        <h3>Let's start building your team today!</h3>
+                        <div class="form-grid">
+                            <div><input type="text" class="ibex-input" placeholder="First Name"></div>
+                            <div><input type="text" class="ibex-input" placeholder="Last Name"></div>
+                            <div class="form-full"><input type="email" class="ibex-input" placeholder="Company Email">
+                            </div>
+                            <div class="form-full"><button class="btn-submit">Submit Transmission</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="customer-care" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>CUSTOMER CARE</h2>
+                        <p><strong class="highlight-text">Ibex was founded by professionals, delivering
+                                exceptional
+                                customer service.</strong></p>
+                        <p>Ibex was founded by professionals who are <span class="catchable-word">uncompromising</span>
+                            when it comes to delivering exceptional customer service. We understand that in
+                            partnering
+                            with Ibex, you are bestowing <span class="catchable-word">trust</span> on our
+                            team as well
+                            as all of the resources that you bring on to work within your organization. We
+                            reward that
+                            trust by being responsive to your requests when you need us and being proactive
+                            in ensuring
+                            your needs are being met fully.</p>
+
+                        <h3>How we operate</h3>
+                        <p>Our clients are assigned a dedicated Account Manager that is <span
+                                class="catchable-word">responsive</span>, communicative, <span
+                                class="catchable-word">proactive</span> and efficient. Our goal is to ensure
+                            that you
+                            get the best service available in the industry. We know from our strong history
+                            of staffing
+                            and IT service that having responsive customer service is essential to
+                            maximizing the
+                            results. No client wants to be ignored when something is time sensitive and we
+                            are always an
+                            email, phone call, or text away.</p>
+
+                        <h3>After Hours Help Desk Support</h3>
+                        <p>As a global team, Ibex can be responsive to our Clients needs around the clock.
+                            Let us show
+                            you the Ibex difference. Ibex’s Customer Care team will maintain regular
+                            communication with
+                            every client. Ensuring proactive attention and <span
+                                class="catchable-word">commitment</span> to getting ahead of your needs. New
+                            business
+                            challenges arise daily, and it’s imperative that you have a partner that you can
+                            rely on to
+                            meet these challenges.</p>
+                    </section>
+
+                    <section id="blog" class="page">
+                        <div class="section-pre-header">
+                            <a href="#">844-737-1477</a> | <a href="#">Become a Partner</a> | <a href="#">Submit
+                                Resume</a>
+                        </div>
+                        <h2>IBEX TRANSMISSIONS // BLOG</h2>
+                        <p>Access the latest industry insights, staffing trends, and corporate updates.</p>
+
+                        <div class="portfolio-grid" style="margin-top: 20px;">
+                            <div class="portfolio-item">
+                                <span style="font-size: 0.8rem; color: var(--text-dim);">LATEST
+                                    UPDATE</span>
+                                <h3>The Future of Remote IT</h3>
+                                <p style="font-size: 0.9rem;">How global workforces are reshaping the
+                                    infrastructure of
+                                    tech companies in 2024.</p>
+                                <a href="#" style="color: var(--ibex-gold); text-decoration: none; font-size: 0.9rem;">[
+                                    READ MORE ]</a>
+                            </div>
+                            <div class="portfolio-item">
+                                <span style="font-size: 0.8rem; color: var(--text-dim);">CASE STUDY</span>
+                                <h3>Scaling Security Ops</h3>
+                                <p style="font-size: 0.9rem;">Learn how Ibex helped a leading MSP expand
+                                    their SOC to
+                                    24/7 coverage efficiently.</p>
+                                <a href="#" style="color: var(--ibex-gold); text-decoration: none; font-size: 0.9rem;">[
+                                    READ MORE ]</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="roi" class="page" style="padding: 0; overflow: hidden;">
+                        <div class="roi-3d-wrapper">
+                            <div class="grid-bg"></div>
+                            <canvas id="stars-canvas"></canvas>
+                            <div class="sun-container" id="sun-container">
+                                <div class="retro-sun"></div>
+                            </div>
+
+                            <canvas id="renderCanvas"></canvas>
+                            <canvas id="birds-canvas"></canvas>
+
+                            <div class="logo-glow-wrap">
+                                <img class="ibex-logo-3d" src="IBEXlogo.svg" alt="IBEX Logo"
+                                    onerror="this.style.display='none'">
+                            </div>
+
+                            <button id="toggle-ui-btn" class="toggle-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                            </button>
+
+                            <div id="holo-panel" class="holo-panel visible">
+                                <div class="holo-title">Control Interface</div>
+
+                                <div class="landscape-slider">
+                                    <div id="slider-indicator" class="slider-indicator"></div>
+                                    <div class="slider-option" data-value="small">Small</div>
+                                    <div class="slider-option active" data-value="medium">Medium</div>
+                                    <div class="slider-option" data-value="large">Large</div>
+                                </div>
+
+                                <div class="fte-row">
+                                    <div class="fte-col">
+                                        <div class="fte-label">Team Size (FTE)</div>
+                                        <input type="number" id="fte-input" class="fte-input" placeholder="e.g. 10">
+                                    </div>
+                                    <div class="fte-col">
+                                        <div class="fte-label">Budget</div>
+                                        <div class="budget-wrap">
+                                            <span class="currency-prefix">$</span>
+                                            <input type="text" id="budget-input" class="fte-input" placeholder="50,000">
+                                            <span class="currency-suffix">USD</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="roi-panel-h" class="roi-panel-h">
+                                    <div class="roi-title">Projected Impact</div>
+                                    <div class="roi-grid">
+                                        <div class="roi-stat">
+                                            <div id="roi-savings" class="roi-stat-value">$0</div>
+                                            <div class="roi-stat-label">Savings</div>
+                                        </div>
+                                        <div class="roi-stat">
+                                            <div id="roi-hires" class="roi-stat-value">0</div>
+                                            <div class="roi-stat-label">Extra Hires</div>
+                                            <div id="res-hires-visual" class="roi-visual-stack"></div>
+                                        </div>
+                                        <div class="roi-stat">
+                                            <div id="roi-hours" class="roi-stat-value">0</div>
+                                            <div class="roi-stat-label">Hours Saved</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
+            </div>
+
+            <footer class="sys-element">
+                <div id="cli-output" aria-live="polite"></div>
+                <div class="cli-input-wrapper">
+                    <label for="cli-input" class="visually-hidden">Terminal Input</label>
+                    <span class="prompt" id="cli-prompt-text">user@ibex:~#</span>
+                    <input type="text" id="cli-input" autocomplete="off" spellcheck="false"
+                        placeholder="Type 'help' for commands..." />
                 </div>
+            </footer>
+        </div>
+    </div>
 
-                <script>
-                    const mainUI = document.getElementById('main-ui');
+    <script>
+        const mainUI = document.getElementById('main-ui');
 
-                    // --- Initiate Sequence on Page Load ---
-                    window.onload = () => {
-                        mainUI.style.opacity = '1';
-                        const uiElements = document.querySelectorAll('.sys-element');
-                        uiElements.forEach((el, index) => { setTimeout(() => { el.classList.add('flicker-on'); }, index * 125); });
-                        setTimeout(() => {
-                            initTelemetry();
-                            initBackgroundMatrix();
-                            initInlineMDR();
-                            calculateROI();
-                            animateCounters();
-                            initSkillNetwork();
-                        }, uiElements.length * 125 + 300);
-                    };
+        // --- Initiate Sequence on Page Load ---
+        window.onload = () => {
+            mainUI.style.opacity = '1';
+            const uiElements = document.querySelectorAll('.sys-element');
+            uiElements.forEach((el, index) => { setTimeout(() => { el.classList.add('flicker-on'); }, index * 125); });
+            setTimeout(() => {
+                initTelemetry();
+                initBackgroundMatrix();
+                initInlineMDR();
+                calculateROI();
+                animateCounters();
+                initSkillNetwork();
+                init3DROI();
+            }, uiElements.length * 125 + 300);
+        };
 
-                    // --- Clock System ---
-                    function updateClock() { document.getElementById('sys-time').textContent = new Date().toLocaleTimeString('en-US', { hour12: false }); }
-                    setInterval(updateClock, 1000); updateClock();
+        // --- Clock System ---
+        function updateClock() { document.getElementById('sys-time').textContent = new Date().toLocaleTimeString('en-US', { hour12: false }); }
+        setInterval(updateClock, 1000); updateClock();
 
-                    // --- GLOBAL RICH DATA SOURCE ---
-                    const rolesData = [
-                        { title: "Help Desk", stack: "O365, Active Directory, Ticketing", exp: "Tier 1-3 Support", avail: "IMMEDIATE" },
-                        { title: "SysAdmin", stack: "Windows Server, VMware, PowerShell", exp: "5+ Years", avail: "HIGH" },
-                        { title: "NOC", stack: "Cisco, SolarWinds, Wireshark", exp: "24/7 Shift Ready", avail: "HIGH" },
-                        { title: "Linux", stack: "RHEL, Bash, Apache/Nginx", exp: "RHCE Certified", avail: "MODERATE" },
-                        { title: "Full Stack", stack: "React, Node.js, PostgreSQL", exp: "Mid-Senior Level", avail: "HIGH" },
-                        { title: "DevOps", stack: "CI/CD, Docker, Kubernetes", exp: "AWS/Azure Cert", avail: "MODERATE" },
-                        { title: "Cloud", stack: "AWS, Azure, Terraform", exp: "Solutions Architect", avail: "LOW" },
-                        { title: "Cybersecurity", stack: "SIEM, IDS/IPS, Zero Trust", exp: "CISSP Certified", avail: "HIGH" },
-                        { title: "UI/UX", stack: "Figma, Adobe XD, Wireframing", exp: "Portfolio Vetted", avail: "HIGH" },
-                        { title: "Pen Tester", stack: "Kali, Metasploit, Burp Suite", exp: "OSCP Certified", avail: "MODERATE" },
-                        { title: "GRC", stack: "ISO 27001, SOC 2, HIPAA", exp: "Compliance Expert", avail: "HIGH" },
-                        { title: "Project Mgr", stack: "Agile, Scrum, Jira", exp: "PMP Certified", avail: "HIGH" },
-                        { title: "AI/ML", stack: "Python, TensorFlow, PyTorch", exp: "Ph.D / Masters", avail: "LOW" },
-                        { title: "Tech Writer", stack: "API Docs, Confluence, Markdown", exp: "B2B/B2C Exp", avail: "HIGH" },
-                        { title: "DB Architect", stack: "SQL, NoSQL, Oracle", exp: "High Availability", avail: "MODERATE" },
-                        { title: "Mobile Dev", stack: "Swift, Kotlin, Flutter", exp: "App Store Vetted", avail: "HIGH" },
-                        { title: "Embedded", stack: "C, C++, RTOS", exp: "IoT Specialists", avail: "LOW" },
-                        { title: "Vuln Researcher", stack: "Reverse Engineering, Fuzzing", exp: "CVE Publishers", avail: "MODERATE" },
-                        { title: "Forensics", stack: "EnCase, FTK, Autopsy", exp: "Incident Response", avail: "HIGH" },
-                        { title: "Social Media", stack: "Hootsuite, Sprout, Analytics", exp: "B2B Tech Focus", avail: "HIGH" },
-                        { title: "Marketing", stack: "HubSpot, SEO/SEM, Marketo", exp: "Growth Hackers", avail: "HIGH" },
-                        { title: "Exec Asst", stack: "Calendar, Travel, Comms", exp: "C-Level Support", avail: "IMMEDIATE" },
-                        { title: "Procurement", stack: "Vendor Mgmt, SAP, ERP", exp: "Cost Optimization", avail: "HIGH" },
-                        { title: "Sales Ops", stack: "Salesforce, CRM Data, Forecasting", exp: "Revenue Focus", avail: "HIGH" },
-                        { title: "Finance", stack: "QuickBooks, Modeling, FinOps", exp: "Tech Sector Exp", avail: "HIGH" }
-                    ];
+        // --- GLOBAL RICH DATA SOURCE ---
+        const rolesData = [
+            { title: "Help Desk", stack: "O365, Active Directory, Ticketing", exp: "Tier 1-3 Support", avail: "IMMEDIATE" },
+            { title: "SysAdmin", stack: "Windows Server, VMware, PowerShell", exp: "5+ Years", avail: "HIGH" },
+            { title: "NOC", stack: "Cisco, SolarWinds, Wireshark", exp: "24/7 Shift Ready", avail: "HIGH" },
+            { title: "Linux", stack: "RHEL, Bash, Apache/Nginx", exp: "RHCE Certified", avail: "MODERATE" },
+            { title: "Full Stack", stack: "React, Node.js, PostgreSQL", exp: "Mid-Senior Level", avail: "HIGH" },
+            { title: "DevOps", stack: "CI/CD, Docker, Kubernetes", exp: "AWS/Azure Cert", avail: "MODERATE" },
+            { title: "Cloud", stack: "AWS, Azure, Terraform", exp: "Solutions Architect", avail: "LOW" },
+            { title: "Cybersecurity", stack: "SIEM, IDS/IPS, Zero Trust", exp: "CISSP Certified", avail: "HIGH" },
+            { title: "UI/UX", stack: "Figma, Adobe XD, Wireframing", exp: "Portfolio Vetted", avail: "HIGH" },
+            { title: "Pen Tester", stack: "Kali, Metasploit, Burp Suite", exp: "OSCP Certified", avail: "MODERATE" },
+            { title: "GRC", stack: "ISO 27001, SOC 2, HIPAA", exp: "Compliance Expert", avail: "HIGH" },
+            { title: "Project Mgr", stack: "Agile, Scrum, Jira", exp: "PMP Certified", avail: "HIGH" },
+            { title: "AI/ML", stack: "Python, TensorFlow, PyTorch", exp: "Ph.D / Masters", avail: "LOW" },
+            { title: "Tech Writer", stack: "API Docs, Confluence, Markdown", exp: "B2B/B2C Exp", avail: "HIGH" },
+            { title: "DB Architect", stack: "SQL, NoSQL, Oracle", exp: "High Availability", avail: "MODERATE" },
+            { title: "Mobile Dev", stack: "Swift, Kotlin, Flutter", exp: "App Store Vetted", avail: "HIGH" },
+            { title: "Embedded", stack: "C, C++, RTOS", exp: "IoT Specialists", avail: "LOW" },
+            { title: "Vuln Researcher", stack: "Reverse Engineering, Fuzzing", exp: "CVE Publishers", avail: "MODERATE" },
+            { title: "Forensics", stack: "EnCase, FTK, Autopsy", exp: "Incident Response", avail: "HIGH" },
+            { title: "Social Media", stack: "Hootsuite, Sprout, Analytics", exp: "B2B Tech Focus", avail: "HIGH" },
+            { title: "Marketing", stack: "HubSpot, SEO/SEM, Marketo", exp: "Growth Hackers", avail: "HIGH" },
+            { title: "Exec Asst", stack: "Calendar, Travel, Comms", exp: "C-Level Support", avail: "IMMEDIATE" },
+            { title: "Procurement", stack: "Vendor Mgmt, SAP, ERP", exp: "Cost Optimization", avail: "HIGH" },
+            { title: "Sales Ops", stack: "Salesforce, CRM Data, Forecasting", exp: "Revenue Focus", avail: "HIGH" },
+            { title: "Finance", stack: "QuickBooks, Modeling, FinOps", exp: "Tech Sector Exp", avail: "HIGH" }
+        ];
 
-                    // --- INTERACTIVE DOSSIER SYSTEM (RADAR) ---
-                    function triggerRadarPing() {
-                        const radarContainer = document.getElementById('radar-container');
-                        if (!radarContainer) return;
-                        const ping = document.createElement('div');
-                        ping.className = 'radar-ping';
-                        ping.textContent = '[+]';
-                        ping.style.left = (Math.random() * 80 + 10) + '%';
-                        ping.style.top = (Math.random() * 80 + 10) + '%';
+        // --- INTERACTIVE DOSSIER SYSTEM (RADAR) ---
+        function triggerRadarPing() {
+            const radarContainer = document.getElementById('radar-container');
+            if (!radarContainer) return;
+            const ping = document.createElement('div');
+            ping.className = 'radar-ping';
+            ping.textContent = '[+]';
+            ping.style.left = (Math.random() * 80 + 10) + '%';
+            ping.style.top = (Math.random() * 80 + 10) + '%';
 
-                        ping.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            showCentralDossier();
-                        });
+            ping.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showCentralDossier();
+            });
 
-                        radarContainer.appendChild(ping);
-                        setTimeout(() => ping.remove(), 4000);
-                    }
+            radarContainer.appendChild(ping);
+            setTimeout(() => ping.remove(), 4000);
+        }
 
-                    function showCentralDossier() {
-                        const dossier = document.getElementById('central-dossier');
-                        if (!dossier) return;
+        function showCentralDossier() {
+            const dossier = document.getElementById('central-dossier');
+            if (!dossier) return;
 
-                        const rIndex = Math.floor(Math.random() * rolesData.length);
-                        const role = rolesData[rIndex];
+            const rIndex = Math.floor(Math.random() * rolesData.length);
+            const role = rolesData[rIndex];
 
-                        dossier.innerHTML = `
+            dossier.innerHTML = `
                 <div style="color: var(--ibex-amber); font-weight: bold; margin-bottom: 8px;">[ DATA INTERCEPTED ]</div>
                 <div style="margin-bottom: 4px;"><strong>ROLE:</strong> ${role.title}</div>
                 <div style="margin-bottom: 4px;"><strong>STACK:</strong> ${role.stack}</div>
@@ -1927,503 +2630,984 @@
                 <div style="color: var(--ibex-green);">STATUS: Vetted & Ready</div>
             `;
 
-                        dossier.style.display = 'block';
-                        printToCLI(`> DOSSIER ACCESSED: ${role.title} telemetry intercepted.`, 'system');
+            dossier.style.display = 'block';
+            printToCLI(`> DOSSIER ACCESSED: ${role.title} telemetry intercepted.`, 'system');
+        }
+
+        // --- Telemetry Stream Logic ---
+        const telemetryOutput = document.getElementById('telemetry-output');
+        const sectors = ['TECH', 'EXEC', 'FINANCE', 'OPS', 'MEDICAL', 'LEGAL'];
+        const statuses = [
+            { text: "MATCH CONFIRMED", class: "t-pass" },
+            { text: "SKILLS VERIFIED", class: "t-pass" },
+            { text: "REQUIREMENTS NOT MET", class: "t-fail" },
+            { text: "PENDING REVIEW", class: "t-sector" }
+        ];
+
+        function initTelemetry() {
+            setInterval(() => {
+                const id = Math.floor(Math.random() * 8999 + 1000);
+                const sector = sectors[Math.floor(Math.random() * sectors.length)];
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+
+                const line = document.createElement('div');
+                line.className = 'telemetry-line';
+                line.innerHTML = `> PROFILE <span class="t-id">#${id}</span> - STATUS: <span class="${status.class}">${status.text}</span> - DEPT: <span class="t-sector">[${sector}]</span>`;
+
+                if (telemetryOutput) {
+                    telemetryOutput.appendChild(line);
+                    if (telemetryOutput.children.length > 6) telemetryOutput.removeChild(telemetryOutput.firstChild);
+                }
+
+                if (status.class === "t-pass") {
+                    triggerRadarPing();
+                }
+            }, 2500);
+        }
+
+        // --- Metrics Count-Up Animation ---
+        function animateCounters() {
+            const counters = document.querySelectorAll('.count-up');
+            const duration = 2000;
+
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const startTime = performance.now();
+                counter.innerText = '0';
+
+                function updateCounter(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    const currentVal = Math.floor(easeOut * target);
+
+                    counter.innerText = currentVal;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.innerText = target;
                     }
+                }
+                requestAnimationFrame(updateCounter);
+            });
+        }
 
-                    // --- Telemetry Stream Logic ---
-                    const telemetryOutput = document.getElementById('telemetry-output');
-                    const sectors = ['TECH', 'EXEC', 'FINANCE', 'OPS', 'MEDICAL', 'LEGAL'];
-                    const statuses = [
-                        { text: "MATCH CONFIRMED", class: "t-pass" },
-                        { text: "SKILLS VERIFIED", class: "t-pass" },
-                        { text: "REQUIREMENTS NOT MET", class: "t-fail" },
-                        { text: "PENDING REVIEW", class: "t-sector" }
-                    ];
+        // --- SKILL CONSTELLATION NETWORK GRAPH ---
+        const canvas = document.getElementById('skills-canvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        let cWidth, cHeight;
+        let skillNodes = [];
 
-                    function initTelemetry() {
-                        setInterval(() => {
-                            const id = Math.floor(Math.random() * 8999 + 1000);
-                            const sector = sectors[Math.floor(Math.random() * sectors.length)];
-                            const status = statuses[Math.floor(Math.random() * statuses.length)];
+        function resizeCanvas() {
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            cWidth = container.clientWidth;
+            cHeight = 450;
+            canvas.width = cWidth;
+            canvas.height = cHeight;
+        }
 
-                            const line = document.createElement('div');
-                            line.className = 'telemetry-line';
-                            line.innerHTML = `> PROFILE <span class="t-id">#${id}</span> - STATUS: <span class="${status.class}">${status.text}</span> - DEPT: <span class="t-sector">[${sector}]</span>`;
+        class SkillNode {
+            constructor(data) {
+                this.data = data;
+                this.text = data.title;
+                this.x = Math.random() * (cWidth || 800);
+                this.y = Math.random() * (cHeight || 450);
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = 4;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > cWidth) this.vx *= -1;
+                if (this.y < 0 || this.y > cHeight) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffaa00';
+                ctx.fill();
 
-                            if (telemetryOutput) {
-                                telemetryOutput.appendChild(line);
-                                if (telemetryOutput.children.length > 6) telemetryOutput.removeChild(telemetryOutput.firstChild);
-                            }
+                ctx.fillStyle = '#ffe6cc';
+                ctx.font = '16px "Share Tech Mono"';
+                ctx.fillText(this.text, this.x + 10, this.y + 5);
+            }
+        }
 
-                            if (status.class === "t-pass") {
-                                triggerRadarPing();
-                            }
-                        }, 2500);
+        function initSkillNetwork() {
+            if (!canvas) return;
+            resizeCanvas();
+            skillNodes = rolesData.map(r => new SkillNode(r));
+            animateNetwork();
+        }
+
+        let mouseCanvas = { x: -1000, y: -1000 };
+        if (canvas) {
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouseCanvas.x = e.clientX - rect.left;
+                mouseCanvas.y = e.clientY - rect.top;
+            });
+            canvas.addEventListener('mouseleave', () => { mouseCanvas.x = -1000; mouseCanvas.y = -1000; });
+        }
+
+        function animateNetwork() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, cWidth, cHeight);
+            let hoveredNode = null;
+
+            skillNodes.forEach((n, i) => {
+                n.update();
+                const mdx = n.x - mouseCanvas.x;
+                const mdy = n.y - mouseCanvas.y;
+                const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+
+                if (mDist < 25) hoveredNode = n;
+
+                if (mDist < 150) {
+                    ctx.beginPath();
+                    ctx.moveTo(n.x, n.y);
+                    ctx.lineTo(mouseCanvas.x, mouseCanvas.y);
+                    ctx.strokeStyle = `rgba(51, 255, 102, ${1 - mDist / 150})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                for (let j = i + 1; j < skillNodes.length; j++) {
+                    const dx = n.x - skillNodes[j].x;
+                    const dy = n.y - skillNodes[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 140) {
+                        ctx.beginPath();
+                        ctx.moveTo(n.x, n.y);
+                        ctx.lineTo(skillNodes[j].x, skillNodes[j].y);
+                        ctx.strokeStyle = `rgba(255, 170, 0, ${0.8 - dist / 140})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
                     }
+                }
+            });
 
-                    // --- Metrics Count-Up Animation ---
-                    function animateCounters() {
-                        const counters = document.querySelectorAll('.count-up');
-                        const duration = 2000;
+            skillNodes.forEach(n => n.draw());
 
-                        counters.forEach(counter => {
-                            const target = parseInt(counter.getAttribute('data-target'));
-                            const startTime = performance.now();
-                            counter.innerText = '0';
+            if (hoveredNode) {
+                const boxWidth = 320;
+                const boxHeight = 100;
+                let bX = hoveredNode.x + 15;
+                if (bX + boxWidth > cWidth) bX = hoveredNode.x - boxWidth - 15;
+                let bY = hoveredNode.y - boxHeight / 2;
+                if (bY < 0) bY = 10;
+                if (bY + boxHeight > cHeight) bY = cHeight - boxHeight - 10;
 
-                            function updateCounter(currentTime) {
-                                const elapsedTime = currentTime - startTime;
-                                const progress = Math.min(elapsedTime / duration, 1);
-                                const easeOut = 1 - Math.pow(1 - progress, 3);
-                                const currentVal = Math.floor(easeOut * target);
+                ctx.fillStyle = 'rgba(10, 10, 25, 0.95)';
+                ctx.strokeStyle = '#33ff66';
+                ctx.lineWidth = 1;
+                ctx.fillRect(bX, bY, boxWidth, boxHeight);
+                ctx.strokeRect(bX, bY, boxWidth, boxHeight);
 
-                                counter.innerText = currentVal;
+                ctx.fillStyle = '#ffcc00';
+                ctx.font = 'bold 14px "Share Tech Mono"';
+                ctx.fillText(`[ ROLE: ${hoveredNode.data.title.toUpperCase()} ]`, bX + 15, bY + 25);
+                ctx.fillStyle = '#ffe6cc';
+                ctx.font = '13px "Share Tech Mono"';
+                ctx.fillText(`STACK: ${hoveredNode.data.stack}`, bX + 15, bY + 50);
+                ctx.fillText(`EXP  : ${hoveredNode.data.exp}`, bX + 15, bY + 70);
+                ctx.fillStyle = '#33ff66';
+                ctx.fillText(`AVAIL: ${hoveredNode.data.avail}`, bX + 15, bY + 90);
+            }
+            requestAnimationFrame(animateNetwork);
+        }
 
-                                if (progress < 1) {
-                                    requestAnimationFrame(updateCounter);
-                                } else {
-                                    counter.innerText = target;
-                                }
-                            }
-                            requestAnimationFrame(updateCounter);
-                        });
-                    }
+        // --- Toggle Constellation / Grid View ---
+        const toggleMeshBtn = document.getElementById('toggle-mesh-btn');
+        if (toggleMeshBtn) {
+            toggleMeshBtn.addEventListener('click', () => {
+                const meshView = document.getElementById('mesh-view');
+                const gridView = document.getElementById('grid-view');
+                if (meshView.style.display === 'none') {
+                    meshView.style.display = 'block';
+                    gridView.style.display = 'none';
+                    toggleMeshBtn.textContent = '[ Toggle Plain Text ]';
+                    resizeCanvas();
+                } else {
+                    meshView.style.display = 'none';
+                    gridView.style.display = 'block';
+                    toggleMeshBtn.textContent = '[ Toggle Constellation ]';
+                }
+            });
+        }
 
-                    // --- SKILL CONSTELLATION NETWORK GRAPH ---
-                    const canvas = document.getElementById('skills-canvas');
-                    const ctx = canvas ? canvas.getContext('2d') : null;
-                    let cWidth, cHeight;
-                    let skillNodes = [];
+        // --- ROI Calculator Logic ---
+        const roiFtes = document.getElementById('roi-ftes');
+        const roiBudget = document.getElementById('roi-budget');
 
-                    function resizeCanvas() {
-                        if (!canvas) return;
-                        const container = canvas.parentElement;
-                        cWidth = container.clientWidth;
-                        cHeight = 450;
-                        canvas.width = cWidth;
-                        canvas.height = cHeight;
-                    }
+        function calculateROI() {
+            if (!roiFtes || !roiBudget) return;
+            const ftes = parseInt(roiFtes.value) || 0;
+            const budget = parseInt(roiBudget.value) || 0;
 
-                    class SkillNode {
-                        constructor(data) {
-                            this.data = data;
-                            this.text = data.title;
-                            this.x = Math.random() * (cWidth || 800);
-                            this.y = Math.random() * (cHeight || 450);
-                            this.vx = (Math.random() - 0.5) * 0.5;
-                            this.vy = (Math.random() - 0.5) * 0.5;
-                            this.radius = 4;
+            const savingsRate = 0.50;
+            const budgetPerFteSaved = budget * savingsRate;
+            const totalSavings = budgetPerFteSaved * ftes;
+            const ibexRate = budget * (1 - savingsRate);
+            const additionalHires = ibexRate > 0 ? Math.floor(totalSavings / ibexRate) : 0;
+            const extraHours = additionalHires * 174;
+
+            document.getElementById('res-savings').textContent = '$' + totalSavings.toLocaleString();
+            document.getElementById('res-per-fte').textContent = '$' + budgetPerFteSaved.toLocaleString();
+            document.getElementById('res-hires').textContent = additionalHires.toLocaleString();
+            document.getElementById('res-hours').textContent = extraHours.toLocaleString();
+
+        }
+
+        if (roiFtes && roiBudget) {
+            roiFtes.addEventListener('input', calculateROI);
+            roiBudget.addEventListener('input', calculateROI);
+        }
+
+        // --- GUI Navigation Logic ---
+        const navBtns = document.querySelectorAll('.nav-btn[data-target]');
+        const pages = document.querySelectorAll('.page');
+        const cliOutput = document.getElementById('cli-output');
+
+        function navigateTo(targetId, fromCli = false) {
+            const targetPage = document.getElementById(targetId);
+            const targetBtn = document.querySelector(`.nav-btn[data-target="${targetId}"]`);
+            if (!targetPage) return false;
+            navBtns.forEach(btn => btn.setAttribute('aria-selected', 'false'));
+            pages.forEach(p => p.classList.remove('active'));
+            if (targetBtn) targetBtn.setAttribute('aria-selected', 'true');
+            targetPage.classList.add('active');
+            if (!fromCli) printToCLI(`> GUI Navigating to module: ${targetId}`, 'system');
+
+            if (window.innerWidth <= 900) document.getElementById('viewport').scrollTop = 0;
+            if (targetId === 'home') animateCounters();
+            if (targetId === 'talent') setTimeout(resizeCanvas, 50);
+            return true;
+        }
+        navBtns.forEach(btn => btn.addEventListener('click', () => navigateTo(btn.getAttribute('data-target'))));
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- CLI System Logic ---
+        const cliInput = document.getElementById('cli-input');
+        const validPaths = ['home', 'about', 'talent', 'customer-care', 'blog', 'roi'];
+
+        function printToCLI(text, type = 'normal') {
+            const line = document.createElement('div');
+            line.className = `cli-line ${type}`; line.textContent = text;
+            cliOutput.appendChild(line);
+            setTimeout(() => { cliOutput.scrollTop = cliOutput.scrollHeight; }, 10);
+        }
+
+        printToCLI("IBEX Terminal v3.1 initialized. Type 'help' for available commands.", "system");
+
+        cliInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                const commandFull = this.value.trim().toLowerCase();
+                this.value = '';
+                if (commandFull === '') return;
+
+                printToCLI(`${document.getElementById('cli-prompt-text').textContent} ${commandFull}`, "system");
+                const parts = commandFull.split(' ');
+                const cmd = parts[0], arg = parts[1];
+
+                switch (cmd) {
+                    case 'help': printToCLI("COMMANDS: cd [module], ls, theme [name], clear, reboot", "normal"); break;
+                    case 'ls': printToCLI("MODULES: home/ about/ talent/ customer-care/ blog/ roi/", "success"); break;
+                    case 'cd':
+                        if (!arg) printToCLI("Error: Target module required.", "error");
+                        else if (validPaths.includes(arg)) { navigateTo(arg, true); printToCLI(`> Accessing ${arg}...`, "system"); }
+                        else printToCLI(`Error: Module '${arg}' not found.`, "error");
+                        break;
+                    case 'theme':
+                        if (arg === 'matrix') { document.body.setAttribute('data-theme', 'matrix'); printToCLI("> Theme updated: NEON MATRIX", "success"); }
+                        else if (arg === 'cyberpunk') { document.body.setAttribute('data-theme', 'cyberpunk'); printToCLI("> Theme updated: CYBERPUNK", "success"); }
+                        else if (arg === 'lumon') { document.body.setAttribute('data-theme', 'lumon'); printToCLI("> Theme updated: LUMON MACRODATA", "success"); }
+                        else if (arg === 'default') { document.body.removeAttribute('data-theme'); printToCLI("> Theme updated: DEFAULT", "success"); }
+                        else { printToCLI("Error: Unknown theme. Available: default, matrix, cyberpunk, lumon", "error"); }
+                        break;
+                    case 'clear': cliOutput.innerHTML = ''; break;
+                    case 'sudo':
+                    case 'admin': printToCLI("ADMINISTRATOR PRIVILEGES REQUIRED. PLEASE CONTACT IT SUPPORT.", "error"); break;
+                    case 'reboot':
+                        printToCLI("INITIATING SYSTEM REBOOT...", "system");
+                        document.body.classList.add('tv-off');
+                        setTimeout(() => location.reload(), 1000);
+                        break;
+                    default: printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
+                }
+            }
+        });
+
+        document.addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); } });
+
+        // --- NEW INLINE TEXT EXTRACTION GAME (SEAMLESS 1-STEP) ---
+        let wordsFound = 0;
+        const targetGoal = 20;
+        const fillBar = document.getElementById('mdr-fill');
+        const statusText = document.getElementById('mdr-status');
+        const ibexBin = document.getElementById('ibex-bin');
+        let attachedNodes = [];
+
+        let mouseX = 0; let mouseY = 0;
+        document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+
+        function renderTrailingNodes() {
+            if (attachedNodes.length > 0) {
+                attachedNodes.forEach((node, index) => {
+                    const x = mouseX + 15 + (index * 5);
+                    const y = mouseY + 15 + (index * 20);
+                    node.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+                });
+            }
+            requestAnimationFrame(renderTrailingNodes);
+        }
+        requestAnimationFrame(renderTrailingNodes);
+
+        // GLOBAL CLICK LISTENER: Handles dropping words AND hiding radar dossier
+        document.addEventListener('click', (e) => {
+            // 1. Drop words logic - if dropped OUTSIDE bin, shatter and source text resets
+            if (attachedNodes.length > 0 && !e.target.closest('#ibex-bin')) {
+                attachedNodes.forEach(node => {
+                    const sourceId = node.dataset.sourceId;
+                    if (sourceId) {
+                        const source = document.querySelector(`.catchable-word[data-id="${sourceId}"]`);
+                        if (source) {
+                            source.classList.remove('extracted');
                         }
-                        update() {
-                            this.x += this.vx;
-                            this.y += this.vy;
-                            if (this.x < 0 || this.x > cWidth) this.vx *= -1;
-                            if (this.y < 0 || this.y > cHeight) this.vy *= -1;
+                    }
+                    node.remove(); // destroy floating clone
+                });
+                attachedNodes = [];
+                if (ibexBin) ibexBin.classList.remove('blinking-hint');
+            }
+
+            // 2. Hide Radar Dossier logic
+            const dossier = document.getElementById('central-dossier');
+            if (dossier && dossier.style.display === 'block') {
+                if (!e.target.closest('#central-dossier') && !e.target.classList.contains('radar-ping')) {
+                    dossier.style.display = 'none';
+                }
+            }
+        });
+
+        function initInlineMDR() {
+            if (window.innerWidth <= 900) return; // Disable on mobile
+
+            const catchableWords = document.querySelectorAll('.catchable-word');
+
+            catchableWords.forEach((span, index) => {
+                span.dataset.id = index;
+
+                span.addEventListener('mouseenter', () => {
+                    if (span.classList.contains('extracted')) return;
+
+                    // --- CAPACITY CHECK (Max 3 Words) ---
+                    if (attachedNodes.length >= 3) {
+                        if (!span.dataset.warned) {
+                            //printToCLI("> SYSTEM WARNING: Maximum payload capacity (3/3). Deposit metrics into IBEX POOL.", "error");
+                            span.dataset.warned = "true";
+                            setTimeout(() => delete span.dataset.warned, 3000); // Prevent console spam
                         }
-                        draw() {
-                            ctx.beginPath();
-                            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                            ctx.fillStyle = '#ffaa00';
-                            ctx.fill();
-
-                            ctx.fillStyle = '#ffe6cc';
-                            ctx.font = '16px "Share Tech Mono"';
-                            ctx.fillText(this.text, this.x + 10, this.y + 5);
-                        }
+                        return;
                     }
+                    // ------------------------------------
 
-                    function initSkillNetwork() {
-                        if (!canvas) return;
-                        resizeCanvas();
-                        skillNodes = rolesData.map(r => new SkillNode(r));
-                        animateNetwork();
-                    }
+                    // Extract seamlessly on FIRST hover
+                    span.classList.add('extracted');
 
-                    let mouseCanvas = { x: -1000, y: -1000 };
-                    if (canvas) {
-                        canvas.addEventListener('mousemove', (e) => {
-                            const rect = canvas.getBoundingClientRect();
-                            mouseCanvas.x = e.clientX - rect.left;
-                            mouseCanvas.y = e.clientY - rect.top;
-                        });
-                        canvas.addEventListener('mouseleave', () => { mouseCanvas.x = -1000; mouseCanvas.y = -1000; });
-                    }
+                    // Get precise physical location on screen
+                    const rect = span.getBoundingClientRect();
 
-                    function animateNetwork() {
-                        if (!ctx) return;
-                        ctx.clearRect(0, 0, cWidth, cHeight);
-                        let hoveredNode = null;
+                    // Create clone
+                    const clone = document.createElement('div');
+                    clone.className = 'data-node attached';
+                    clone.textContent = span.innerText.toUpperCase();
+                    clone.dataset.word = clone.textContent;
+                    clone.dataset.sourceId = span.dataset.id;
 
-                        skillNodes.forEach((n, i) => {
-                            n.update();
-                            const mdx = n.x - mouseCanvas.x;
-                            const mdy = n.y - mouseCanvas.y;
-                            const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
+                    // Place clone EXACTLY over original word with no transition
+                    clone.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
+                    clone.style.transition = 'none';
 
-                            if (mDist < 25) hoveredNode = n;
+                    document.body.appendChild(clone);
 
-                            if (mDist < 150) {
-                                ctx.beginPath();
-                                ctx.moveTo(n.x, n.y);
-                                ctx.lineTo(mouseCanvas.x, mouseCanvas.y);
-                                ctx.strokeStyle = `rgba(51, 255, 102, ${1 - mDist / 150})`;
-                                ctx.lineWidth = 2;
-                                ctx.stroke();
-                            }
+                    // Force browser reflow to register the physical starting coordinate
+                    requestAnimationFrame(() => {
+                        // Enable fast, seamless fly-to-cursor animation
+                        clone.style.transition = 'transform 0.1s ease-out';
+                        attachedNodes.push(clone);
+                        if (ibexBin) ibexBin.classList.add('blinking-hint');
+                        //printToCLI(`> SYSTEM: Target metric '${span.innerText}' extracted.`, 'system');
+                    });
+                });
+            });
+        }
 
-                            for (let j = i + 1; j < skillNodes.length; j++) {
-                                const dx = n.x - skillNodes[j].x;
-                                const dy = n.y - skillNodes[j].y;
-                                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                                if (dist < 140) {
-                                    ctx.beginPath();
-                                    ctx.moveTo(n.x, n.y);
-                                    ctx.lineTo(skillNodes[j].x, skillNodes[j].y);
-                                    ctx.strokeStyle = `rgba(255, 170, 0, ${0.8 - dist / 140})`;
-                                    ctx.lineWidth = 1;
-                                    ctx.stroke();
-                                }
-                            }
-                        });
-
-                        skillNodes.forEach(n => n.draw());
-
-                        if (hoveredNode) {
-                            const boxWidth = 320;
-                            const boxHeight = 100;
-                            let bX = hoveredNode.x + 15;
-                            if (bX + boxWidth > cWidth) bX = hoveredNode.x - boxWidth - 15;
-                            let bY = hoveredNode.y - boxHeight / 2;
-                            if (bY < 0) bY = 10;
-                            if (bY + boxHeight > cHeight) bY = cHeight - boxHeight - 10;
-
-                            ctx.fillStyle = 'rgba(10, 10, 25, 0.95)';
-                            ctx.strokeStyle = '#33ff66';
-                            ctx.lineWidth = 1;
-                            ctx.fillRect(bX, bY, boxWidth, boxHeight);
-                            ctx.strokeRect(bX, bY, boxWidth, boxHeight);
-
-                            ctx.fillStyle = '#ffcc00';
-                            ctx.font = 'bold 14px "Share Tech Mono"';
-                            ctx.fillText(`[ ROLE: ${hoveredNode.data.title.toUpperCase()} ]`, bX + 15, bY + 25);
-                            ctx.fillStyle = '#ffe6cc';
-                            ctx.font = '13px "Share Tech Mono"';
-                            ctx.fillText(`STACK: ${hoveredNode.data.stack}`, bX + 15, bY + 50);
-                            ctx.fillText(`EXP  : ${hoveredNode.data.exp}`, bX + 15, bY + 70);
-                            ctx.fillStyle = '#33ff66';
-                            ctx.fillText(`AVAIL: ${hoveredNode.data.avail}`, bX + 15, bY + 90);
-                        }
-                        requestAnimationFrame(animateNetwork);
-                    }
-
-                    // --- Toggle Constellation / Grid View ---
-                    const toggleMeshBtn = document.getElementById('toggle-mesh-btn');
-                    if (toggleMeshBtn) {
-                        toggleMeshBtn.addEventListener('click', () => {
-                            const meshView = document.getElementById('mesh-view');
-                            const gridView = document.getElementById('grid-view');
-                            if (meshView.style.display === 'none') {
-                                meshView.style.display = 'block';
-                                gridView.style.display = 'none';
-                                toggleMeshBtn.textContent = '[ Toggle Plain Text ]';
-                                resizeCanvas();
-                            } else {
-                                meshView.style.display = 'none';
-                                gridView.style.display = 'block';
-                                toggleMeshBtn.textContent = '[ Toggle Constellation ]';
-                            }
-                        });
-                    }
-
-                    // --- ROI Calculator Logic ---
-                    const roiFtes = document.getElementById('roi-ftes');
-                    const roiBudget = document.getElementById('roi-budget');
-
-                    function calculateROI() {
-                        if (!roiFtes || !roiBudget) return;
-                        const ftes = parseInt(roiFtes.value) || 0;
-                        const budget = parseInt(roiBudget.value) || 0;
-
-                        const savingsRate = 0.50;
-                        const budgetPerFteSaved = budget * savingsRate;
-                        const totalSavings = budgetPerFteSaved * ftes;
-                        const ibexRate = budget * (1 - savingsRate);
-                        const additionalHires = ibexRate > 0 ? Math.floor(totalSavings / ibexRate) : 0;
-                        const extraHours = additionalHires * 174;
-
-                        document.getElementById('res-savings').textContent = '$' + totalSavings.toLocaleString();
-                        document.getElementById('res-per-fte').textContent = '$' + budgetPerFteSaved.toLocaleString();
-                        document.getElementById('res-hires').textContent = additionalHires.toLocaleString();
-                        document.getElementById('res-hours').textContent = extraHours.toLocaleString();
-
-                    }
-
-                    if (roiFtes && roiBudget) {
-                        roiFtes.addEventListener('input', calculateROI);
-                        roiBudget.addEventListener('input', calculateROI);
-                    }
-
-                    // --- GUI Navigation Logic ---
-                    const navBtns = document.querySelectorAll('.nav-btn[data-target]');
-                    const pages = document.querySelectorAll('.page');
-                    const cliOutput = document.getElementById('cli-output');
-
-                    function navigateTo(targetId, fromCli = false) {
-                        const targetPage = document.getElementById(targetId);
-                        const targetBtn = document.querySelector(`.nav-btn[data-target="${targetId}"]`);
-                        if (!targetPage) return false;
-                        navBtns.forEach(btn => btn.setAttribute('aria-selected', 'false'));
-                        pages.forEach(p => p.classList.remove('active'));
-                        if (targetBtn) targetBtn.setAttribute('aria-selected', 'true');
-                        targetPage.classList.add('active');
-                        if (!fromCli) printToCLI(`> GUI Navigating to module: ${targetId}`, 'system');
-
-                        if (window.innerWidth <= 900) document.getElementById('viewport').scrollTop = 0;
-                        if (targetId === 'home') animateCounters();
-                        if (targetId === 'talent') setTimeout(resizeCanvas, 50);
-                        return true;
-                    }
-                    navBtns.forEach(btn => btn.addEventListener('click', () => navigateTo(btn.getAttribute('data-target'))));
-                    window.addEventListener('resize', resizeCanvas);
-
-                    // --- CLI System Logic ---
-                    const cliInput = document.getElementById('cli-input');
-                    const validPaths = ['home', 'about', 'talent', 'customer-care', 'blog', 'roi'];
-
-                    function printToCLI(text, type = 'normal') {
-                        const line = document.createElement('div');
-                        line.className = `cli-line ${type}`; line.textContent = text;
-                        cliOutput.appendChild(line);
-                        setTimeout(() => { cliOutput.scrollTop = cliOutput.scrollHeight; }, 10);
-                    }
-
-                    printToCLI("IBEX Terminal v3.1 initialized. Type 'help' for available commands.", "system");
-
-                    cliInput.addEventListener('keydown', function (e) {
-                        if (e.key === 'Enter') {
-                            const commandFull = this.value.trim().toLowerCase();
-                            this.value = '';
-                            if (commandFull === '') return;
-
-                            printToCLI(`${document.getElementById('cli-prompt-text').textContent} ${commandFull}`, "system");
-                            const parts = commandFull.split(' ');
-                            const cmd = parts[0], arg = parts[1];
-
-                            switch (cmd) {
-                                case 'help': printToCLI("COMMANDS: cd [module], ls, theme [name], clear, reboot", "normal"); break;
-                                case 'ls': printToCLI("MODULES: home/ about/ talent/ customer-care/ blog/ roi/", "success"); break;
-                                case 'cd':
-                                    if (!arg) printToCLI("Error: Target module required.", "error");
-                                    else if (validPaths.includes(arg)) { navigateTo(arg, true); printToCLI(`> Accessing ${arg}...`, "system"); }
-                                    else printToCLI(`Error: Module '${arg}' not found.`, "error");
-                                    break;
-                                case 'theme':
-                                    if (arg === 'matrix') { document.body.setAttribute('data-theme', 'matrix'); printToCLI("> Theme updated: NEON MATRIX", "success"); }
-                                    else if (arg === 'cyberpunk') { document.body.setAttribute('data-theme', 'cyberpunk'); printToCLI("> Theme updated: CYBERPUNK", "success"); }
-                                    else if (arg === 'lumon') { document.body.setAttribute('data-theme', 'lumon'); printToCLI("> Theme updated: LUMON MACRODATA", "success"); }
-                                    else if (arg === 'default') { document.body.removeAttribute('data-theme'); printToCLI("> Theme updated: DEFAULT", "success"); }
-                                    else { printToCLI("Error: Unknown theme. Available: default, matrix, cyberpunk, lumon", "error"); }
-                                    break;
-                                case 'clear': cliOutput.innerHTML = ''; break;
-                                case 'sudo':
-                                case 'admin': printToCLI("ADMINISTRATOR PRIVILEGES REQUIRED. PLEASE CONTACT IT SUPPORT.", "error"); break;
-                                case 'reboot':
-                                    printToCLI("INITIATING SYSTEM REBOOT...", "system");
-                                    document.body.classList.add('tv-off');
-                                    setTimeout(() => location.reload(), 1000);
-                                    break;
-                                default: printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
-                            }
-                        }
+        // Bin logic (Successful Drop)
+        if (ibexBin) {
+            ibexBin.addEventListener('mouseenter', () => {
+                if (attachedNodes.length > 0) {
+                    attachedNodes.forEach(node => {
+                        // Destroy clone visually. Source stays harvested.
+                        node.remove();
+                        wordsFound++;
                     });
 
-                    document.addEventListener('keydown', (e) => { if (e.key === '/' && document.activeElement !== cliInput) { e.preventDefault(); cliInput.focus(); } });
+                    attachedNodes = []; ibexBin.classList.remove('blinking-hint');
+                    updateMDRProgress();
 
-                    // --- NEW INLINE TEXT EXTRACTION GAME (SEAMLESS 1-STEP) ---
-                    let wordsFound = 0;
-                    const targetGoal = 20;
-                    const fillBar = document.getElementById('mdr-fill');
-                    const statusText = document.getElementById('mdr-status');
-                    const ibexBin = document.getElementById('ibex-bin');
-                    let attachedNodes = [];
+                    ibexBin.classList.add('drag-over');
+                    setTimeout(() => ibexBin.classList.remove('drag-over'), 300);
+                }
+            });
+        }
 
-                    let mouseX = 0; let mouseY = 0;
-                    document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+        function updateMDRProgress() {
+            if (!fillBar || !statusText || !ibexBin) return;
 
-                    function renderTrailingNodes() {
-                        if (attachedNodes.length > 0) {
-                            attachedNodes.forEach((node, index) => {
-                                const x = mouseX + 15 + (index * 5);
-                                const y = mouseY + 15 + (index * 20);
-                                node.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                            });
-                        }
-                        requestAnimationFrame(renderTrailingNodes);
+            let percentage = (wordsFound / targetGoal) * 100;
+            if (percentage >= 100) percentage = 100;
+
+            fillBar.style.width = `${percentage}%`;
+
+            if (percentage < 100) {
+                statusText.textContent = `${Math.round(percentage)}%`;
+            } else {
+                statusText.textContent = `100%`;
+                if (wordsFound === targetGoal || (wordsFound > targetGoal && wordsFound - attachedNodes.length < targetGoal)) {
+                    printToCLI("> SYSTEM: Background metrics optimized. Continuous extraction active.", "success");
+                }
+            }
+        }
+
+        function initBackgroundMatrix() {
+            if (window.innerWidth <= 900) return; // Disable on mobile
+
+            const bgMatrix = document.getElementById('bg-matrix');
+            if (!bgMatrix) return;
+            bgMatrix.innerHTML = '';
+
+            const ambientWords = [
+                "TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING",
+                "LEADERSHIP", "INNOVATION", "CULTURE", "SCALABILITY", "EXPERTISE", "AGILITY", "RELIABILITY",
+                "TURNOVER", "STAGNATION", "ATTRITION", "MISMATCH", "GAPS", "UNRELIABLE", "CONFLICT",
+                "DELAYS", "BURNOUT", "OVERHEAD", "FRICTION", "SILOS", "DOWNTIME", "RISK", "RIGIDITY"
+            ];
+
+            let allNodes = [];
+            for (let i = 0; i < 800; i++) {
+                allNodes.push({ word: ambientWords[Math.floor(Math.random() * ambientWords.length)] });
+            }
+
+            const numColumns = 24;
+            const numRows = Math.ceil(allNodes.length / numColumns);
+            const fragment = document.createDocumentFragment();
+
+            /*
+            allNodes.forEach((item, index) => {
+                const node = document.createElement('div');
+                node.className = 'data-node';
+                node.textContent = item.word;
+
+                const colIndex = index % numColumns;
+                const rowIndex = Math.floor(index / numColumns);
+
+                node.style.left = (colIndex * (100 / numColumns)) + 0.5 + '%';
+                node.style.top = (rowIndex * (100 / numRows)) + 1 + '%';
+
+                fragment.appendChild(node);
+            });
+
+            bgMatrix.appendChild(fragment);
+            */
+        }
+
+        function init3DROI() {
+            // --- Holo Panel Toggles ---
+            const toggleBtn = document.getElementById('toggle-ui-btn');
+            const holoPanel = document.getElementById('holo-panel');
+            if (toggleBtn && holoPanel) {
+                toggleBtn.addEventListener('click', () => {
+                    holoPanel.classList.toggle('visible');
+                });
+            }
+
+            const sliderOptions = document.querySelectorAll('.slider-option');
+            const sliderIndicator = document.getElementById('slider-indicator');
+            let selectedLandscape = 'medium';
+
+            function selectLandscape(value) {
+                if (selectedLandscape === value) return;
+                selectedLandscape = value;
+                sliderOptions.forEach(opt => opt.classList.toggle('active', opt.dataset.value === value));
+                const positions = { small: '2px', medium: 'calc(33.333% + 2px)', large: 'calc(66.667% + 2px)' };
+                if (sliderIndicator) sliderIndicator.style.left = positions[value];
+                if (value === 'small') window.targetMountainScaleY = 0.4;
+                if (value === 'medium') window.targetMountainScaleY = 1.0;
+                if (value === 'large') window.targetMountainScaleY = 1.6;
+                startFadeOut();
+            }
+            sliderOptions.forEach(opt => opt.addEventListener('click', () => selectLandscape(opt.dataset.value)));
+
+            // --- ROI Glitch Logic & Formats ---
+            const fteInput = document.getElementById('fte-input');
+            const budgetInput = document.getElementById('budget-input');
+            const roiPanelH = document.getElementById('roi-panel-h');
+            const roiSavings = document.getElementById('roi-savings');
+            const roiHires = document.getElementById('roi-hires');
+            const roiHours = document.getElementById('roi-hours');
+            let roiVisible = false;
+
+            function formatCurrency(n) {
+                if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+                if (n >= 1000) return '$' + (n / 1000).toFixed(1) + 'K';
+                return '$' + n.toFixed(0);
+            }
+            function formatCompact(n) {
+                if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+                if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+                return n.toLocaleString('en-US');
+            }
+            function parseBudget(str) { return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0; }
+            function formatBudgetDisplay(val) { return Math.min(Math.max(0, Math.round(val)), 300000).toLocaleString('en-US'); }
+
+            const glitchTimers = new Map();
+            function glitchTo(el, finalText) {
+                if (!el) return;
+                if (glitchTimers.has(el)) { clearInterval(glitchTimers.get(el).iv); clearTimeout(glitchTimers.get(el).to); }
+                if (el.textContent === finalText) return;
+                el.classList.remove('glitch-settle'); el.classList.add('glitching');
+                const chars = finalText.split(''); const steps = 12; let step = 0;
+                const iv = setInterval(() => {
+                    step++; const locked = Math.floor((step / steps) * chars.length); let scrambled = '';
+                    for (let i = 0; i < chars.length; i++) {
+                        if (i < locked) scrambled += chars[i];
+                        else if (/[0-9]/.test(chars[i])) scrambled += Math.floor(Math.random() * 10);
+                        else scrambled += chars[i];
                     }
-                    requestAnimationFrame(renderTrailingNodes);
-
-                    // GLOBAL CLICK LISTENER: Handles dropping words AND hiding radar dossier
-                    document.addEventListener('click', (e) => {
-                        // 1. Drop words logic - if dropped OUTSIDE bin, shatter and source text resets
-                        if (attachedNodes.length > 0 && !e.target.closest('#ibex-bin')) {
-                            attachedNodes.forEach(node => {
-                                const sourceId = node.dataset.sourceId;
-                                if (sourceId) {
-                                    const source = document.querySelector(`.catchable-word[data-id="${sourceId}"]`);
-                                    if (source) {
-                                        source.classList.remove('extracted');
-                                    }
-                                }
-                                node.remove(); // destroy floating clone
-                            });
-                            attachedNodes = [];
-                            if (ibexBin) ibexBin.classList.remove('blinking-hint');
-                        }
-
-                        // 2. Hide Radar Dossier logic
-                        const dossier = document.getElementById('central-dossier');
-                        if (dossier && dossier.style.display === 'block') {
-                            if (!e.target.closest('#central-dossier') && !e.target.classList.contains('radar-ping')) {
-                                dossier.style.display = 'none';
-                            }
-                        }
-                    });
-
-                    function initInlineMDR() {
-                        if (window.innerWidth <= 900) return; // Disable on mobile
-
-                        const catchableWords = document.querySelectorAll('.catchable-word');
-
-                        catchableWords.forEach((span, index) => {
-                            span.dataset.id = index;
-
-                            span.addEventListener('mouseenter', () => {
-                                if (span.classList.contains('extracted')) return;
-
-                                // --- CAPACITY CHECK (Max 3 Words) ---
-                                if (attachedNodes.length >= 3) {
-                                    if (!span.dataset.warned) {
-                                        //printToCLI("> SYSTEM WARNING: Maximum payload capacity (3/3). Deposit metrics into IBEX POOL.", "error");
-                                        span.dataset.warned = "true";
-                                        setTimeout(() => delete span.dataset.warned, 3000); // Prevent console spam
-                                    }
-                                    return;
-                                }
-                                // ------------------------------------
-
-                                // Extract seamlessly on FIRST hover
-                                span.classList.add('extracted');
-
-                                // Get precise physical location on screen
-                                const rect = span.getBoundingClientRect();
-
-                                // Create clone
-                                const clone = document.createElement('div');
-                                clone.className = 'data-node attached';
-                                clone.textContent = span.innerText.toUpperCase();
-                                clone.dataset.word = clone.textContent;
-                                clone.dataset.sourceId = span.dataset.id;
-
-                                // Place clone EXACTLY over original word with no transition
-                                clone.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
-                                clone.style.transition = 'none';
-
-                                document.body.appendChild(clone);
-
-                                // Force browser reflow to register the physical starting coordinate
-                                requestAnimationFrame(() => {
-                                    // Enable fast, seamless fly-to-cursor animation
-                                    clone.style.transition = 'transform 0.1s ease-out';
-                                    attachedNodes.push(clone);
-                                    if (ibexBin) ibexBin.classList.add('blinking-hint');
-                                    //printToCLI(`> SYSTEM: Target metric '${span.innerText}' extracted.`, 'system');
-                                });
-                            });
-                        });
+                    el.textContent = scrambled;
+                    if (step >= steps) {
+                        clearInterval(iv); el.textContent = finalText; el.classList.remove('glitching'); el.classList.add('glitch-settle'); glitchTimers.delete(el);
                     }
+                }, 52);
+                glitchTimers.set(el, { iv, to: setTimeout(() => { }, 0) });
+            }
 
-                    // Bin logic (Successful Drop)
-                    if (ibexBin) {
-                        ibexBin.addEventListener('mouseenter', () => {
-                            if (attachedNodes.length > 0) {
-                                attachedNodes.forEach(node => {
-                                    // Destroy clone visually. Source stays harvested.
-                                    node.remove();
-                                    wordsFound++;
-                                });
+            function updateHoloROI() {
+                if (!fteInput || !budgetInput) return;
+                const fte = Math.max(0, parseInt(fteInput.value, 10) || 0);
+                const budget = Math.min(Math.max(0, parseBudget(budgetInput.value)), 300000);
 
-                                attachedNodes = []; ibexBin.classList.remove('blinking-hint');
-                                updateMDRProgress();
+                if (fte > 0 && budget > 0) {
+                    const savingsPerFTE = budget * 0.70; const totalSavings = savingsPerFTE * fte;
+                    const additionalHires = budget > 0 ? Math.floor(totalSavings / budget) : 0;
+                    const additionalHours = additionalHires * 174;
+                    window.fteTarget = additionalHires;
+                    glitchTo(roiSavings, formatCurrency(totalSavings));
+                    glitchTo(roiHires, formatCompact(additionalHires) + '+');
+                    glitchTo(roiHours, formatCompact(additionalHours) + '+');
+                    if (!roiVisible && roiPanelH) { roiVisible = true; roiPanelH.classList.add('visible'); }
+                } else {
+                    window.fteTarget = 0;
+                    if (roiVisible && roiPanelH) { roiVisible = false; roiPanelH.classList.remove('visible'); }
+                }
+            }
 
-                                ibexBin.classList.add('drag-over');
-                                setTimeout(() => ibexBin.classList.remove('drag-over'), 300);
-                            }
-                        });
-                    }
+            if (fteInput) {
+                fteInput.addEventListener('input', updateHoloROI);
+                fteInput.addEventListener('blur', () => { let val = parseInt(fteInput.value, 10); fteInput.value = (isNaN(val) || val < 0) ? 0 : val; updateHoloROI(); });
+                budgetInput.addEventListener('input', () => { let raw = Math.min(parseBudget(budgetInput.value), 300000); budgetInput.value = formatBudgetDisplay(raw); updateHoloROI(); });
+            }
 
-                    function updateMDRProgress() {
-                        if (!fillBar || !statusText || !ibexBin) return;
+            // --- Theme Parsing Helper ---
+            function hexToRgba(hex, alpha) {
+                let r = parseInt(hex.substring(1, 3), 16);
+                let g = parseInt(hex.substring(3, 5), 16);
+                let b = parseInt(hex.substring(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
 
-                        let percentage = (wordsFound / targetGoal) * 100;
-                        if (percentage >= 100) percentage = 100;
+            // --- 2D Canvas Setup (Stars & Birds) ---
+            const starsCanvas = document.getElementById('stars-canvas');
+            const birdsCanvas = document.getElementById('birds-canvas');
+            const renderCanvas = document.getElementById('renderCanvas');
+            if (!renderCanvas) return;
 
-                        fillBar.style.width = `${percentage}%`;
+            const ctx2d = starsCanvas ? starsCanvas.getContext('2d') : null;
+            const birdsCtx = birdsCanvas ? birdsCanvas.getContext('2d') : null;
 
-                        if (percentage < 100) {
-                            statusText.textContent = `${Math.round(percentage)}%`;
+            window.resize2DROICanvases = function () {
+                const w = renderCanvas.parentElement.clientWidth;
+                const h = renderCanvas.parentElement.clientHeight;
+                if (starsCanvas) { starsCanvas.width = w; starsCanvas.height = h; }
+                if (birdsCanvas) { birdsCanvas.width = w; birdsCanvas.height = h; }
+            }
+            window.resize2DROICanvases();
+
+            const stars = Array.from({ length: 200 }, () => ({
+                x: Math.random() * (starsCanvas ? starsCanvas.width : 1000),
+                y: Math.random() * (starsCanvas ? starsCanvas.height * 0.65 : 500),
+                size: Math.random() < 0.1 ? 2 + Math.random() * 2 : 1 + Math.random(),
+                brightness: 0.3 + Math.random() * 0.7, twinkleSpeed: 0.5 + Math.random() * 3
+            }));
+
+            const birds = [];
+            function spawnBird() {
+                if (!starsCanvas) return;
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                const speedFactor = 0.85 + Math.random() * 0.30;
+                birds.push({
+                    x: dir > 0 ? -30 : starsCanvas.width + 30,
+                    y: 30 + Math.random() * starsCanvas.height * 0.25,
+                    vx: dir * (0.4 + Math.random() * 0.6) * speedFactor,
+                    wingPhase: Math.random() * Math.PI * 2,
+                    wingSpeed: (1.2 + Math.random() * 1.5) * speedFactor,
+                    scale: 2 + Math.random() * 3
+                });
+            }
+
+            let stars2dTime = 0;
+            function drawStarsLayer() {
+                if (!ctx2d || !starsCanvas || !window.themeColors) return;
+                stars2dTime += 0.016;
+                ctx2d.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+                stars.forEach(s => {
+                    const alpha = s.brightness * (0.5 + 0.5 * Math.sin(stars2dTime * s.twinkleSpeed + s.x));
+                    ctx2d.fillStyle = hexToRgba(window.themeColors.gold, alpha);
+                    ctx2d.fillRect(Math.floor(s.x), Math.floor(s.y), Math.ceil(s.size), Math.ceil(s.size));
+                });
+                if (Math.random() < 0.0005) spawnBird();
+            }
+
+            function drawBirdsLayer() {
+                if (!birdsCtx || !birdsCanvas || !window.themeColors) return;
+                birdsCtx.clearRect(0, 0, birdsCanvas.width, birdsCanvas.height);
+                for (let i = birds.length - 1; i >= 0; i--) {
+                    const b = birds[i];
+                    b.x += b.vx; b.wingPhase += b.wingSpeed * 0.016;
+                    if (b.x < -50 || b.x > birdsCanvas.width + 50) { birds.splice(i, 1); continue; }
+                    const wingY = Math.sin(b.wingPhase) * b.scale * 1.5; const px = Math.floor(b.scale);
+                    birdsCtx.fillStyle = hexToRgba(window.themeColors.amber, 0.85);
+                    birdsCtx.fillRect(Math.floor(b.x), Math.floor(b.y), px, px);
+                    birdsCtx.fillRect(Math.floor(b.x) - px * 2, Math.floor(b.y + wingY), px, px); birdsCtx.fillRect(Math.floor(b.x) - px, Math.floor(b.y + wingY * 0.5), px, px);
+                    birdsCtx.fillRect(Math.floor(b.x) + px * 2, Math.floor(b.y + wingY), px, px); birdsCtx.fillRect(Math.floor(b.x) + px, Math.floor(b.y + wingY * 0.5), px, px);
+                }
+            }
+
+            // --- Babylon Engine Setup ---
+            const engine = new BABYLON.Engine(renderCanvas, true, { preserveDrawingBuffer: true, stencil: true, alpha: true, adaptToDeviceRatio: true });
+            window.roiEngine = engine;
+            window.babylonMountain = null;
+            window.targetMountainScaleY = 1.0;
+
+            // THE FIX: Instead of waiting for the user to drag the window, this watches 
+            // the actual canvas element. The millisecond the ROI tab opens and the canvas 
+            // gets its true width/height from CSS, it forces Babylon to render in High-Def!
+            const canvasObserver = new ResizeObserver(() => {
+                engine.resize();
+                if (typeof window.resize2DROICanvases === 'function') {
+                    window.resize2DROICanvases();
+                }
+            });
+            canvasObserver.observe(renderCanvas);
+
+            // Keep the standard window resize just as a backup
+            window.addEventListener('resize', () => {
+                engine.resize();
+                if (typeof window.resize2DROICanvases === 'function') window.resize2DROICanvases();
+            });
+
+            const scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+
+            const cameraAngle = Math.PI / 2.5;
+            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, cameraAngle, 85, new BABYLON.Vector3(0, 7, 0), scene);
+            camera.attachControl(renderCanvas, true);
+            camera.lowerRadiusLimit = 85; camera.upperRadiusLimit = 85; camera.panningSensibility = 0;
+            camera.lowerBetaLimit = cameraAngle - 0.001; camera.upperBetaLimit = cameraAngle + 0.001;
+            camera.inertia = 0.98; camera.angularSensibilityX = 1500;
+
+            window.ll = new BABYLON.DirectionalLight("ll", new BABYLON.Vector3(1, -0.3, 0.5), scene); window.ll.intensity = 1.6;
+            window.rl = new BABYLON.DirectionalLight("rl", new BABYLON.Vector3(-1, -0.3, 0.5), scene); window.rl.intensity = 1.8;
+
+            // --- Cyan Stick Figures & Smoke ---
+            const figCanvas = document.createElement('canvas');
+            figCanvas.width = 32; figCanvas.height = 64;
+            const fCtx = figCanvas.getContext('2d');
+            fCtx.strokeStyle = '#ffffff'; fCtx.lineWidth = 3; fCtx.lineCap = 'round';
+            fCtx.beginPath(); fCtx.arc(16, 8, 5, 0, Math.PI * 2); fCtx.stroke();
+            fCtx.beginPath(); fCtx.moveTo(16, 13); fCtx.lineTo(16, 38); fCtx.stroke();
+            fCtx.beginPath(); fCtx.moveTo(6, 24); fCtx.lineTo(16, 20); fCtx.lineTo(26, 24); fCtx.stroke();
+            fCtx.beginPath(); fCtx.moveTo(8, 56); fCtx.lineTo(16, 38); fCtx.lineTo(24, 56); fCtx.stroke();
+            const figDataUrl = figCanvas.toDataURL();
+
+            const smokeCanvas = document.createElement('canvas');
+            smokeCanvas.width = 16; smokeCanvas.height = 16;
+            const smCtx = smokeCanvas.getContext('2d');
+            smCtx.fillStyle = '#00ffff'; // High-contrast cyan smoke
+            [[3, 2], [4, 2], [3, 3], [4, 3], [5, 3], [2, 4], [3, 4], [4, 4], [5, 4], [2, 5], [3, 5], [4, 5], [5, 5], [3, 6], [4, 6]].forEach(([gx, gy]) => smCtx.fillRect(gx * 2, gy * 2, 2, 2));
+            const smokeDataUrl = smokeCanvas.toDataURL();
+
+            const figManager = new BABYLON.SpriteManager("figManager", figDataUrl, 1000, { width: 32, height: 64 }, scene);
+            const smokeManager = new BABYLON.SpriteManager("smokeManager", smokeDataUrl, 3000, { width: 16, height: 16 }, scene);
+
+            const figSprites = [];
+            const smokePuffs = [];
+            window.fteTarget = 0;
+            let fadingOut = false;
+            let figWaveTime = 0;
+            let figWaveTimer = 0;
+            let figWaveInterval = 4;
+
+            function sampleMountainPositions(count, scene) {
+                const positions = [];
+                let attempts = 0;
+                while (positions.length < count && attempts < count * 20) {
+                    attempts++;
+                    const radius = 30;
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = Math.sqrt(Math.random()) * radius;
+                    const x = Math.cos(angle) * r;
+                    const z = Math.sin(angle) * r;
+                    if (!window.babylonMountain) continue;
+                    const ray = new BABYLON.Ray(new BABYLON.Vector3(x, 100, z), new BABYLON.Vector3(0, -1, 0), 200);
+                    const pick = scene.pickWithRay(ray, (m) => m === window.babylonMountain);
+                    if (pick.hit && pick.pickedPoint.y > 1.0) positions.push(pick.pickedPoint.clone());
+                }
+                return positions;
+            }
+
+            function spawnSmokePuff(pos) {
+                if (!smokeManager) return;
+                const count = 4 + Math.floor(Math.random() * 4);
+                for (let i = 0; i < count; i++) {
+                    const s = new BABYLON.Sprite("smoke", smokeManager);
+                    s.position.copyFrom(pos); s.position.x += (Math.random() - 0.5) * 0.6; s.position.y += Math.random() * 0.4; s.position.z += (Math.random() - 0.5) * 0.6;
+                    s.size = 0.3 + Math.random() * 0.4;
+                    s.color = new BABYLON.Color4(1, 1, 1, 0.9);
+                    smokePuffs.push({ sprite: s, vx: (Math.random() - 0.5) * 0.05, vy: 0.02 + Math.random() * 0.03, life: 1.0, decay: 0.02 + Math.random() * 0.02 });
+                }
+            }
+
+            function spawnFigure(pos) {
+                if (!figManager) return;
+                const s = new BABYLON.Sprite("fig", figManager);
+                s.position.copyFrom(pos); s.position.y += 0.8; s.width = 0.8; s.height = 1.6;
+                s.color = new BABYLON.Color4(0, 1.0, 1.0, 0); // Invisible Cyan default
+                spawnSmokePuff(s.position);
+                const dist = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+                figSprites.push({ sprite: s, targetOpacity: 1.0, currentOpacity: 0, blinkTime: 0, blinkPhase: 0, dist: dist });
+            }
+
+            function removeFigure(index) {
+                const fig = figSprites[index];
+                spawnSmokePuff(fig.sprite.position);
+                fig.sprite.dispose();
+                figSprites.splice(index, 1);
+            }
+
+            function updateFigures(scene) {
+                if (fadingOut) return;
+                const renderCount = window.fteTarget <= 0 ? 0 : Math.min(window.fteTarget, 100);
+                const current = figSprites.length;
+                const maxChangePerFrame = 1;
+                if (current < renderCount) {
+                    const toSpawn = Math.min(maxChangePerFrame, renderCount - current);
+                    const pts = sampleMountainPositions(toSpawn, scene);
+                    pts.forEach(p => spawnFigure(p));
+                } else if (current > renderCount) {
+                    const toRemove = Math.min(maxChangePerFrame, current - renderCount);
+                    for (let i = 0; i < toRemove; i++) removeFigure(figSprites.length - 1);
+                }
+            }
+
+            function updateFigureAnimation(scene) {
+                figWaveTimer += 0.016;
+                if (figWaveTimer >= figWaveInterval) { figWaveTimer = 0; figWaveTime = 0; figWaveInterval = 4 + Math.random() * 4; }
+                figWaveTime += 0.016;
+                const waveFront = figWaveTime * 20; const waveWidth = 8;
+
+                for (let i = figSprites.length - 1; i >= 0; i--) {
+                    const f = figSprites[i];
+                    f.currentOpacity += (f.targetOpacity - f.currentOpacity) * 0.08;
+
+                    if (!fadingOut && waveFront >= f.dist && waveFront < f.dist + waveWidth && f.blinkPhase === 0) { f.blinkPhase = 1; f.blinkTime = 0; }
+                    if (f.blinkPhase === 1) { f.blinkTime += 0.16; if (f.blinkTime >= 1.0) { f.blinkTime = 1.0; f.blinkPhase = 2; } }
+                    if (f.blinkPhase === 2) { f.blinkTime -= 0.005; if (f.blinkTime <= 0) { f.blinkTime = 0; f.blinkPhase = 0; } }
+
+                    const t = f.blinkTime;
+                    // Cyan color mix (Blinks white, rests on Cyan)
+                    f.sprite.color.r = t;
+                    f.sprite.color.g = 1.0;
+                    f.sprite.color.b = 1.0;
+                    f.sprite.color.a = f.currentOpacity;
+
+                    if (fadingOut && f.currentOpacity < 0.01) { f.sprite.dispose(); figSprites.splice(i, 1); }
+                }
+
+                if (fadingOut && figSprites.length === 0) fadingOut = false;
+
+                for (let i = smokePuffs.length - 1; i >= 0; i--) {
+                    const p = smokePuffs[i];
+                    p.life -= p.decay; p.sprite.position.x += p.vx; p.sprite.position.y += p.vy;
+                    p.sprite.color.a = Math.max(0, p.life * 0.8); p.sprite.size = 0.3 + (1 - p.life) * 0.5;
+                    if (p.life <= 0) { p.sprite.dispose(); smokePuffs.splice(i, 1); }
+                }
+                if (!fadingOut) updateFigures(scene);
+            }
+
+            function startFadeOut() { fadingOut = true; figSprites.forEach(f => f.targetOpacity = 0); }
+
+            // --- Theme Manager (Listens to CLI) ---
+            window.themeColors = { amber: "#ffaa00", gold: "#ffcc00", orange: "#ff5500" };
+            window.themeC3 = new BABYLON.Color3(1, 0.66, 0); // Default Amber
+
+            function sync3DTheme() {
+                const style = getComputedStyle(document.body);
+                const rawAmber = style.getPropertyValue('--ibex-amber').trim();
+                const rawGold = style.getPropertyValue('--ibex-gold').trim();
+                const rawOrange = style.getPropertyValue('--ibex-orange').trim();
+
+                if (rawAmber) window.themeColors.amber = rawAmber;
+                if (rawGold) window.themeColors.gold = rawGold;
+                if (rawOrange) window.themeColors.orange = rawOrange;
+
+                window.themeC3 = BABYLON.Color3.FromHexString(window.themeColors.amber);
+
+                if (window.gridMat) window.gridMat.lineColor = window.themeC3;
+                if (window.babylonMountain) window.babylonMountain.edgesColor = BABYLON.Color4.FromHexString(window.themeColors.amber + "FF");
+                if (window.horizonLines) window.horizonLines.forEach(l => l.color = window.themeC3);
+
+                if (window.ll) window.ll.diffuse = BABYLON.Color3.FromHexString(window.themeColors.gold);
+                if (window.rl) window.rl.diffuse = BABYLON.Color3.FromHexString(window.themeColors.orange);
+            }
+
+            // Observe body for data-theme changes from terminal
+            const themeObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'data-theme') sync3DTheme();
+                });
+            });
+            themeObserver.observe(document.body, { attributes: true });
+
+            // --- Babylon Meshes ---
+            let stagModel = null, stagTimer = 0, isStagRunning = true, angle = 0;
+            const stagAnims = [];
+
+            BABYLON.SceneLoader.ImportMesh("", "./", "stag_test.glb", scene, (meshes, ps, skel, anims) => {
+                stagModel = meshes[0]; stagModel.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
+                const wireMat = new BABYLON.StandardMaterial("wireMat", scene);
+                wireMat.wireframe = true; wireMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                meshes.forEach(m => { if (m.getTotalVertices() > 0) m.material = wireMat; });
+                stagAnims.push(...anims);
+                if (stagAnims[4]) stagAnims[4].play(true);
+            });
+
+            const mMat = new BABYLON.StandardMaterial("mMat", scene);
+            mMat.specularColor = new BABYLON.Color3(0, 0, 0); mMat.diffuseColor = new BABYLON.Color3(0.65, 0.65, 0.65);
+
+            const floor = BABYLON.MeshBuilder.CreateGround("floor", { width: 500, height: 500 }, scene); floor.position.y = -0.1;
+            window.gridMat = new BABYLON.GridMaterial("gridMat", scene);
+            window.gridMat.mainColor = new BABYLON.Color3(0, 0, 0);
+            window.gridMat.majorUnitFrequency = 10; window.gridMat.opacity = 0.9; floor.material = window.gridMat;
+
+            // --- Mountain Generation (with Stepped/Voxel Math) ---
+            const size = 70; const subdivisions = 45;
+            window.babylonMountain = BABYLON.MeshBuilder.CreateGround("mountain", { width: size, height: size, subdivisions: subdivisions }, scene);
+            const pos = window.babylonMountain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+            for (let i = 0; i < pos.length; i += 3) {
+                const x = pos[i]; const z = pos[i + 2]; const distance = Math.sqrt(x * x + z * z);
+                let y = 0;
+                if (distance < size / 2) {
+                    let norm = 1.0 - (distance / (size / 2));
+                    y = Math.pow(norm, 2.5) * 28;
+                    y += (Math.sin(x * 0.2) * Math.cos(z * 0.2) * 5.0 + Math.abs(Math.sin(x * 0.4 + z * 0.3)) * 3.5 + (Math.sin(x * 0.8 - z * 0.7) + Math.cos(x * 0.7 + z * 0.8)) * 1.5) * Math.pow(norm, 1.2);
+                    y += Math.pow(Math.max(0, 1.0 - (Math.sqrt((x - 1.5) ** 2 + (z + 1.0) ** 2) / 12)), 2.0) * 6;
+                }
+                // The crucial Math.round step to make it voxel/blocky!
+                pos[i + 1] = Math.round(Math.max(0, y) * 1.0) / 1.0;
+            }
+            window.babylonMountain.setVerticesData(BABYLON.VertexBuffer.PositionKind, pos);
+            window.babylonMountain.convertToFlatShadedMesh(); window.babylonMountain.material = mMat;
+            window.babylonMountain.enableEdgesRendering(0.94); window.babylonMountain.edgesWidth = 16.0;
+
+            const basePoints = [new BABYLON.Vector3(-250, 0.05, 0), new BABYLON.Vector3(250, 0.05, 0)];
+            const baseLine = BABYLON.MeshBuilder.CreateLines("baseLine", { points: basePoints }, scene);
+            window.horizonLines = [baseLine];
+            for (let i = 1; i <= 3; i++) {
+                let t1 = baseLine.clone("bl1" + i); t1.position.z += i * .08; window.horizonLines.push(t1);
+                let t2 = baseLine.clone("bl2" + i); t2.position.z -= i * .08; window.horizonLines.push(t2);
+            }
+
+            sync3DTheme(); // Apply initial colors immediately!
+
+          // THE FIX: Added pipeline.samples = 4 to turn on High-Quality Anti-Aliasing
+            const pipeline = new BABYLON.DefaultRenderingPipeline("pipe", true, scene, [camera]);
+            pipeline.bloomEnabled = true; 
+            pipeline.bloomThreshold = 0.8; 
+            pipeline.bloomWeight = 1.2;
+            pipeline.samples = 4; // <--- This forces sharp, clean edges on desktop monitors!
+
+            engine.runRenderLoop(() => {
+                drawStarsLayer(); drawBirdsLayer();
+                if (window.babylonMountain) window.babylonMountain.scaling.y += (window.targetMountainScaleY - window.babylonMountain.scaling.y) * 0.05;
+                updateFigureAnimation(scene);
+                if (stagModel && window.babylonMountain) {
+                    stagTimer += scene.getEngine().getDeltaTime();
+                    if (isStagRunning) {
+                        if (stagTimer >= 4000) {
+                            isStagRunning = false; stagTimer = 0;
+                            if (stagAnims[4]) stagAnims[4].stop();
+                            if (stagAnims[0]) stagAnims[0].play(true);
                         } else {
-                            statusText.textContent = `100%`;
-                            if (wordsFound === targetGoal || (wordsFound > targetGoal && wordsFound - attachedNodes.length < targetGoal)) {
-                                printToCLI("> SYSTEM: Background metrics optimized. Continuous extraction active.", "success");
+                            angle += 0.009; const r = 18; const sx = Math.cos(angle) * r, sz = Math.sin(angle) * r;
+                            const pick = scene.pickWithRay(new BABYLON.Ray(new BABYLON.Vector3(sx, 50, sz), new BABYLON.Vector3(0, -1, 0), 100), m => m === window.babylonMountain);
+                            if (pick.hit) {
+                                stagModel.position.set(sx, pick.pickedPoint.y, sz);
+                                const np = scene.pickWithRay(new BABYLON.Ray(new BABYLON.Vector3(Math.cos(angle + .05) * r, 50, Math.sin(angle + .05) * r), new BABYLON.Vector3(0, -1, 0), 100), m => m === window.babylonMountain);
+                                if (np.hit) stagModel.lookAt(np.pickedPoint);
                             }
                         }
+                    } else if (stagTimer >= 2000) {
+                        isStagRunning = true; stagTimer = 0;
+                        if (stagAnims[0]) stagAnims[0].stop();
+                        if (stagAnims[4]) stagAnims[4].play(true);
                     }
+                }
+                scene.render();
+            });
 
-                    function initBackgroundMatrix() {
-                        if (window.innerWidth <= 900) return; // Disable on mobile
-
-                        const bgMatrix = document.getElementById('bg-matrix');
-                        if (!bgMatrix) return;
-                        bgMatrix.innerHTML = '';
-
-                        const ambientWords = [
-                            "TALENT", "SYNERGY", "RETENTION", "PLACEMENTS", "EFFICIENCY", "DIVERSITY", "GROWTH", "ONBOARDING",
-                            "LEADERSHIP", "INNOVATION", "CULTURE", "SCALABILITY", "EXPERTISE", "AGILITY", "RELIABILITY",
-                            "TURNOVER", "STAGNATION", "ATTRITION", "MISMATCH", "GAPS", "UNRELIABLE", "CONFLICT",
-                            "DELAYS", "BURNOUT", "OVERHEAD", "FRICTION", "SILOS", "DOWNTIME", "RISK", "RIGIDITY"
-                        ];
-
-                        let allNodes = [];
-                        for (let i = 0; i < 800; i++) {
-                            allNodes.push({ word: ambientWords[Math.floor(Math.random() * ambientWords.length)] });
-                        }
-
-                        const numColumns = 24;
-                        const numRows = Math.ceil(allNodes.length / numColumns);
-                        const fragment = document.createDocumentFragment();
-
-                        /*
-                        allNodes.forEach((item, index) => {
-                            const node = document.createElement('div');
-                            node.className = 'data-node';
-                            node.textContent = item.word;
-
-                            const colIndex = index % numColumns;
-                            const rowIndex = Math.floor(index / numColumns);
-
-                            node.style.left = (colIndex * (100 / numColumns)) + 0.5 + '%';
-                            node.style.top = (rowIndex * (100 / numRows)) + 1 + '%';
-
-                            fragment.appendChild(node);
-                        });
-
-                        bgMatrix.appendChild(fragment);
-                        */
+            // Typewriter Flip-board
+            const flipWords = ['PENTESTING', 'DEVELOPMENT', 'ANALYTICS', 'SUPPORT', 'ENGINEERING', 'MAINTENANCE', 'MONITORING'];
+            const fb = document.getElementById('flip-board');
+            let fbIdx = 0;
+            function triggerNextWord() {
+                if (!fb) return;
+                fbIdx = (fbIdx + 1) % flipWords.length;
+                const targetText = '[ ' + flipWords[fbIdx] + ' ]';
+                let text = fb.innerText.replace('█', '');
+                let isDeleting = true;
+                if (fb.iv) clearInterval(fb.iv);
+                fb.iv = setInterval(() => {
+                    if (isDeleting) {
+                        if (text.length > 2) text = text.substring(0, text.length - 1);
+                        else isDeleting = false;
+                    } else {
+                        if (text.length < targetText.length) text = targetText.substring(0, text.length + 1);
+                        else { clearInterval(fb.iv); fb.innerText = targetText; return; }
                     }
+                    fb.innerText = text + '█';
+                }, 40);
+            }
+            triggerNextWord(); setInterval(triggerNextWord, 4000);
+        }
 
-                </script>
+
+    </script>
 </body>
 
 </html>

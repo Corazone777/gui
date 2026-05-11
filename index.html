@@ -476,8 +476,36 @@
             pointer-events: none;
         }
 
+        nav {
+            pointer-events: auto;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: border-color 0.5s, box-shadow 0.5s, background-color 0.5s;
+            overflow-y: auto;
+            padding-right: 8px;
+        }   
+
+        /* 2. Custom retro styling just for the Nav */
+        nav::-webkit-scrollbar {
+            width: 6px; /* A nice thin bar for the side menu */
+        }
+        
+        nav::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        nav::-webkit-scrollbar-thumb {
+            background: var(--ibex-amber, #ffaa00);
+            border-radius: 4px;
+            box-shadow: 0 0 8px var(--ibex-amber, #ffaa00);
+        }
+        
+        nav::-webkit-scrollbar-thumb:hover {
+            background: var(--ibex-rust, #cc5500);
+        }
+
         header,
-        nav,
         main,
         footer {
             pointer-events: auto;
@@ -3545,10 +3573,10 @@
 
             sync3DTheme(); // Apply initial colors immediately!
 
-          // THE FIX: Added pipeline.samples = 4 to turn on High-Quality Anti-Aliasing
+            // THE FIX: Added pipeline.samples = 4 to turn on High-Quality Anti-Aliasing
             const pipeline = new BABYLON.DefaultRenderingPipeline("pipe", true, scene, [camera]);
-            pipeline.bloomEnabled = true; 
-            pipeline.bloomThreshold = 0.8; 
+            pipeline.bloomEnabled = true;
+            pipeline.bloomThreshold = 0.8;
             pipeline.bloomWeight = 1.2;
             pipeline.samples = 4; // <--- This forces sharp, clean edges on desktop monitors!
 

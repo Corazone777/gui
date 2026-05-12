@@ -38,6 +38,34 @@
             --font-mono: 'Share Tech Mono', monospace;
         }
 
+        /* --- NATIVE GAME IFRAME (BULLETPROOF) --- */
+        
+        /* 1. Strip all padding from the game page and set it as the boundary */
+        #multiplayer-game {
+            padding: 0 !important;
+            margin: 0 !important;
+            position: relative; /* Acts as the anchor for the iframe */
+            width: 100%;
+            height: 100%;
+            overflow: hidden !important; /* Prevents double scrollbars */
+        }
+
+        /* 2. Force the iframe to stretch to the exact corners of the container */
+        #ibex-game-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            display: block;
+            background-color: #000;
+        }
+
+        /* Hides the mobile menu button on desktop screens */
+        .mobile-only-btn { display: none; }
+
         /* The classes JS will toggle */
         .system-wrapper.power-on {
             animation: 3000ms linear 0ms normal forwards 1 running crt-on;
@@ -426,43 +454,44 @@
             pointer-events: none;
         }
 
-        /* --- Classic CRT TV Power Off --- */
-        body.tv-off {
-            background-color: #000;
+       /* --- REBOOT ANIMATION --- */
+        body {
+            /* Makes sure the void behind the TV is pitch black when it shrinks */
+            background-color: #000; 
         }
 
-        body.tv-off .system-wrapper {
-            animation: crt-power-off 0.7s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+   body.tv-off .system-wrapper {
+            transform-origin: 50% 50%;
+            /* Sped up to 450ms */
+            animation: crt-off-fast 450ms ease-in-out 0ms normal forwards 1;
+        }
+
+        body.tv-off .scanlines {
+            opacity: 0 !important;
+            transition: opacity 0.05s ease; 
             pointer-events: none;
         }
 
-        @keyframes crt-power-off {
-            0% {
-                transform: scale(1, 1);
-                filter: brightness(1);
-                opacity: 1;
+        @keyframes crt-off-fast {
+            0% { 
+                transform: scale(1, 1); 
+                filter: brightness(1); 
+                opacity: 1; 
             }
-
-            50% {
-                transform: scale(1, 0.005);
-                filter: brightness(5);
-                opacity: 1;
+            /* Snaps into a bright horizontal line */
+            50% { 
+                transform: scale(1, 0.005); 
+                filter: brightness(20); 
+                opacity: 1; 
             }
-
-            90% {
-                transform: scale(0, 0.005);
-                filter: brightness(5);
-                opacity: 1;
-            }
-
-            100% {
-                transform: scale(0, 0);
+            /* Instantly collapses horizontally to nothing. No dot! */
+            100% { 
+                transform: scale(0, 0); 
                 filter: brightness(0);
-                opacity: 0;
+                opacity: 0; 
             }
         }
 
-        /* --- AMBIENT BACKGROUND MACRODATA (VISUAL ONLY) --- */
         #bg-matrix {
             position: absolute;
             inset: 0;
@@ -649,7 +678,6 @@
             text-align: right;
             color: var(--ibex-orange);
             font-size: 1.1rem;
-            display: flex;
             gap: 20px;
             transition: color 0.5s;
         }
@@ -1377,30 +1405,53 @@
                 overflow: hidden;
             }
 
-            nav {
-                flex-direction: row;
-                flex-wrap: wrap;
-                flex: 0 0 auto;
+            nnav { width: 100%; padding-right: 0; }
+            
+            /* 1. Style and show the Toggle Button */
+            .mobile-only-btn {
+                display: block;
+                width: 100%;
+                background: rgba(0, 0, 0, 0.6);
+                border: 1px solid var(--ibex-amber);
+                color: var(--ibex-amber);
+                padding: 12px;
+                font-family: 'Terminal', monospace; /* or whatever your terminal font is */
+                font-size: 16px;
+                cursor: pointer;
+                text-align: center;
+                box-shadow: 0 0 10px rgba(255, 170, 0, 0.2);
+            }
+
+            /* 2. Hide the menu by default and prep it for dropping down */
+            .nav-menu {
+                display: none; /* Hidden until toggled */
+                flex-direction: column;
+                width: 100%;
+                background: #050505; /* Solid background so it sits over the app */
+                border: 1px dashed var(--ibex-amber);
+                padding: 10px;
+                box-sizing: border-box;
                 gap: 5px;
             }
 
-            .nav-btn {
-                flex: 1 1 calc(33.333% - 5px);
-                padding: 10px 5px;
-                font-size: 0.85rem;
-                text-align: center;
-                justify-content: center;
+            /* 3. The class JS will add to reveal the menu */
+            .nav-menu.open {
+                display: flex;
             }
 
-            .nav-menu {
-               flex-direction: row; 
+            /* Hide the logo to save space on the dropdown */
+            .ibex-logo-container { display: none; }
+
+            /* Make buttons full width */
+            .nav-btn {
+                width: 100%;
+                text-align: left;
+                padding: 12px 15px;
             }
+
+            .ibex-dropzone { width: 100%; box-sizing: border-box; }
 
             .nav-btn::before {
-                display: none;
-            }
-
-            .ibex-logo-container {
                 display: none;
             }
 
@@ -2182,21 +2233,21 @@
 
 
                 <nav aria-label="Main Navigation" class="sys-element">
-                    <div class="nav-menu">
+                    <button id="mobile-menu-toggle" class="mobile-only-btn">[ === MENU === ]</button>
+                    
+                    <div class="nav-menu" id="mobile-nav-dropdown">
                         <div class="ibex-logo-container">
-                            <img src="IBEXlogo.svg" alt="IBEX Logo" class="ibex-logo-3d"
-                                onerror="this.style.display='none'">
+                            <img src="IBEXlogo.svg" alt="IBEX Logo" class="ibex-logo-3d" onerror="this.style.display='none'">
                         </div>
                         <button class="nav-btn" aria-selected="true" data-target="home">Dashboard</button>
                         <button class="nav-btn" aria-selected="false" data-target="about">About Ibex</button>
-                        <button class="nav-btn" aria-selected="false" data-target="talent">Talent
-                            Solutions</button>
-                        <button class="nav-btn" aria-selected="false" data-target="customer-care">Customer
-                            Care</button>
+                        <button class="nav-btn" aria-selected="false" data-target="talent">Talent Solutions</button>
+                        <button class="nav-btn" aria-selected="false" data-target="customer-care">Customer Care</button>
                         <button class="nav-btn" aria-selected="false" data-target="blog">Blog</button>
                         <button class="nav-btn" aria-selected="false" data-target="roi">ROI</button>
-
+                        <button class="nav-btn" aria-selected="false" data-target="multiplayer-game">Wargames [BETA]</button>
                     </div>
+                    
                     <div class="ibex-dropzone" id="ibex-bin">
                         [ IBEX POOL ]
                         <div class="bin-container">
@@ -2472,6 +2523,17 @@
                                 <div class="role-item">DevOps Engineers</div>
                                 <div class="role-item">Cloud Architects</div>
                                 <div class="role-item">Cybersecurity Analysts</div>
+                                <div class="role-item">UI/UX Designer</div>
+                                <div class="role-item">Penetration Testers</div>
+                                <div class="role-item">GRC Analysts</div>
+                                <div class="role-item">Technical Project Manager</div>
+                                <div class="role-item">AI/ML Engineer</div>
+                                <div class="role-item">Technical Writer</div>
+                                <div class="role-item">Database Architect</div>
+                                <div class="role-item">Mobile App Developer</div>
+                                <div class="role-item">Embedded Systems Developer</div>
+                                <div class="role-item">Vulnerability Researcher</div>
+                                <div class="role-item">Digital Forensics Analyst</div>
                             </div>
                         </div>
 
@@ -2633,6 +2695,16 @@
                                 </div>
                             </div>
                         </div>
+                    </section>
+
+                    <section id="multiplayer-game" class="page" style="padding: 0; overflow: hidden;">
+                        <iframe 
+                            id="ibex-game-frame" 
+                            src="https://clientdemo.at.n-r.hr/" 
+                            title="Ibex Multiplayer"
+                            allow="autoplay; fullscreen"
+                            sandbox="allow-scripts allow-same-origin allow-forms">
+                        </iframe>
                     </section>
 
                 </main>
@@ -2983,17 +3055,47 @@
             const targetPage = document.getElementById(targetId);
             const targetBtn = document.querySelector(`.nav-btn[data-target="${targetId}"]`);
             if (!targetPage) return false;
+            
             navBtns.forEach(btn => btn.setAttribute('aria-selected', 'false'));
             pages.forEach(p => p.classList.remove('active'));
+            
             if (targetBtn) targetBtn.setAttribute('aria-selected', 'true');
             targetPage.classList.add('active');
             if (!fromCli) printToCLI(`> GUI Navigating to module: ${targetId}`, 'system');
 
             if (window.innerWidth <= 900) document.getElementById('viewport').scrollTop = 0;
+            
+            // --- PAGE SPECIFIC TRIGGERS ---
             if (targetId === 'home') animateCounters();
             if (targetId === 'talent') setTimeout(resizeCanvas, 50);
+            
+            // --- PERFORMANCE CRITICAL: PAUSE 3D ENGINE WHEN NOT ON ROI ---
+            if (window.roiEngine) {
+                if (targetId === 'roi') {
+                    // Turn the 3D engine back on when looking at the mountain
+                    window.roiEngine.runRenderLoop(() => window.roiEngine.scenes[0].render());
+                } else {
+                    // Kill the 3D render loop for the game (and all other tabs) to save CPU/GPU!
+                    window.roiEngine.stopRenderLoop();
+                }
+            }
+
+            // --- PAGE SPECIFIC TRIGGERS ---
+            if (targetId === 'home') animateCounters();
+            if (targetId === 'talent') setTimeout(resizeCanvas, 50);
+            
+            // --- IFRAME AUTOFOCUS FIX ---
+            if (targetId === 'multiplayer-game') {
+                const gameFrame = document.getElementById('ibex-game-frame');
+                if (gameFrame) {
+                    // Force the keyboard inputs to instantly go to the game!
+                    setTimeout(() => gameFrame.focus(), 100); 
+                }
+            }
+
             return true;
         }
+
         navBtns.forEach(btn => btn.addEventListener('click', () => navigateTo(btn.getAttribute('data-target'))));
         window.addEventListener('resize', resizeCanvas);
 
@@ -3040,16 +3142,12 @@
                     case 'admin': printToCLI("ADMINISTRATOR PRIVILEGES REQUIRED. PLEASE CONTACT IT SUPPORT.", "error"); break;
                     case 'reboot':
                         printToCLI("INITIATING SYSTEM REBOOT...", "system");
-
-                        // 1. Grab the main wrapper instead of the body
-                        const wrapper = document.querySelector('.system-wrapper');
-
-                        // 2. Remove the "on" state and trigger the classic TV "shut off" shrink
-                        wrapper.classList.remove('power-on');
-                        wrapper.classList.add('power-off');
-
-                        // 3. Wait for the 750ms animation to finish, then hard reload the page!
-                        setTimeout(() => location.reload(), 800);
+                        
+                        // Adds the class to the body, triggering the CSS animation
+                        document.body.classList.add('tv-off');
+                        
+                        // Wait for the animation to finish (1000ms), then reload
+                        setTimeout(() => location.reload(), 770);
                         break;
                     default: printToCLI(`Error: Command '${cmd}' not recognized.`, "error");
                 }
@@ -3718,6 +3816,34 @@
                 }, 40);
             }
             triggerNextWord(); setInterval(triggerNextWord, 4000);
+        }
+
+        // --- MOBILE MENU TOGGLE LOGIC ---
+        const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
+        const mobileNavDropdown = document.getElementById('mobile-nav-dropdown');
+        const navButtons = document.querySelectorAll('.nav-menu .nav-btn');
+
+        if (mobileToggleBtn && mobileNavDropdown) {
+            // Open/Close the menu when clicking the [ === MENU === ] button
+            mobileToggleBtn.addEventListener('click', () => {
+                mobileNavDropdown.classList.toggle('open');
+                // Optional: Change button text based on state
+                if(mobileNavDropdown.classList.contains('open')) {
+                    mobileToggleBtn.innerText = '[ X CLOSE X ]';
+                } else {
+                    mobileToggleBtn.innerText = '[ === MENU === ]';
+                }
+            });
+
+            // Automatically close the dropdown when a user clicks a navigation link
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        mobileNavDropdown.classList.remove('open');
+                        mobileToggleBtn.innerText = '[ === MENU === ]';
+                    }
+                });
+            });
         }
 
 
